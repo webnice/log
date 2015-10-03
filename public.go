@@ -58,5 +58,28 @@ func Debug(tpl string, args ...interface{}) {
 
 // Flush log buffer immediately
 func Flush() error {
-	return newLog().Writer.Flush()
+	return newLog().Flush()
+}
+
+// Close logging
+func Close() error {
+	return self.Close()
+}
+
+// Configure log
+func Configure(cnf Configuration) error {
+	return self.Configure(cnf)
+}
+
+// Set application name
+// If name is empty, get name from os.Args[0] (string)
+func SetApplicationName(name string) {
+	self.SetApplicationName(name)
+	
+}
+
+// Set module name
+// If module name is empty or not set, name equals package name
+func SetModuleName(name string) {
+	self.SetModuleName(name)
 }

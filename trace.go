@@ -3,6 +3,8 @@ package log
 import (
 	"runtime"
 	"strings"
+
+	"github.com/webdeskltd/log/record"
 )
 
 const (
@@ -12,18 +14,14 @@ const (
 
 // Trace
 type trace struct {
-	Package  string
-	Function string
-	File     string
-	Line     int
-	Stack    string
+	Record *record.Record
 }
 
 func newTrace() *trace {
 	return new(trace)
 }
 
-func (self *trace) Trace(level int) *trace {
+func (this *trace) Trace(level int) *trace {
 	var ok bool
 	var pc uintptr
 	var fn *runtime.Func
@@ -31,33 +29,60 @@ func (self *trace) Trace(level int) *trace {
 	var tmp []string
 	var i int
 
+	this.Record = record.NewRecord()
 	if level == 0 {
 		level = traceStepBack
 	}
 	buf = make([]byte, 1<<16)
-	pc, self.File, self.Line, ok = runtime.Caller(level)
+	pc, this.Record.FileNameLong, this.Record.FileLine, ok = runtime.Caller(level)
 	if ok == true {
 		fn = runtime.FuncForPC(pc)
 		if fn != nil {
-			self.Function = fn.Name()
+			this.Record.Function = fn.Name()
 		}
 		i = runtime.Stack(buf, true)
-		self.Stack = string(buf[:i])
+		this.Record.CallStack = string(buf[:i])
 
-		tmp = strings.Split(self.Function, packageSeparator)
+		tmp = strings.Split(this.Record.Function, packageSeparator)
 		if len(tmp) > 1 {
-			self.Package += strings.Join(tmp[:len(tmp)-1], packageSeparator)
-			self.Function = tmp[len(tmp)-1]
+			this.Record.Package += strings.Join(tmp[:len(tmp)-1], packageSeparator)
+			this.Record.Function = tmp[len(tmp)-1]
 		}
-		tmp = strings.SplitN(self.Function, `.`, 2)
+		tmp = strings.SplitN(this.Record.Function, `.`, 2)
 		if len(tmp) == 2 {
-			if self.Package != "" {
-				self.Package += packageSeparator
+			if this.Record.Package != "" {
+				this.Record.Package += packageSeparator
 			}
-			self.Package += tmp[0]
-			self.Function = tmp[1]
+			this.Record.Package += tmp[0]
+			this.Record.Function = tmp[1]
 		}
 
+		// Filename short
+		tmp = strings.Split(this.Record.FileNameLong, packageSeparator)
+		if len(tmp) > 0 {
+			this.Record.FileNameShort = tmp[len(tmp)-1]
+		}
+
+		// Module name
+		tmp = strings.Split(this.Record.Package, packageSeparator)
+		if len(tmp) > 0 {
+			this.Record.Module = tmp[len(tmp)-1]
+		}
+
+		// Custom module name
+		if _, ok = self.moduleNames[this.Record.Package]; ok == true {
+			this.Record.Module = self.moduleNames[this.Record.Package]
+		}
 	}
-	return self
+	return this
+}
+
+func (this *trace) GetRecord() *record.Record {
+	if self.AppName != "" {
+		this.Record.AppName = self.AppName
+	}
+	if self.HostName != "" {
+		this.Record.HostName = self.HostName
+	}
+	return this.Record
 }
