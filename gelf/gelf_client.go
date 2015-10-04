@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"compress/gzip"
 	"compress/flate"
+	
+	//"github.com/webdeskltd/debug"
 )
 
 type MessageData []byte
@@ -49,6 +51,8 @@ func (gelfClient *GelfClient) SendMessage(message interface{}) error {
 	if nil != marshalErr {
 		return marshalErr
 	}
+
+	//debug.Dumper(message)
 
 	var messageData MessageData
 

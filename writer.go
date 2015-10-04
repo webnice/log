@@ -1,46 +1,35 @@
 package log
 
 import (
-	//"fmt"
-
-	"github.com/webdeskltd/log/logging"
+	"regexp"
 )
 
+var (
+	rexSpaceFirst *regexp.Regexp = regexp.MustCompile(`^[\t\n\f\r ]`)
+	rexSpaceLast  *regexp.Regexp = regexp.MustCompile(`[\t\n\f\r ]$`)
+)
+
+// Сюда попадают все сообщения от сторонни логеров
+// сообщениям присваивается дефолтовый уровень логирования
+
+// Для []byte
 func (this *log) Write(buf []byte) (l int, err error) {
-	var tmp []byte
-	//	var i int
-
 	if this.Record == nil {
-		this.Record = newTrace().Trace(traceStepBack + 2).GetRecord().SetLevel(int8(defaultLevel)).SetMessage(string(buf)).Complete()
+		this.Record = newTrace().Trace(traceStepBack + 2).GetRecord()
 	}
-
-	//	tmp = []byte(fmt.Sprintf("- [%s] [%s] [%s:%d] ", this.Trace.Package, this.Trace.Function, this.Trace.File, this.Trace.Line))
-	//	i, err = self.Writer.Write(tmp)
-	//	l += i
-	//	if err != nil {
-	//		return
-	//	}
-	//	i, err = self.Writer.Write(buf)
-	//	l += i
-
-	lll := logging.MustGetLogger("123")
-	lll.Critical("%s", tmp)
-
-	// Flush
-	if self.BufferFlushImmediately {
-		this.Flush()
-	}
-	this.Flush()
-
+	this.write(defaultLevel, rexSpaceLast.ReplaceAllString(rexSpaceFirst.ReplaceAllString(string(buf), ``), ``))
+	l = this.WriteLen
+	err = this.WriteErr
 	return
 }
 
+// Для string
 func (this *log) WriteString(buf string) (l int, err error) {
-	l, err = this.Write([]byte(buf + "\n"))
-	return
-}
-
-func (this *log) Flush() (err error) {
-	err = self.Writer.Flush()
+	if this.Record == nil {
+		this.Record = newTrace().Trace(traceStepBack + 2).GetRecord()
+	}
+	this.write(defaultLevel, rexSpaceLast.ReplaceAllString(rexSpaceFirst.ReplaceAllString(buf, ``), ``))
+	l = this.WriteLen
+	err = this.WriteErr
 	return
 }

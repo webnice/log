@@ -58,12 +58,17 @@ func Debug(tpl string, args ...interface{}) {
 
 // Flush log buffer immediately
 func Flush() error {
-	return newLog().Flush()
+	return self.Writer.Flush()
 }
 
 // Close logging
-func Close() error {
-	return self.Close()
+func Close() (err error) {
+	err = self.Writer.Flush()
+	if err != nil {
+		return
+	}
+	err = self.Close()
+	return
 }
 
 // Configure log
@@ -75,7 +80,7 @@ func Configure(cnf Configuration) error {
 // If name is empty, get name from os.Args[0] (string)
 func SetApplicationName(name string) {
 	self.SetApplicationName(name)
-	
+
 }
 
 // Set module name

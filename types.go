@@ -67,7 +67,9 @@ type configuration struct {
 }
 
 type log struct {
-	Record *record.Record
+	Record   *record.Record
+	WriteLen int
+	WriteErr error
 }
 
 type writer struct {
@@ -80,10 +82,11 @@ type ConfigurationLevelName string
 type ConfigurationGraylog struct {
 	Host        string               `yaml:"Host"`        // IP адрес или имя хоста Graylog сервера
 	Port        uint16               `yaml:"Port"`        // Порт на котором находится Graylog сервер
-	Proto       string               `yaml:"Proto"`       // Протокол передачи данных, возможные значения: tcp, udp. По умолчанию: udp
+	Protocol    string               `yaml:"Protocol"`    // Протокол передачи данных, возможные значения: tcp, udp. По умолчанию: udp
 	Source      string               `yaml:"Source"`      // Наименование источника логов
 	ChunkSize   uint                 `yaml:"ChunkSize"`   // Максимальный размер отправляемого пакета
 	Compression gelf.CompressionType `yaml:"Compression"` // Сжатие передаваемых пакетов данных
+	BufferSize  int64                `yaml:"BufferSize"`  // Размер буфера ???
 }
 
 // Log configuration

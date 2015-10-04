@@ -7,8 +7,9 @@ import (
 
 	"github.com/webdeskltd/debug"
 	"github.com/webdeskltd/log/gelf"
-	"github.com/webdeskltd/log/logging"
 	"github.com/webdeskltd/log/record"
+
+	"github.com/webdeskltd/log/logging"
 )
 
 func init() {
@@ -18,11 +19,23 @@ func init() {
 // Apply new configuration
 func (self *configuration) Configure(cnf Configuration) (err error) {
 	var i int
+	var ok bool
 	var level logging.Level
 	var logFormatter *logging.StringFormatterStruct
 
 	self.cnf = new(Configuration)
 	*self.cnf = cnf
+
+	// Если формат по умолчанию для всех режимов не установлен, используем стандартный формат по умолчанию
+	if self.cnf.Format == "" {
+		self.cnf.Format = defaultFormat
+	}
+	// Проверка формата
+	err = record.CheckFormat(self.cnf.Format)
+	if err != nil {
+		return
+	}
+
 	for i = range self.cnf.Mode {
 		level, err = logging.LogLevel(string(self.cnf.Levels[ConfigurationModeName(self.cnf.Mode[i])]))
 		if err != nil {
@@ -30,6 +43,16 @@ func (self *configuration) Configure(cnf Configuration) (err error) {
 			level = logging.NOTICE
 			err = nil
 		}
+		// Если для режима логирования не о определён формат, то присваиваем формат по умолчанию
+		if _, ok = self.cnf.Formats[self.cnf.Mode[i]]; ok == false {
+			self.cnf.Formats[self.cnf.Mode[i]] = self.cnf.Format
+		}
+		// Проверка формата
+		err = record.CheckFormat(self.cnf.Formats[self.cnf.Mode[i]])
+		if err != nil {
+			return
+		}
+
 		switch self.cnf.Mode[i] {
 		case mode_CONSOLE:
 			var lh *logging.LogBackend
@@ -65,10 +88,10 @@ func (self *configuration) Configure(cnf Configuration) (err error) {
 			var hgpc gelf.GelfProtocolClient
 			var hG *gelf.GelfClient
 			var lh *gelfBackend
-			if strings.EqualFold(strings.ToLower(self.cnf.Graylog.Proto), strings.ToLower(gelf.UDP_NETWORK)) == true {
+			if strings.EqualFold(strings.ToLower(self.cnf.Graylog.Protocol), strings.ToLower(gelf.UDP_NETWORK)) == true {
 				hgpc = gelf.MustUdpClient(cnf.Graylog.Host, cnf.Graylog.Port, cnf.Graylog.ChunkSize)
 			}
-			if strings.EqualFold(strings.ToLower(self.cnf.Graylog.Proto), strings.ToLower(gelf.TCP_NETWORK)) == true {
+			if strings.EqualFold(strings.ToLower(self.cnf.Graylog.Protocol), strings.ToLower(gelf.TCP_NETWORK)) == true {
 				hgpc = gelf.MustTcpClient(cnf.Graylog.Host, cnf.Graylog.Port)
 			}
 			hG = gelf.NewGelfClient(hgpc, self.cnf.Graylog.Compression)
@@ -83,13 +106,18 @@ func (self *configuration) Configure(cnf Configuration) (err error) {
 	logging.SetBackend(self.backends...)
 	logFormatter = logging.MustStringFormatter(self.cnf.Format)
 	logging.SetFormatter(logFormatter)
+	//debug.Dumper(self.cnf)
 	return
 }
 
 func (self *configuration) SetApplicationName(name string) {
+	var tmp []string
 	self.AppName = name
 	if self.AppName == "" {
-		self.AppName = os.Args[0]
+		tmp = strings.Split(os.Args[0], string(os.PathSeparator))
+		if len(tmp) > 0 {
+			self.AppName = tmp[len(tmp)-1]
+		}
 	}
 	return
 }

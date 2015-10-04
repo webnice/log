@@ -8,22 +8,33 @@ import (
 	"github.com/webdeskltd/log/uuid"
 )
 
+// Игноритуются слеюующие поля структуры
+// - Не имеющие тега fmt:""
+// - Описанные как fmt:""
+// - Описанные как fmt:"-"
+// Если формат поля структуры не описан, то подставляется формат %v
 type Record struct {
-	Id            uuid.UUID // %{id}                      - ([16]byte ) Time GUID(UUID) for log message
-	Pid           int       // %{pid}                     - (int    ) Process id
-	AppName       string    // %{application}             - (string   ) Application name basename of os.Args[0]
-	HostName      string    // %{hostname}                - (string   ) Server host name
-	TodayAndNow   time.Time // %{time}                    - (time.Time) Time when log occurred
-	Level         int8      // %{level}                   - (int8     ) Log level
-	Message       string    // %{message}                 - (string   ) Message
-	Color         bool      // %{color}                   - (bool     ) ANSI color based on log level
-	FileNameLong  string    // %{longfile}                - (string   ) Full file name and line number: /a/b/c/d.go
-	FileNameShort string    // %{shortfile}               - (string   ) Final file name element and line number: d.go
-	FileLine      int       // %{line}                    - (int      ) Line number in file
-	Package       string    // %{package}                 - (string   ) Full package path, eg. github.com/webdeskltd/log
-	Module        string    // %{module} or %{shortpkg}   - (string   ) Module name base package path, eg. log
-	Function      string    // %{function} or %{facility} - (string   ) Full function name, eg. PutUint32
-	CallStack     string    // %{callstack}               - (string   ) Full call stack
+	Id            uuid.UUID `fmt:"id"`                    // %{id}                      - ([16]byte ) Time GUID(UUID) for log message
+	Pid           int       `fmt:"pid:d"`                 // %{pid}                     - (int      ) Process id
+	AppName       string    `fmt:"application:s"`         // %{application}             - (string   ) Application name basename of os.Args[0]
+	HostName      string    `fmt:"hostname:s"`            // %{hostname}                - (string   ) Server host name
+	TodayAndNow   time.Time `fmt:"time"`                  // %{time}                    - (time.Time) Time when log occurred
+	Level         int8      `fmt:"level:d"`               // %{level}                   - (int8     ) Log level
+	Message       string    `fmt:"message:s"`             // %{message}                 - (string   ) Message
+	Color         bool      `fmt:"color"`                 // %{color}                   - (bool     ) ANSI color for messages in general, based on log level
+	BegColor      bool      `fmt:"begcolor"`              // %{begcolor}                - (bool     ) Mark the beginning colored text in message, based on log level
+	EndColor      bool      `fmt:"endcolor"`              // %{endcolor}                - (bool     ) Mark the ending colored text in message, based on log level
+	FileNameLong  string    `fmt:"longfile:s"`            // %{longfile}                - (string   ) Full file name and line number: /a/b/c/d.go
+	FileNameShort string    `fmt:"shortfile:s"`           // %{shortfile}               - (string   ) Final file name element and line number: d.go
+	FileLine      int       `fmt:"line:d"`                // %{line}                    - (int      ) Line number in file
+	Package       string    `fmt:"package:s"`             // %{package}                 - (string   ) Full package path, eg. github.com/webdeskltd/log
+	Module        string    `fmt:"module:s,shortpkg:s"`   // %{module} or %{shortpkg}   - (string   ) Module name base package path, eg. log
+	Function      string    `fmt:"function:s,facility:s"` // %{function} or %{facility} - (string   ) Full function name, eg. PutUint32
+	CallStack     string    `fmt:"callstack:s"`           // %{callstack}               - (string   ) Full call stack
+}
+
+func init() {
+	debug.Nop()
 }
 
 func NewRecord() (self *Record) {
@@ -49,6 +60,6 @@ func (this *Record) SetMessage(msg string) *Record {
 // Finishing object
 func (this *Record) Complete() *Record {
 
-	debug.Dumper(this)
+	//debug.Dumper(this)
 	return this
 }

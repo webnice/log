@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 
+	//"github.com/webdeskltd/debug"
 	"github.com/webdeskltd/log/gelf"
 	"github.com/webdeskltd/log/logging"
 )
@@ -59,6 +60,9 @@ func (gelfBackend *gelfBackend) createLoggingMessage(record *logging.Record, fil
 func (gelfBackend *gelfBackend) Log(level logging.Level, calldepth int, record *logging.Record) (err error) {
 	file, fnName, line := callerMeta(calldepth + 1)
 	message := gelfBackend.createLoggingMessage(record, file, fnName, line)
+
+	//debug.Dumper(level, calldepth, record, message)
+
 	err = gelfBackend.SendMessage(message)
 	if err != nil {
 		Error("Log message sending error: %s", err)
