@@ -26,6 +26,7 @@ const (
 	mode_SYSLOG  ConfigurationModeName = "syslog"
 	mode_FILE    ConfigurationModeName = "file"
 	mode_GRAYLOG ConfigurationModeName = "graylog"
+	mode_MEMPIPE ConfigurationModeName = "memorypipe"
 )
 
 const (

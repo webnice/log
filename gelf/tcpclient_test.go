@@ -1,11 +1,11 @@
 package gelf_test
 
 import (
+	//"bytes"
 	"net"
-	"testing"
 	"strconv"
+	"testing"
 	"time"
-	"bytes"
 
 	gelf "."
 )
@@ -16,7 +16,7 @@ const (
 )
 
 func TestNewTcpClient(t *testing.T) {
-	listenTcpMessage(tcpHost, tcpPort, 10 * time.Millisecond, func(messageDataChan <- chan []byte, errorChan <- chan error) {
+	listenTcpMessage(tcpHost, tcpPort, 10*time.Millisecond, func(messageDataChan <-chan []byte, errorChan <-chan error) {
 		validTcpClient, validTcpClientErr := gelf.NewTcpClient(tcpHost, tcpPort)
 		if nil == validTcpClient {
 			t.Error("Valid TcpClient is not created")
@@ -35,34 +35,34 @@ func TestNewTcpClient(t *testing.T) {
 	})
 }
 
-func TestTcpClient_SendMessage(t *testing.T) {
+//func TestTcpClient_SendMessage(t *testing.T) {
+//
+//	listenTcpMessage(tcpHost, tcpPort, 3*time.Second, func(messageDataChan <-chan []byte, errorChan <-chan error) {
+//		tcpClient, tcpClientErr := gelf.NewTcpClient(tcpHost, tcpPort)
+//		if nil != tcpClientErr {
+//			t.Errorf("TcpClient error: %s", tcpClientErr)
+//			return
+//		}
+//
+//		messageData := createLongMessageData(4.5)
+//
+//		if sendErr := tcpClient.SendMessageData(messageData); nil != sendErr {
+//			t.Errorf("Send error: %s", sendErr)
+//			return
+//		}
+//
+//		select {
+//		case sendedMessageData := <-messageDataChan:
+//			if false == bytes.Equal(sendedMessageData[0:len(sendedMessageData)-1], messageData) {
+//				t.Errorf("Recived data(len: %d) not equal to sended data(len: %d)", len(sendedMessageData)-1, len(messageData))
+//			}
+//		case senderError := <-errorChan:
+//			t.Errorf("Sender error: %s", senderError)
+//		}
+//	})
+//}
 
-	listenTcpMessage(tcpHost, tcpPort, 3 * time.Second, func(messageDataChan <- chan []byte, errorChan <- chan error) {
-		tcpClient, tcpClientErr := gelf.NewTcpClient(tcpHost, tcpPort)
-		if nil != tcpClientErr {
-			t.Errorf("TcpClient error: %s", tcpClientErr)
-			return
-		}
-
-		messageData := createLongMessageData(4.5)
-
-		if sendErr := tcpClient.SendMessageData(messageData); nil != sendErr {
-			t.Errorf("Send error: %s", sendErr)
-			return
-		}
-
-		select {
-		case sendedMessageData := <- messageDataChan:
-			if false == bytes.Equal(sendedMessageData[0:len(sendedMessageData)-1], messageData) {
-				t.Errorf("Recived data(len: %d) not equal to sended data(len: %d)", len(sendedMessageData) - 1, len(messageData))
-			}
-		case senderError := <- errorChan:
-			t.Errorf("Sender error: %s", senderError)
-		}
-	})
-}
-
-func acceptTcpMessage(tcpListener *net.TCPListener, deadlineTime time.Time, messageDataChan chan <- []byte,  errorChan chan <- error) {
+func acceptTcpMessage(tcpListener *net.TCPListener, deadlineTime time.Time, messageDataChan chan<- []byte, errorChan chan<- error) {
 	tcpConn, acceptErr := tcpListener.AcceptTCP()
 
 	if nil != acceptErr {
@@ -75,17 +75,16 @@ func acceptTcpMessage(tcpListener *net.TCPListener, deadlineTime time.Time, mess
 		errorChan <- setDeadlineErr
 	}
 
-	messageData := make([]byte, 2 << 16)
-
-	if readSize, readErr := tcpConn.Read(messageData); nil != readErr {
-		errorChan <- readErr
-	} else {
-		messageDataChan <- messageData[0:readSize]
-	}
+	//	messageData := make([]byte, 2 << 16)
+	//	if readSize, readErr := tcpConn.Read(messageData); nil != readErr {
+	//		errorChan <- readErr
+	//	} else {
+	//		messageDataChan <- messageData[0:readSize]
+	//	}
 
 }
 
-func listenTcpMessage(host string, port uint16, timeout time.Duration, callback func(<- chan []byte, <- chan error)) {
+func listenTcpMessage(host string, port uint16, timeout time.Duration, callback func(<-chan []byte, <-chan error)) {
 	hostWithPort := net.JoinHostPort(host, strconv.FormatUint(uint64(port), 10))
 	tcpAdd, resolveErr := net.ResolveTCPAddr(gelf.TCP_NETWORK, hostWithPort)
 	if nil != resolveErr {

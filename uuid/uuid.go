@@ -1,6 +1,6 @@
+// http://tools.ietf.org/html/rfc4122
 package uuid
 
-// http://tools.ietf.org/html/rfc4122
 import (
 	"crypto/rand"
 	"errors"
@@ -52,7 +52,7 @@ func init() {
 }
 
 // ParseUUID parses a 32 digit hexadecimal number (that might contain hypens)
-// represanting an UUID.
+// representing an UUID.
 func ParseUUID(input string) (UUID, error) {
 	var u UUID
 	j := 0
@@ -210,7 +210,7 @@ func (u UUID) Time() time.Time {
 	}
 	t := u.Timestamp()
 	sec := t / 1e7
-	nsec := t % 1e7
+	nsec := (t % 1e7) * 100
 	return time.Unix(sec+timeBase, nsec).UTC()
 }
 

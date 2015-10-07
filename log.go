@@ -13,6 +13,8 @@ import (
 func init() {
 	var err error
 	var cnf Configuration
+	var wrt *log
+	
 	self = new(configuration)
 	self.moduleNames = make(map[string]string)
 	self.Writer = bufio.NewWriterSize(os.Stderr, self.BufferSize)
@@ -38,8 +40,10 @@ func init() {
 	cnf.Levels[mode_CONSOLE] = ConfigurationLevelName(levelMap[defaultLevel])
 	self.Configure(cnf)
 	self.SetApplicationName(``)
-	stdLogConnect()
-	
+	wrt = newLog()
+	wrt.Record = nil
+	stdLogConnect(wrt)
+
 	debug.Nop()
 }
 
@@ -59,8 +63,26 @@ func (this *log) write(level logLevel, tpl string, args ...interface{}) *log {
 	//this.WriteString(tmp)
 
 	//debug.Dumper(this.Record)
-	this.Record.Format()
 
+	var test string = ` 1: %{id}
+ 2: %{pid:8d}                  - (int      ) Process id
+ 3: %{application}             - (string   ) Application name basename of os.Args[0]
+ 4: %{hostname}                - (string   ) Server host name
+ 5: %{time}                    - (time.Time) Time when log occurred
+ 6: %{level:-8d}               - (int8     ) Log level
+ 7: %{message}                 - (string   ) Message
+ 8: %{color}                   - %{begcolor}(bool     ) ANSI color based on log level%{endcolor}
+ 9: %{longfile}                - (string   ) Full file name and line number: /a/b/c/d.go
+10: %{shortfile}               - (string   ) Final file name element and line number: d.go
+11: %{line}                    - (int      ) Line number in file
+12: %{package}                 - (string   ) Full package path, eg. github.com/webdeskltd/log
+13: %{module} or %{shortpkg}   - (string   ) Module name base package path, eg. log
+14: %{function} or %{facility} - (string   ) Full function name, eg. PutUint32
+15: %{callstack}               - (string   ) Full call stack
+
+"%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00} (%{level:7s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})"
+%{level:.1s}`
+	this.Record.Format(test)
 
 	return this
 }

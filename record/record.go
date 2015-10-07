@@ -21,9 +21,6 @@ type Record struct {
 	TodayAndNow   time.Time `fmt:"time"`                  // %{time}                    - (time.Time) Time when log occurred
 	Level         int8      `fmt:"level:d"`               // %{level}                   - (int8     ) Log level
 	Message       string    `fmt:"message:s"`             // %{message}                 - (string   ) Message
-	Color         bool      `fmt:"color"`                 // %{color}                   - (bool     ) ANSI color for messages in general, based on log level
-	BegColor      bool      `fmt:"begcolor"`              // %{begcolor}                - (bool     ) Mark the beginning colored text in message, based on log level
-	EndColor      bool      `fmt:"endcolor"`              // %{endcolor}                - (bool     ) Mark the ending colored text in message, based on log level
 	FileNameLong  string    `fmt:"longfile:s"`            // %{longfile}                - (string   ) Full file name and line number: /a/b/c/d.go
 	FileNameShort string    `fmt:"shortfile:s"`           // %{shortfile}               - (string   ) Final file name element and line number: d.go
 	FileLine      int       `fmt:"line:d"`                // %{line}                    - (int      ) Line number in file
@@ -31,6 +28,9 @@ type Record struct {
 	Module        string    `fmt:"module:s,shortpkg:s"`   // %{module} or %{shortpkg}   - (string   ) Module name base package path, eg. log
 	Function      string    `fmt:"function:s,facility:s"` // %{function} or %{facility} - (string   ) Full function name, eg. PutUint32
 	CallStack     string    `fmt:"callstack:s"`           // %{callstack}               - (string   ) Full call stack
+	color         bool      `fmt:"color"`                 // %{color}                   - (bool     ) ANSI color for messages in general, based on log level
+	colorBeg      bool      `fmt:"colorbeg"`              // %{colorbeg}                - (bool     ) Mark the beginning colored text in message, based on log level
+	colorEnd      bool      `fmt:"colorend"`              // %{colorend}                - (bool     ) Mark the ending colored text in message, based on log level
 }
 
 func init() {
