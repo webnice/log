@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/webdeskltd/debug"
+	"github.com/webdeskltd/log/backends"
 	"github.com/webdeskltd/log/gelf"
 )
 
@@ -13,8 +14,7 @@ import (
 func init() {
 	var err error
 	var cnf Configuration
-	var wrt *log
-	
+
 	self = new(configuration)
 	self.moduleNames = make(map[string]string)
 	self.Writer = bufio.NewWriterSize(os.Stderr, self.BufferSize)
@@ -40,29 +40,34 @@ func init() {
 	cnf.Levels[mode_CONSOLE] = ConfigurationLevelName(levelMap[defaultLevel])
 	self.Configure(cnf)
 	self.SetApplicationName(``)
-	wrt = newLog()
-	wrt.Record = nil
-	stdLogConnect(wrt)
+
+	// Create default dackend - STDERR
+	self.backend = backends.NewBackends()
+	self.backend.AddBackend(backends.NewBackendSTD(nil).SetModeNormal())
+
+	// Setup standard logging
+	self.stdLogWriter = new(Writer)
+	stdLogConnect(self.stdLogWriter)
 
 	debug.Nop()
 }
 
 // Конструктор сообщений журнала
-func newLog() (this *log) {
-	this = new(log)
+func newLogMessage() (this *logMessage) {
+	this = new(logMessage)
 	this.Record = newTrace().Trace(traceStepBack + 1).GetRecord()
 	return
 }
 
-// Сюда подапаю все сообщения от всех уровней
-func (this *log) write(level logLevel, tpl string, args ...interface{}) *log {
+// Сюда попадают все сообщения от всех уровней логирования
+func (this *logMessage) Write(level logLevel, tpl string, args ...interface{}) *logMessage {
 	var tmp string
 
 	tmp = fmt.Sprintf(tpl, args...)
 	this.Record.SetLevel(int8(level)).SetMessage(tmp).Complete()
-	//this.WriteString(tmp)
+	//	this.WriteString(tmp)
 
-	//debug.Dumper(this.Record)
+	//	debug.Dumper(this.Record)
 
 	var test string = ` 1: %{id}
  2: %{pid:8d}                  - (int      ) Process id
@@ -84,5 +89,6 @@ func (this *log) write(level logLevel, tpl string, args ...interface{}) *log {
 %{level:.1s}`
 	this.Record.Format(test)
 
+	self.backend.Push(this.Record)
 	return this
 }

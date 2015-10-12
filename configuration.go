@@ -133,16 +133,19 @@ func (self *configuration) SetModuleName(name string) {
 	return
 }
 
+// Remove module name
+func (self *configuration) DelModuleName() {
+	var r *record.Record
+	r = newTrace().Trace(traceStepBack + 1).GetRecord()
+	delete(self.moduleNames, r.Package)
+	return
+}
+
 // Close logging
 func (self *configuration) Close() (err error) {
-	//logging.Reset()
+	// Stop all backend and reset
+	self.backend.ResetBackends()
+	// Reset standard logging to default settings
 	stdLogClose()
-	if self.fH != nil {
-		err = self.fH.Sync()
-		if err != nil {
-			return
-		}
-		err = self.fH.Close()
-	}
 	return
 }

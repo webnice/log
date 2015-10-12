@@ -9,27 +9,26 @@ var (
 	rexSpaceLast  *regexp.Regexp = regexp.MustCompile(`[\t\n\f\r ]$`)
 )
 
-// Сюда попадают все сообщения от сторонни логеров
-// сообщениям присваивается дефолтовый уровень логирования
+// Сюда попадают все сообщения от сторонних логеров
+// У сообщений удаляются пробельные символы, предшествующие и заканчивающие сообщение
+// Сообщениям присваивается дефолтовый уровень логирования
 
 // Для []byte
-func (this *log) Write(buf []byte) (l int, err error) {
-	if this.Record == nil {
-		this.Record = newTrace().Trace(traceStepBack + 2).GetRecord()
-	}
-	this.write(defaultLevel, rexSpaceLast.ReplaceAllString(rexSpaceFirst.ReplaceAllString(string(buf), ``), ``))
-	l = this.WriteLen
-	err = this.WriteErr
+func (this *Writer) Write(buf []byte) (l int, err error) {
+	var msg *logMessage = newLogMessage()
+	msg.Record = newTrace().Trace(traceStepBack + 2).GetRecord()
+	msg.Write(defaultLevel, rexSpaceLast.ReplaceAllString(rexSpaceFirst.ReplaceAllString(string(buf), ``), ``))
+	l = msg.WriteLen
+	err = msg.WriteErr
 	return
 }
 
 // Для string
-func (this *log) WriteString(buf string) (l int, err error) {
-	if this.Record == nil {
-		this.Record = newTrace().Trace(traceStepBack + 2).GetRecord()
-	}
-	this.write(defaultLevel, rexSpaceLast.ReplaceAllString(rexSpaceFirst.ReplaceAllString(buf, ``), ``))
-	l = this.WriteLen
-	err = this.WriteErr
+func (this *Writer) WriteString(buf string) (l int, err error) {
+	var msg *logMessage = newLogMessage()
+	msg.Record = newTrace().Trace(traceStepBack + 2).GetRecord()
+	msg.Write(defaultLevel, rexSpaceLast.ReplaceAllString(rexSpaceFirst.ReplaceAllString(buf, ``), ``))
+	l = msg.WriteLen
+	err = msg.WriteErr
 	return
 }

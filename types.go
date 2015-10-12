@@ -3,10 +3,11 @@ package log
 import (
 	"bufio"
 	"errors"
-	"os"
+	//"os"
 
 	"github.com/webdeskltd/log/gelf"
-	"github.com/webdeskltd/log/logging"
+	//"github.com/webdeskltd/log/logging"
+	"github.com/webdeskltd/log/backends"
 	"github.com/webdeskltd/log/record"
 )
 
@@ -49,31 +50,34 @@ var (
 	errLevelUnknown = errors.New(`Unknown or not supported logging level`) // В конфигурации указан не известный уровень логирования
 )
 
-type logLevel int8
+type logLevel int8 // Тип уровня журналирования
 
 type configuration struct {
-	BufferSize             int                    // Size memory buffer for log messages
-	BufferFlushImmediately bool                   // Flush log buffer after call
-	Writer                 *bufio.Writer          // Log writer
-	AppName                string                 // %{program} - Application name
-	HostName               string                 // %{hostname} - Server host name
-	cnf                    *Configuration         // Current configuration
-	fH                     *os.File               // File handle
-	backends               []logging.Backend      // All mode logging
-	bStderr                logging.LeveledBackend // Mode: "console" STDERR
-	bSyslog                logging.LeveledBackend // Mode: "syslog" SYSTEM SYSLOG
-	bFile                  logging.LeveledBackend // Mode: "file"
-	bGraylog               logging.LeveledBackend // Mode: "graylog"
-	moduleNames            map[string]string      // Кастомные названия модулей опубликованные через SetModuleName()
+	BufferSize             int                // Size memory buffer for log messages
+	BufferFlushImmediately bool               // Flush log buffer after call
+	Writer                 *bufio.Writer      // Log writer
+	AppName                string             // %{program} - Application name
+	HostName               string             // %{hostname} - Server host name
+	cnf                    *Configuration     // Current configuration
+	backend                *backends.Backends // Backend workflow
+	stdLogWriter           *Writer            // Writer for standard logging
+	moduleNames            map[string]string  // Кастомные названия модулей опубликованные через SetModuleName()
+	// backends               []logging.Backend // All mode logging
+	//	fH                     *os.File           // File handle
+	//	bStderr                logging.LeveledBackend // Mode: "console" STDERR
+	//	bSyslog                logging.LeveledBackend // Mode: "syslog" SYSTEM SYSLOG
+	//	bFile                  logging.LeveledBackend // Mode: "file"
+	//	bGraylog               logging.LeveledBackend // Mode: "graylog"
 }
 
-type log struct {
+type logMessage struct {
 	Record   *record.Record
 	WriteLen int
 	WriteErr error
 }
 
-type writer struct {
+// Writer object for standard logging and etc...
+type Writer struct {
 }
 
 type ConfigurationModeName string
