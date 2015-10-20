@@ -7,10 +7,10 @@ import (
 func NewBackendSTD(f *os.File) (ret *Backend) {
 	ret = new(Backend)
 	ret.hType = BACKEND_STD
-	if f == nil {
-		f = os.Stderr
-	} else if f != os.Stderr && f != os.Stdout {
-		f = os.Stderr
+	if f != nil {
+		ret.fH = f
+	} else {
+		ret.fH = os.Stderr
 	}
 	return
 }

@@ -1,13 +1,15 @@
 package log
 
 import (
-	"os"
+	"errors"
+	"fmt"
 	"strings"
-	//"syscall"
+	//"os"
 
 	"github.com/webdeskltd/debug"
-	//"github.com/webdeskltd/log/gelf"
+	"github.com/webdeskltd/log/backends"
 	"github.com/webdeskltd/log/record"
+	//"github.com/webdeskltd/log/gelf"
 
 	//"github.com/webdeskltd/log/logging"
 )
@@ -17,44 +19,45 @@ func init() {
 }
 
 // Apply new configuration
-func (self *configuration) Configure(cnf Configuration) (err error) {
+func (self *Log) Configure(cnf *Configuration) (err error) {
 	var i int
 	var ok bool
-	//var level logging.Level
-	//var logFormatter *logging.StringFormatterStruct
+	var mode ModeName
 
-	self.cnf = new(Configuration)
-	*self.cnf = cnf
+	if cnf == nil {
+		err = ERROR_CONFIGURATION_IS_NULL
+		return
+	}
+	self.cnf = cnf
 
 	// Если формат по умолчанию для всех режимов не установлен, используем стандартный формат по умолчанию
 	if self.cnf.Format == "" {
-		self.cnf.Format = defaultFormat
+		self.cnf.Format = default_FORMAT
 	}
-	// Проверка формата
+	// Проверка формата по умолчанию
 	_, err = record.CheckFormat(self.cnf.Format)
 	if err != nil {
 		return
 	}
 
 	for i = range self.cnf.Mode {
-		//		level, err = logging.LogLevel(string(self.cnf.Levels[ConfigurationModeName(self.cnf.Mode[i])]))
-		//		if err != nil {
-		//			Error("Error log level. Mode: '%v', Level: '%v'", self.cnf.Mode[i], string(self.cnf.Levels[ConfigurationModeName(self.cnf.Mode[i])]))
-		//			level = logging.NOTICE
-		//			err = nil
-		//		}
+		mode = ModeName(strings.ToLower(string(self.cnf.Mode[i])))
+
 		// Если для режима логирования не о определён формат, то присваиваем формат по умолчанию
-		if _, ok = self.cnf.Formats[self.cnf.Mode[i]]; ok == false {
-			self.cnf.Formats[self.cnf.Mode[i]] = self.cnf.Format
+		if _, ok = self.cnf.Formats[mode]; ok == false {
+			self.cnf.Formats[mode] = self.cnf.Format
 		}
 		// Проверка формата
-		_, err = record.CheckFormat(self.cnf.Formats[self.cnf.Mode[i]])
+		_, err = record.CheckFormat(self.cnf.Formats[mode])
 		if err != nil {
 			return
 		}
 
-		switch self.cnf.Mode[i] {
+		switch mode {
 		case mode_CONSOLE:
+			print(mode_CONSOLE + "\n")
+			self.backend = backends.NewBackends()
+			self.backend.AddBackend(backends.NewBackendSTD(nil).SetModeNormal())
 			//			var lh *logging.LogBackend
 			//			lh = logging.NewLogBackend(os.Stderr, ``, 0)
 			//			lh.Color = true
@@ -62,6 +65,7 @@ func (self *configuration) Configure(cnf Configuration) (err error) {
 			//			self.bStderr.SetLevel(level, ``)
 			//			self.backends = append(self.backends, self.bStderr)
 		case mode_SYSLOG:
+			print(mode_SYSLOG + "\n")
 			//			var lh *logging.SyslogBackend
 			//			lh, err = logging.NewSyslogBackend(self.HostName)
 			//			if err != nil {
@@ -71,6 +75,7 @@ func (self *configuration) Configure(cnf Configuration) (err error) {
 			//			self.bSyslog.SetLevel(level, ``)
 			//			self.backends = append(self.backends, self.bSyslog)
 		case mode_FILE:
+			print(mode_FILE + "\n")
 			//			var lh *fileBackend
 			//			if self.cnf.File == "" {
 			//				Warning("Not specified log file name but mode 'file' is setted")
@@ -84,7 +89,8 @@ func (self *configuration) Configure(cnf Configuration) (err error) {
 			//			self.bFile = logging.AddModuleLevel(lh)
 			//			self.bFile.SetLevel(level, ``)
 			//			self.backends = append(self.backends, self.bFile)
-		case mode_GRAYLOG:
+		case mode_GRAYLOG2:
+			print(mode_GRAYLOG2 + "\n")
 			//			var hgpc gelf.GelfProtocolClient
 			//			var hG *gelf.GelfClient
 			//			var lh *gelfBackend
@@ -100,52 +106,17 @@ func (self *configuration) Configure(cnf Configuration) (err error) {
 			//			self.bGraylog.SetLevel(level, ``)
 			//			self.backends = append(self.backends, self.bGraylog)
 		case mode_MEMPIPE:
+			print(mode_MEMPIPE + "\n")
+		case mode_TELEGRAM:
+			print(mode_TELEGRAM + "\n")
 		default:
-			Fatal("Unknown logging mode %v", self.cnf.Mode[i])
+			err = errors.New(fmt.Sprintf("%s %v", ERROR_UNKNOWN_MODE.Error(), mode))
+			return
 		}
 	}
 	//logging.SetBackend(self.backends...)
 	//logFormatter = logging.MustStringFormatter(self.cnf.Format)
 	//logging.SetFormatter(logFormatter)
 	//debug.Dumper(self.cnf)
-	return
-}
-
-func (self *configuration) SetApplicationName(name string) {
-	var tmp []string
-	self.AppName = name
-	if self.AppName == "" {
-		tmp = strings.Split(os.Args[0], string(os.PathSeparator))
-		if len(tmp) > 0 {
-			self.AppName = tmp[len(tmp)-1]
-		}
-	}
-	return
-}
-
-// Set module name
-func (self *configuration) SetModuleName(name string) {
-	var r *record.Record
-	if name != "" {
-		r = newTrace().Trace(traceStepBack + 1).GetRecord()
-		self.moduleNames[r.Package] = name
-	}
-	return
-}
-
-// Remove module name
-func (self *configuration) DelModuleName() {
-	var r *record.Record
-	r = newTrace().Trace(traceStepBack + 1).GetRecord()
-	delete(self.moduleNames, r.Package)
-	return
-}
-
-// Close logging
-func (self *configuration) Close() (err error) {
-	// Stop all backend and reset
-	self.backend.ResetBackends()
-	// Reset standard logging to default settings
-	stdLogClose()
 	return
 }

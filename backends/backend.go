@@ -1,10 +1,16 @@
 package backends
 
 import (
-	"time"
+	//"time"
+	"fmt"
 
 	"github.com/webdeskltd/debug"
+	l "github.com/webdeskltd/log/level"
 )
+
+func init() {
+	debug.Nop()
+}
 
 // Set mode filtering messages on the level of logging
 // 	MODE_NORMAL - Публикуются сообщения начиная от выбранного уровня и ниже. Напримр выбран NOTICE, публковаться будут FATAL, ALERT, CRITICAL, ERROR, WARNING, NOTICE, игнорироваться INFO, DEBUG
@@ -21,15 +27,15 @@ func (self *Backend) SetModeNormal() *Backend {
 }
 
 // Set logging level for Mode = MODE_NORMAL
-func (self *Backend) SetLevel(level Level) *Backend {
+func (self *Backend) SetLevel(level l.Level) *Backend {
 	self.hLevelNormal = level
 	return self
 }
 
 // Set selected logging levels for Mode = MODE_SELECT
-func (self *Backend) SetSelectLevels(levels ...Level) *Backend {
+func (self *Backend) SetSelectLevels(levels ...l.Level) *Backend {
 	var i int
-	self.hLevelSelect = make([]Level, len(levels))
+	self.hLevelSelect = make([]l.Level, len(levels))
 	for i = range levels {
 		self.hLevelSelect[i] = levels[i]
 	}
@@ -38,8 +44,12 @@ func (self *Backend) SetSelectLevels(levels ...Level) *Backend {
 
 // Блокируемая функция сброса буффера бэкэнда и остановки логирования
 func (self *Backend) Stop() (err error) {
-	debug.Dumper("Stop() start", self.hLevelNormal, self.hLevelSelect, self.hMode, self.hType)
-	time.Sleep(time.Second * 2)
-	debug.Dumper("Stop() end")
+	// Close file if open
+	if self.hType == BACKEND_FILE {
+		if self.fH != nil {
+			err = self.fH.Close()
+		}
+	}
+	print(fmt.Sprintf("Stop() type: '%s', mode: '%s'\n", typeName[self.hType], modeName[self.hMode]))
 	return
 }

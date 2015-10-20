@@ -3,56 +3,42 @@ package log
 import (
 	"bufio"
 	"errors"
-	//"os"
+	"os"
 
-	"github.com/webdeskltd/log/gelf"
-	//"github.com/webdeskltd/log/logging"
 	"github.com/webdeskltd/log/backends"
-	"github.com/webdeskltd/log/record"
+	"github.com/webdeskltd/log/gelf"
+	l "github.com/webdeskltd/log/level"
+	m "github.com/webdeskltd/log/message"
 )
 
 const (
-	level_FATAL    logLevel = iota // 0 Fatal: system is unusable
-	level_ALERT                    // 1 Alert: action must be taken immediately
-	level_CRITICAL                 // 2 Critical: critical conditions
-	level_ERROR                    // 3 Error: error conditions
-	level_WARNING                  // 4 Warning: warning conditions
-	level_NOTICE                   // 5 Notice: normal but significant condition
-	level_INFO                     // 6 Informational: informational messages
-	level_DEBUG                    // 7 Debug: debug-level messages
+	mode_CONSOLE  ModeName = "console"
+	mode_SYSLOG   ModeName = "syslog"
+	mode_FILE     ModeName = "file"
+	mode_GRAYLOG2 ModeName = "graylog2"
+	mode_MEMPIPE  ModeName = "memorypipe"
+	mode_TELEGRAM ModeName = "telegram"
 )
 
 const (
-	mode_CONSOLE ConfigurationModeName = "console"
-	mode_SYSLOG  ConfigurationModeName = "syslog"
-	mode_FILE    ConfigurationModeName = "file"
-	mode_GRAYLOG ConfigurationModeName = "graylog"
-	mode_MEMPIPE ConfigurationModeName = "memorypipe"
-)
-
-const (
-	defaultFormat string   = `"%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00} (%{level:7s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})"`
-	defaultLevel  logLevel = level_NOTICE
+	default_LOG    string  = `CB7D0E12-C1EC-49CB-A3DD-AD62DE7FB7D8`
+	default_FORMAT string  = `"%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00} (%{level:7s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})"`
+	default_LEVEL  l.Level = l.NOTICE
 )
 
 var (
-	self     *configuration      // Singleton
-	levelMap map[logLevel]string = map[logLevel]string{
-		level_FATAL:    `FATAL`,    // Система не стабильна, проолжение работы не возможно
-		level_ALERT:    `ALERT`,    // Система не стабильна но может частично продолжить работу (например запусился один из двух серверов - что-то работает а что-то нет)
-		level_CRITICAL: `CRITICAL`, // Критическая ошибка, часть функционала системы работает не корректно
-		level_ERROR:    `ERROR`,    // Ошибки не прерывающие работу приложения
-		level_WARNING:  `WARNING`,  // Предупреждения
-		level_NOTICE:   `NOTICE`,   // Информационные сообщения
-		level_INFO:     `INFO`,     // Сообщения информационного характера описывающие шаги выполнения алгоритмов приложения
-		level_DEBUG:    `DEBUG`,    // Режим отладки, аналогичен INFO но с подробными данными и дампом переменных
-	}
-	errLevelUnknown = errors.New(`Unknown or not supported logging level`) // В конфигурации указан не известный уровень логирования
+	ERROR_LEVEL_UNKNOWN         = errors.New(`Unknown or not supported logging level`)                                     // В конфигурации указан не известный уровень логирования
+	ERROR_CONFIGURATION_IS_NULL = errors.New(`The configuration does not initialized. Received nil instead of the object`) // The configuration does not initialized. Received nil instead of the object
+	ERROR_UNKNOWN_MODE          = errors.New(`Unknown logging mode`)                                                       // Unknown logging mode
 )
 
-type logLevel int8 // Тип уровня журналирования
+// Карта всех логгеров
+var singleton map[string]*Log
 
-type configuration struct {
+type Log struct {
+	ready                  bool               // =true - log ready to use
+	rescueSTDOUT           *os.File           // Save original STDOUT
+	rescueSTDERR           *os.File           // Save original STDERR
 	BufferSize             int                // Size memory buffer for log messages
 	BufferFlushImmediately bool               // Flush log buffer after call
 	Writer                 *bufio.Writer      // Log writer
@@ -60,31 +46,15 @@ type configuration struct {
 	HostName               string             // %{hostname} - Server host name
 	cnf                    *Configuration     // Current configuration
 	backend                *backends.Backends // Backend workflow
-	stdLogWriter           *Writer            // Writer for standard logging
+	defaultLevelLogWriter  *m.Writer          // Writer for standard logging and etc...
 	moduleNames            map[string]string  // Кастомные названия модулей опубликованные через SetModuleName()
-	// backends               []logging.Backend // All mode logging
-	//	fH                     *os.File           // File handle
-	//	bStderr                logging.LeveledBackend // Mode: "console" STDERR
-	//	bSyslog                logging.LeveledBackend // Mode: "syslog" SYSTEM SYSLOG
-	//	bFile                  logging.LeveledBackend // Mode: "file"
-	//	bGraylog               logging.LeveledBackend // Mode: "graylog"
 }
 
-type logMessage struct {
-	Record   *record.Record
-	WriteLen int
-	WriteErr error
-}
-
-// Writer object for standard logging and etc...
-type Writer struct {
-}
-
-type ConfigurationModeName string
-type ConfigurationLevelName string
+type ModeName string
+type LevelName string
 
 // Graylog server configuration
-type ConfigurationGraylog struct {
+type ConfigurationGraylog2 struct {
 	Host        string               `yaml:"Host"`        // IP адрес или имя хоста Graylog сервера
 	Port        uint16               `yaml:"Port"`        // Порт на котором находится Graylog сервер
 	Protocol    string               `yaml:"Protocol"`    // Протокол передачи данных, возможные значения: tcp, udp. По умолчанию: udp
@@ -94,14 +64,19 @@ type ConfigurationGraylog struct {
 	BufferSize  int64                `yaml:"BufferSize"`  // Размер буфера ???
 }
 
+// Telegram messenger configuration
+type ConfigurationTelegram struct {
+}
+
 // Log configuration
 type Configuration struct {
-	BufferFlushImmediately bool                                             `yaml:"BufferFlushImmediately"` // Сбрасывать буффер памяти сразу после записи строки (default: true - unbuffered)
-	BufferSize             int                                              `yaml:"BufferSize"`             // Размер буфера памяти в байтах (default: 0 - equal unbuffered)
-	Mode                   []ConfigurationModeName                          `yaml:"Mode"`                   // Режим логирования, перечисляются включенные режимы логирования
-	Levels                 map[ConfigurationModeName]ConfigurationLevelName `yaml:"Levels"`                 // Уровень логирования для каждого режима логирования
-	Formats                map[ConfigurationModeName]string                 `yaml:"Formats"`                // Формат строки лога для каждого из режимов. Еслине описан, то берётся Format
-	Format                 string                                           `yaml:"Format"`                 // Формат по умолчанию для всех режимов
-	File                   string                                           `yaml:"File"`                   // Режим вывода в файл, путь и имя файла лога
-	Graylog                ConfigurationGraylog                             `yaml:"Graylog"`                // Настройки подключения к graylog серверу
+	BufferFlushImmediately bool                   `yaml:"BufferFlushImmediately"` // Сбрасывать буффер памяти сразу после записи строки (default: true - unbuffered)
+	BufferSize             int                    `yaml:"BufferSize"`             // Размер буфера памяти в байтах (default: 0 - equal unbuffered)
+	Mode                   []ModeName             `yaml:"Mode"`                   // Режим логирования, перечисляются включенные режимы логирования
+	Levels                 map[ModeName]LevelName `yaml:"Levels"`                 // Уровень логирования для каждого режима логирования
+	Formats                map[ModeName]string    `yaml:"Formats"`                // Формат строки лога для каждого из режимов. Еслине описан, то берётся Format
+	Format                 string                 `yaml:"Format"`                 // Формат по умолчанию для всех режимов
+	File                   string                 `yaml:"File"`                   // Режим вывода в файл, путь и имя файла лога
+	Graylog2               ConfigurationGraylog2  `yaml:"Graylog2"`               // Настройки подключения к graylog серверу
+	Telegram               ConfigurationTelegram  `yaml:"Telegram"`               // Настройка отправки сообщений в telegram
 }

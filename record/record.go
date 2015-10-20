@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/webdeskltd/debug"
+	l "github.com/webdeskltd/log/level"
 	"github.com/webdeskltd/log/uuid"
 )
 
@@ -19,7 +20,7 @@ type Record struct {
 	AppName       string    `fmt:"application:s"`         // %{application}             - (string   ) Application name basename of os.Args[0]
 	HostName      string    `fmt:"hostname:s"`            // %{hostname}                - (string   ) Server host name
 	TodayAndNow   time.Time `fmt:"time"`                  // %{time}                    - (time.Time) Time when log occurred
-	Level         int8      `fmt:"level:d"`               // %{level}                   - (int8     ) Log level
+	Level         l.Level   `fmt:"level:d"`               // %{level}                   - (int8     ) Log level
 	Message       string    `fmt:"message:s"`             // %{message}                 - (string   ) Message
 	FileNameLong  string    `fmt:"longfile:s"`            // %{longfile}                - (string   ) Full file name and line number: /a/b/c/d.go
 	FileNameShort string    `fmt:"shortfile:s"`           // %{shortfile}               - (string   ) Final file name element and line number: d.go
@@ -46,7 +47,7 @@ func NewRecord() (self *Record) {
 }
 
 // Set log level
-func (this *Record) SetLevel(level int8) *Record {
+func (this *Record) SetLevel(level l.Level) *Record {
 	this.Level = level
 	return this
 }
@@ -58,7 +59,7 @@ func (this *Record) SetMessage(msg string) *Record {
 }
 
 // Finishing object
-func (this *Record) Complete() *Record {
+func (this *Record) End() *Record {
 
 	//debug.Dumper(this)
 	return this

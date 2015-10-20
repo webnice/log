@@ -2,6 +2,8 @@ package record
 
 import (
 	"fmt"
+	
+	l "github.com/webdeskltd/log/level"
 )
 
 const (
@@ -40,15 +42,15 @@ var (
 		color_WHITE:   fmt.Sprintf("\033[%d;1m", 40+int(color_WHITE)),
 	}
 	// Colors for error level
-	colorLevelMap map[logLevel]ansiStyle = map[logLevel]ansiStyle{
-		level_FATAL:    ansiStyle{Background: color_RED, Foreground: color_BLACK},     // Система не стабильна, проолжение работы не возможно
-		level_ALERT:    ansiStyle{Background: color_MAGENTA, Foreground: color_WHITE}, // Система не стабильна но может частично продолжить работу (например запусился один из двух серверов - что-то работает а что-то нет)
-		level_CRITICAL: ansiStyle{Background: color_BLACK, Foreground: color_MAGENTA}, // Критическая ошибка, часть функционала системы работает не корректно
-		level_ERROR:    ansiStyle{Background: color_BLACK, Foreground: color_RED},     // Ошибки не прерывающие работу приложения
-		level_WARNING:  ansiStyle{Background: color_BLACK, Foreground: color_YELLOW},  // Предупреждения
-		level_NOTICE:   ansiStyle{Background: color_BLACK, Foreground: color_GREEN},   // Информационные сообщения
-		level_INFO:     ansiStyle{Background: color_BLACK, Foreground: color_WHITE},   // Сообщения информационного характера описывающие шаги выполнения алгоритмов приложения
-		level_DEBUG:    ansiStyle{Background: color_BLACK, Foreground: color_CYAN},    // Режим отладки, аналогичен INFO но с подробными данными и дампом переменных
+	colorLevelMap map[l.Level]ansiStyle = map[l.Level]ansiStyle{
+		l.FATAL:    ansiStyle{Background: color_RED, Foreground: color_BLACK},     // Система не стабильна, проолжение работы не возможно
+		l.ALERT:    ansiStyle{Background: color_MAGENTA, Foreground: color_WHITE}, // Система не стабильна но может частично продолжить работу (например запусился один из двух серверов - что-то работает а что-то нет)
+		l.CRITICAL: ansiStyle{Background: color_BLACK, Foreground: color_MAGENTA}, // Критическая ошибка, часть функционала системы работает не корректно
+		l.ERROR:    ansiStyle{Background: color_BLACK, Foreground: color_RED},     // Ошибки не прерывающие работу приложения
+		l.WARNING:  ansiStyle{Background: color_BLACK, Foreground: color_YELLOW},  // Предупреждения
+		l.NOTICE:   ansiStyle{Background: color_BLACK, Foreground: color_GREEN},   // Информационные сообщения
+		l.INFO:     ansiStyle{Background: color_BLACK, Foreground: color_WHITE},   // Сообщения информационного характера описывающие шаги выполнения алгоритмов приложения
+		l.DEBUG:    ansiStyle{Background: color_BLACK, Foreground: color_CYAN},    // Режим отладки, аналогичен INFO но с подробными данными и дампом переменных
 	}
 )
 

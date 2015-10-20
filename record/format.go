@@ -128,8 +128,8 @@ func (this *Record) getFormatedElement(elm recDic, layout string) (ret string) {
 	case "color":
 		this.color = true
 	case "colorBeg":
-		ret += fmt.Sprint(colorsBackground[colorLevelMap[logLevel(this.Level)].Background])
-		ret += fmt.Sprint(colors[colorLevelMap[logLevel(this.Level)].Foreground])
+		ret += fmt.Sprint(colorsBackground[colorLevelMap[this.Level].Background])
+		ret += fmt.Sprint(colors[colorLevelMap[this.Level].Foreground])
 	case "colorEnd":
 		if this.color == false {
 			ret += fmt.Sprint(colorReset)
@@ -186,8 +186,8 @@ func (this *Record) Format(tpl string) (ret string, err error) {
 
 	if this.color {
 		fmt.Print(colorReset)
-		fmt.Print(colorsBackground[colorLevelMap[logLevel(this.Level)].Background])
-		fmt.Print(colors[colorLevelMap[logLevel(this.Level)].Foreground])
+		fmt.Print(colorsBackground[colorLevelMap[this.Level].Background])
+		fmt.Print(colors[colorLevelMap[this.Level].Foreground])
 	}
 	fmt.Print(ret)
 	if this.color {

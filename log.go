@@ -1,94 +1,192 @@
 package log
 
 import (
-	"bufio"
+	//"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/webdeskltd/debug"
 	"github.com/webdeskltd/log/backends"
 	"github.com/webdeskltd/log/gelf"
+	l "github.com/webdeskltd/log/level"
+	m "github.com/webdeskltd/log/message"
+	"github.com/webdeskltd/log/record"
+	t "github.com/webdeskltd/log/trace"
+
+	//"github.com/webdeskltd/log/gelf"
+
+	//"github.com/webdeskltd/log/logging"
 )
 
 // Initialize default log settings
 func init() {
-	var err error
-	var cnf Configuration
+	singleton = make(map[string]*Log)
 
-	self = new(configuration)
-	self.moduleNames = make(map[string]string)
-	self.Writer = bufio.NewWriterSize(os.Stderr, self.BufferSize)
-	self.HostName, err = os.Hostname()
-	if err != nil {
-		self.HostName = `undefined`
-		fmt.Fprintf(os.Stderr, "Error get os.Hostname(): %v\n", err)
-	}
-	cnf = Configuration{
+	// Default public log object
+	singleton[default_LOG] = NewLog()
+
+	// Intercept standard logging only first
+	singleton[default_LOG].InterceptStandardLog(true)
+
+	debug.Nop()
+}
+
+// New log object
+func NewLog() (obj *Log) {
+	obj = new(Log)
+	obj.moduleNames = make(map[string]string)
+	obj.Initialize()
+	return
+}
+
+// Create dafault configuration
+func (self *Log) defaultConfiguration() (cnf *Configuration) {
+	cnf = &Configuration{
 		BufferFlushImmediately: true,
 		BufferSize:             0,
-		Mode:                   []ConfigurationModeName{mode_CONSOLE},
-		Levels:                 make(map[ConfigurationModeName]ConfigurationLevelName),
-		Formats:                make(map[ConfigurationModeName]string),
-		Format:                 defaultFormat,
-		Graylog: ConfigurationGraylog{
+		Mode:                   []ModeName{mode_CONSOLE},
+		Levels:                 make(map[ModeName]LevelName),
+		Formats:                make(map[ModeName]string),
+		Format:                 default_FORMAT,
+		Graylog2: ConfigurationGraylog2{
 			Compression: gelf.COMPRESSION_NONE,
 			Source:      self.HostName,
 			Protocol:    gelf.UDP_NETWORK,
 			BufferSize:  1000,
 		},
+		Telegram: ConfigurationTelegram{},
 	}
-	cnf.Levels[mode_CONSOLE] = ConfigurationLevelName(levelMap[defaultLevel])
-	self.Configure(cnf)
-	self.SetApplicationName(``)
-
-	// Create default dackend - STDERR
-	self.backend = backends.NewBackends()
-	self.backend.AddBackend(backends.NewBackendSTD(nil).SetModeNormal())
-
-	// Setup standard logging
-	self.stdLogWriter = new(Writer)
-	stdLogConnect(self.stdLogWriter)
-
-	debug.Nop()
-}
-
-// Конструктор сообщений журнала
-func newLogMessage() (this *logMessage) {
-	this = new(logMessage)
-	this.Record = newTrace().Trace(traceStepBack + 1).GetRecord()
+	cnf.Levels[mode_CONSOLE] = LevelName(l.Map[default_LEVEL])
 	return
 }
 
-// Сюда попадают все сообщения от всех уровней логирования
-func (this *logMessage) Write(level logLevel, tpl string, args ...interface{}) *logMessage {
-	var tmp string
+// Initialize default configuration
+func (self *Log) Initialize() *Log {
+	var err error
+	var cnf *Configuration
 
-	tmp = fmt.Sprintf(tpl, args...)
-	this.Record.SetLevel(int8(level)).SetMessage(tmp).Complete()
-	//	this.WriteString(tmp)
+	// Default level writer
+	self.defaultLevelLogWriter = m.NewWriter(default_LEVEL).Resolver(self.ResolveModuleName)
 
-	//	debug.Dumper(this.Record)
+	self.SetApplicationName(``)
+	self.HostName, err = os.Hostname()
+	if err != nil {
+		self.HostName = `undefined`
+		fmt.Fprintf(os.Stderr, "Error get os.Hostname(): %v\n", err)
+	}
 
-	var test string = ` 1: %{id}
- 2: %{pid:8d}                  - (int      ) Process id
- 3: %{application}             - (string   ) Application name basename of os.Args[0]
- 4: %{hostname}                - (string   ) Server host name
- 5: %{time}                    - (time.Time) Time when log occurred
- 6: %{level:-8d}               - (int8     ) Log level
- 7: %{message}                 - (string   ) Message
- 8: %{color}                   - %{begcolor}(bool     ) ANSI color based on log level%{endcolor}
- 9: %{longfile}                - (string   ) Full file name and line number: /a/b/c/d.go
-10: %{shortfile}               - (string   ) Final file name element and line number: d.go
-11: %{line}                    - (int      ) Line number in file
-12: %{package}                 - (string   ) Full package path, eg. github.com/webdeskltd/log
-13: %{module} or %{shortpkg}   - (string   ) Module name base package path, eg. log
-14: %{function} or %{facility} - (string   ) Full function name, eg. PutUint32
-15: %{callstack}               - (string   ) Full call stack
+	// Create default configuration and apply
+	cnf = self.defaultConfiguration()
+	err = self.Configure(cnf)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error Configure(): %v\n", err)
+	} else {
+		self.ready = true
+	}
+	return self
+}
 
-"%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00} (%{level:7s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})"
-%{level:.1s}`
-	this.Record.Format(test)
+// Set application name
+func (self *Log) SetApplicationName(name string) *Log {
+	var tmp []string
+	self.AppName = name
+	if self.AppName == "" {
+		tmp = strings.Split(os.Args[0], string(os.PathSeparator))
+		if len(tmp) > 0 {
+			self.AppName = tmp[len(tmp)-1]
+		}
+	}
+	return self
+}
 
-	self.backend.Push(this.Record)
-	return this
+// Set module name
+func (self *Log) SetModuleName(name string) *Log {
+	var r *record.Record
+	if name != "" {
+		r = t.NewTrace().Trace(t.STEP_BACK + 1).GetRecord()
+		self.moduleNames[r.Package] = name
+	}
+	return self
+}
+
+// Remove module name
+func (self *Log) DelModuleName() *Log {
+	var r *record.Record
+	r = t.NewTrace().Trace(t.STEP_BACK + 1).GetRecord()
+	delete(self.moduleNames, r.Package)
+	return self
+}
+
+// Resolve application name
+func (self *Log) ResolveModuleName(r *record.Record) (name string) {
+	var ok bool
+	_, ok = self.moduleNames[r.Package]
+	if ok {
+		name = self.moduleNames[r.Package]
+	} else {
+		name = r.Package
+	}
+	return
+}
+
+// Configuring the interception of communications of a standard log
+// flg=true  - intercept is enabled
+// flg=false - intercept is desabled
+func (self *Log) InterceptStandardLog(flg bool) *Log {
+	if flg {
+		stdLogConnect(self.defaultLevelLogWriter)
+	} else {
+		stdLogClose()
+	}
+	return self
+}
+
+// Configuring the interception of STDOUT
+// flg=true  - intercept is enabled
+// flg=false - intercept is desabled
+func (self *Log) InterceptSTDOUT(flg bool) *Log {
+	if flg {
+		if self.rescueSTDOUT == nil {
+			self.rescueSTDOUT = os.Stdout
+		}
+	} else {
+		if self.rescueSTDOUT != nil {
+			os.Stdout = self.rescueSTDOUT
+		}
+	}
+	return self
+}
+
+// Configuring the interception of STDERR
+// flg=true  - intercept is enabled
+// flg=false - intercept is desabled
+func (self *Log) InterceptSTDERR(flg bool) *Log {
+	if flg {
+		if self.rescueSTDERR == nil {
+			self.rescueSTDERR = os.Stderr
+		}
+	} else {
+		if self.rescueSTDERR != nil {
+			os.Stderr = self.rescueSTDERR
+		}
+	}
+	return self
+}
+
+// Close logging
+func (self *Log) Close() (err error) {
+	// Flush buffer
+	// err = self.Writer.Flush()
+
+	// Reset standard logging to default settings
+	self.InterceptStandardLog(false)
+
+	// Create new backend object, old object automatic call Stop all backend and destroy
+	self.backend = backends.NewBackends()
+
+	// Reinitialisation
+	//	selfMap["main"] = new(Log)
+	//	selfMap["main"].Initialize()
+	return
 }

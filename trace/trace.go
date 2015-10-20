@@ -1,4 +1,4 @@
-package log
+package trace
 
 import (
 	"runtime"
@@ -8,20 +8,20 @@ import (
 )
 
 const (
-	traceStepBack    int    = 2
+	STEP_BACK        int    = 2
 	packageSeparator string = `/`
 )
 
 // Trace
-type trace struct {
+type Trace struct {
 	Record *record.Record
 }
 
-func newTrace() *trace {
-	return new(trace)
+func NewTrace() *Trace {
+	return new(Trace)
 }
 
-func (this *trace) Trace(level int) *trace {
+func (this *Trace) Trace(level int) *Trace {
 	var ok bool
 	var pc uintptr
 	var fn *runtime.Func
@@ -31,7 +31,7 @@ func (this *trace) Trace(level int) *trace {
 
 	this.Record = record.NewRecord()
 	if level == 0 {
-		level = traceStepBack
+		level = STEP_BACK
 	}
 	buf = make([]byte, 1<<16)
 	pc, this.Record.FileNameLong, this.Record.FileLine, ok = runtime.Caller(level)
@@ -70,19 +70,19 @@ func (this *trace) Trace(level int) *trace {
 		}
 
 		// Custom module name
-		if _, ok = self.moduleNames[this.Record.Package]; ok == true {
-			this.Record.Module = self.moduleNames[this.Record.Package]
-		}
+		//		if _, ok = self.moduleNames[this.Record.Package]; ok == true {
+		//			this.Record.Module = self.moduleNames[this.Record.Package]
+		//		}
 	}
 	return this
 }
 
-func (this *trace) GetRecord() *record.Record {
-	if self.AppName != "" {
-		this.Record.AppName = self.AppName
-	}
-	if self.HostName != "" {
-		this.Record.HostName = self.HostName
-	}
+func (this *Trace) GetRecord() *record.Record {
+	//	if self.AppName != "" {
+	//		this.Record.AppName = self.AppName
+	//	}
+	//	if self.HostName != "" {
+	//		this.Record.HostName = self.HostName
+	//	}
 	return this.Record
 }

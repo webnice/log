@@ -2,6 +2,7 @@ package backends
 
 import (
 	"container/list"
+	"runtime"
 
 	"github.com/webdeskltd/log/record"
 	"github.com/webdeskltd/log/uuid"
@@ -13,10 +14,37 @@ func init() {
 	debug.Nop()
 }
 
+// Destructor
+// Graceful stop all backends in pool
+// - Flush all data
+// - Close files and network connections
+// - Close channel
+func destructor(obj *Backends) {
+	var err error
+	var elm *list.Element
+	var item *Backend
+	if obj.Pool != nil {
+		for elm = obj.Pool.Front(); elm != nil; elm = elm.Next() {
+			item = elm.Value.(*Backend)
+			if item == nil {
+				continue
+			}
+			err = item.Stop()
+			// TODO
+			// Обработать ошибку
+			// В настоящий момент ошибка игнорируется
+			err = err
+		}
+	}
+}
+
 func NewBackends() (ret *Backends) {
 	ret = new(Backends)
+	ret.Pool = list.New()
+	ret.PoolIndex = make(map[uuid.UUID]*list.Element)
 	ret.RecordsChan = make(chan *record.Record, lengthRecords)
-	ret.ResetBackends()
+	// Destructor
+	runtime.SetFinalizer(ret, destructor)
 	return
 }
 
@@ -59,32 +87,6 @@ func (self *Backends) DelBackend(id *uuid.UUID) (err error) {
 	self.Pool.Remove(elm)
 	delete(self.PoolIndex, *id)
 	return
-}
-
-// Очистка пула backend
-func (self *Backends) ResetBackends() {
-	var err error
-	var elm *list.Element
-	var item *Backend
-
-	// First run
-	if self.Pool == nil {
-		self.Pool = list.New()
-	}
-	for elm = self.Pool.Front(); elm != nil; elm = elm.Next() {
-		item = elm.Value.(*Backend)
-		if item == nil {
-			continue
-		}
-		err = item.Stop()
-		// TODO
-		// Обработать ошибку
-		// В настоящий момент ошибка игнорируется
-		err = err
-	}
-
-	self.Pool = list.New()
-	self.PoolIndex = make(map[uuid.UUID]*list.Element)
 }
 
 // Sending messages to registered backends
