@@ -32,35 +32,50 @@ type Record struct {
 	color         bool      `fmt:"color"`                 // %{color}                   - (bool     ) ANSI color for messages in general, based on log level
 	colorBeg      bool      `fmt:"colorbeg"`              // %{colorbeg}                - (bool     ) Mark the beginning colored text in message, based on log level
 	colorEnd      bool      `fmt:"colorend"`              // %{colorend}                - (bool     ) Mark the ending colored text in message, based on log level
+
+	msgs     []interface{}   `fmt:"-"` // ---------------------------- Original message and params
+	resolver RecordResolveFn `fmt:"-"` // ---------------------------- Function name record resolution
 }
+
+// Функция разрешения имён записи
+type RecordResolveFn func(r *Record)
 
 func init() {
 	debug.Nop()
 }
 
-func NewRecord() (self *Record) {
-	self = new(Record)
-	self.Id = uuid.TimeUUID()
-	self.TodayAndNow = time.Now().In(time.Local)
-	self.Pid = syscall.Getpid()
-	return self
+func NewRecord() (this *Record) {
+	this = new(Record)
+	this.Id = uuid.TimeUUID()
+	this.TodayAndNow = time.Now().In(time.Local)
+	this.Pid = syscall.Getpid()
+	return this
 }
 
 // Set log level
-func (this *Record) SetLevel(level l.Level) *Record {
-	this.Level = level
-	return this
+func (self *Record) SetLevel(level l.Level) *Record {
+	self.Level = level
+	return self
+}
+
+// Assigning function name resolution
+func (self *Record) Resolver(f RecordResolveFn) *Record {
+	self.resolver = f
+	return self
 }
 
 // Set message
-func (this *Record) SetMessage(msg string) *Record {
-	this.Message = msg
-	return this
+func (self *Record) SetMessage(args ...interface{}) *Record {
+	self.msgs = args
+	return self
 }
 
 // Finishing object
-func (this *Record) End() *Record {
+func (self *Record) End() *Record {
+	if self.resolver != nil {
+		self.resolver(self)
+	}
 
 	//debug.Dumper(this)
-	return this
+	return self
 }

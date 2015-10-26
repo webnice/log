@@ -1,27 +1,27 @@
 package log
 
 import (
-	//"bufio"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
-	"github.com/webdeskltd/debug"
-	"github.com/webdeskltd/log/backends"
-	"github.com/webdeskltd/log/gelf"
+	b "github.com/webdeskltd/log/backends"
+	g "github.com/webdeskltd/log/gelf"
 	l "github.com/webdeskltd/log/level"
-	m "github.com/webdeskltd/log/message"
-	"github.com/webdeskltd/log/record"
+	r "github.com/webdeskltd/log/record"
 	t "github.com/webdeskltd/log/trace"
+	w "github.com/webdeskltd/log/writer"
 
-	//"github.com/webdeskltd/log/gelf"
-
-	//"github.com/webdeskltd/log/logging"
+	"github.com/webdeskltd/debug"
 )
 
 // Initialize default log settings
 func init() {
 	singleton = make(map[string]*Log)
+
+	// Defailt backend format
+	b.DefaultFormat = default_FORMAT
 
 	// Default public log object
 	singleton[default_LOG] = NewLog()
@@ -45,19 +45,20 @@ func (self *Log) defaultConfiguration() (cnf *Configuration) {
 	cnf = &Configuration{
 		BufferFlushImmediately: true,
 		BufferSize:             0,
-		Mode:                   []ModeName{mode_CONSOLE},
-		Levels:                 make(map[ModeName]LevelName),
-		Formats:                make(map[ModeName]string),
+		Mode:                   make(map[b.BackendName][]l.LevelName),
+		Levels:                 make(map[b.BackendName]l.LevelName),
+		Formats:                make(map[b.BackendName]string),
 		Format:                 default_FORMAT,
 		Graylog2: ConfigurationGraylog2{
-			Compression: gelf.COMPRESSION_NONE,
+			Compression: g.COMPRESSION_NONE,
 			Source:      self.HostName,
-			Protocol:    gelf.UDP_NETWORK,
+			Protocol:    g.UDP_NETWORK,
 			BufferSize:  1000,
 		},
 		Telegram: ConfigurationTelegram{},
 	}
-	cnf.Levels[mode_CONSOLE] = LevelName(l.Map[default_LEVEL])
+	cnf.Mode[b.NAME_CONSOLE] = nil
+	cnf.Levels[b.NAME_CONSOLE] = l.LevelName(l.Map[default_LEVEL])
 	return
 }
 
@@ -65,9 +66,6 @@ func (self *Log) defaultConfiguration() (cnf *Configuration) {
 func (self *Log) Initialize() *Log {
 	var err error
 	var cnf *Configuration
-
-	// Default level writer
-	self.defaultLevelLogWriter = m.NewWriter(default_LEVEL).Resolver(self.ResolveModuleName)
 
 	self.SetApplicationName(``)
 	self.HostName, err = os.Hostname()
@@ -84,6 +82,10 @@ func (self *Log) Initialize() *Log {
 	} else {
 		self.ready = true
 	}
+
+	// Default level writer
+	self.defaultLevelLogWriter = w.NewWriter(default_LEVEL).Resolver(self.ResolveNames).AttachBackends(self.backend)
+
 	return self
 }
 
@@ -102,30 +104,28 @@ func (self *Log) SetApplicationName(name string) *Log {
 
 // Set module name
 func (self *Log) SetModuleName(name string) *Log {
-	var r *record.Record
+	var rec *r.Record
 	if name != "" {
-		r = t.NewTrace().Trace(t.STEP_BACK + 1).GetRecord()
-		self.moduleNames[r.Package] = name
+		rec = t.NewTrace().Trace(t.STEP_BACK + 1).GetRecord()
+		self.moduleNames[rec.Package] = name
 	}
 	return self
 }
 
 // Remove module name
 func (self *Log) DelModuleName() *Log {
-	var r *record.Record
-	r = t.NewTrace().Trace(t.STEP_BACK + 1).GetRecord()
-	delete(self.moduleNames, r.Package)
+	var rec *r.Record
+	rec = t.NewTrace().Trace(t.STEP_BACK + 1).GetRecord()
+	delete(self.moduleNames, rec.Package)
 	return self
 }
 
-// Resolve application name
-func (self *Log) ResolveModuleName(r *record.Record) (name string) {
-	var ok bool
-	_, ok = self.moduleNames[r.Package]
-	if ok {
-		name = self.moduleNames[r.Package]
-	} else {
-		name = r.Package
+// Resolve resord
+func (self *Log) ResolveNames(rec *r.Record) {
+	rec.AppName = self.AppName
+	rec.HostName = self.HostName
+	if _, ok := self.moduleNames[rec.Package]; ok == true {
+		rec.Package = self.moduleNames[rec.Package]
 	}
 	return
 }
@@ -145,48 +145,51 @@ func (self *Log) InterceptStandardLog(flg bool) *Log {
 // Configuring the interception of STDOUT
 // flg=true  - intercept is enabled
 // flg=false - intercept is desabled
-func (self *Log) InterceptSTDOUT(flg bool) *Log {
-	if flg {
-		if self.rescueSTDOUT == nil {
-			self.rescueSTDOUT = os.Stdout
-		}
-	} else {
-		if self.rescueSTDOUT != nil {
-			os.Stdout = self.rescueSTDOUT
-		}
-	}
-	return self
-}
+//func (self *Log) InterceptSTDOUT(flg bool) *Log {
+//	if flg {
+//		if self.rescueSTDOUT == nil {
+//			self.rescueSTDOUT = os.Stdout
+//		}
+//	} else {
+//		if self.rescueSTDOUT != nil {
+//			os.Stdout = self.rescueSTDOUT
+//		}
+//	}
+//	return self
+//}
 
 // Configuring the interception of STDERR
 // flg=true  - intercept is enabled
 // flg=false - intercept is desabled
-func (self *Log) InterceptSTDERR(flg bool) *Log {
-	if flg {
-		if self.rescueSTDERR == nil {
-			self.rescueSTDERR = os.Stderr
-		}
-	} else {
-		if self.rescueSTDERR != nil {
-			os.Stderr = self.rescueSTDERR
-		}
-	}
-	return self
-}
+//func (self *Log) InterceptSTDERR(flg bool) *Log {
+//	if flg {
+//		if self.rescueSTDERR == nil {
+//			self.rescueSTDERR = os.Stderr
+//		}
+//	} else {
+//		if self.rescueSTDERR != nil {
+//			os.Stderr = self.rescueSTDERR
+//		}
+//	}
+//	return self
+//}
 
 // Close logging
 func (self *Log) Close() (err error) {
-	// Flush buffer
-	// err = self.Writer.Flush()
-
 	// Reset standard logging to default settings
 	self.InterceptStandardLog(false)
+	self.defaultLevelLogWriter = nil
+
+	// Block programm while goroutine exit
+	self.backend.Close()
 
 	// Create new backend object, old object automatic call Stop all backend and destroy
-	self.backend = backends.NewBackends()
+	self.backend = b.NewBackends()
 
 	// Reinitialisation
-	//	selfMap["main"] = new(Log)
-	//	selfMap["main"].Initialize()
+	singleton[default_LOG] = NewLog()
+	self = singleton[default_LOG]
+	runtime.GC()
+	runtime.Gosched()
 	return
 }

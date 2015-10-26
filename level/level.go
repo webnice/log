@@ -1,6 +1,11 @@
 package level
 
-import ()
+func init() {
+	Map2Level = make(map[LevelName]Level)
+	for n := range Map {
+		Map2Level[Map[n]] = n
+	}
+}
 
 func New(l Level) *LevelObject {
 	var self *LevelObject = new(LevelObject)
@@ -9,7 +14,8 @@ func New(l Level) *LevelObject {
 }
 
 func (self *LevelObject) String() (ret string) {
-	ret, _ = Map[self.Level]
+	resp, _ := Map[self.Level]
+	ret = string(resp)
 	return
 }
 

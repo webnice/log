@@ -62,9 +62,9 @@ func Debug(args ...interface{}) {
 }
 
 // Flush log buffer immediately
-func Flush() {
-	singleton[default_LOG].Flush()
-}
+//func Flush() {
+//	singleton[default_LOG].Flush()
+//}
 
 // Close logging and reinitialisation defailt log
 func Close() (err error) {
@@ -105,13 +105,13 @@ func InterceptStandardLog(flg bool) {
 // Configuring the interception of STDOUT
 // flg=true  - intercept is enabled
 // flg=false - intercept is desabled
-func InterceptSTDOUT(flg bool) {
-	singleton[default_LOG].InterceptSTDOUT(flg)
-}
+//func InterceptSTDOUT(flg bool) {
+//	singleton[default_LOG].InterceptSTDOUT(flg)
+//}
 
 // Configuring the interception of STDERR
 // flg=true  - intercept is enabled
 // flg=false - intercept is desabled
-func InterceptSTDERR(flg bool) {
-	singleton[default_LOG].InterceptSTDERR(flg)
-}
+//func InterceptSTDERR(flg bool) {
+//	singleton[default_LOG].InterceptSTDERR(flg)
+//}

@@ -3,120 +3,201 @@ package log
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
-	//"os"
+	"syscall"
+
+	b "github.com/webdeskltd/log/backends"
+	g "github.com/webdeskltd/log/gelf"
+	l "github.com/webdeskltd/log/level"
+	r "github.com/webdeskltd/log/record"
 
 	"github.com/webdeskltd/debug"
-	"github.com/webdeskltd/log/backends"
-	"github.com/webdeskltd/log/record"
-	//"github.com/webdeskltd/log/gelf"
-
-	//"github.com/webdeskltd/log/logging"
 )
 
 func init() {
 	debug.Nop()
 }
 
-// Apply new configuration
-func (self *Log) Configure(cnf *Configuration) (err error) {
-	var i int
+// Prepare configuration
+func (self *Log) prepareConfigure(cnf *Configuration) (err error) {
+	var i b.BackendName
+	var mode b.BackendName
 	var ok bool
-	var mode ModeName
 
 	if cnf == nil {
 		err = ERROR_CONFIGURATION_IS_NULL
 		return
 	}
-	self.cnf = cnf
 
 	// Если формат по умолчанию для всех режимов не установлен, используем стандартный формат по умолчанию
-	if self.cnf.Format == "" {
-		self.cnf.Format = default_FORMAT
+	if cnf.Format == "" {
+		cnf.Format = default_FORMAT
 	}
+
 	// Проверка формата по умолчанию
-	_, err = record.CheckFormat(self.cnf.Format)
+	_, err = r.CheckFormat(cnf.Format)
 	if err != nil {
 		return
 	}
 
-	for i = range self.cnf.Mode {
-		mode = ModeName(strings.ToLower(string(self.cnf.Mode[i])))
+	for i = range cnf.Mode {
+		mode = b.CheckMode(i)
+		if mode != i {
+			cnf.Mode[mode] = cnf.Mode[i]
+			delete(cnf.Mode, i)
+		}
+	}
 
-		// Если для режима логирования не о определён формат, то присваиваем формат по умолчанию
-		if _, ok = self.cnf.Formats[mode]; ok == false {
-			self.cnf.Formats[mode] = self.cnf.Format
+	for i = range cnf.Levels {
+		mode = b.CheckMode(i)
+		if mode != i {
+			cnf.Levels[mode] = cnf.Levels[i]
+			delete(cnf.Levels, i)
+		}
+	}
+
+	for i = range cnf.Formats {
+		mode = b.CheckMode(i)
+		if mode != i {
+			cnf.Formats[mode] = cnf.Formats[i]
+			delete(cnf.Formats, i)
+		}
+		// Если для режима логирования не определён формат, то присваиваем формат по умолчанию
+		if _, ok = cnf.Formats[mode]; ok == false {
+			cnf.Formats[mode] = cnf.Format
 		}
 		// Проверка формата
-		_, err = record.CheckFormat(self.cnf.Formats[mode])
+		_, err = r.CheckFormat(cnf.Formats[mode])
 		if err != nil {
 			return
 		}
+	}
 
-		switch mode {
-		case mode_CONSOLE:
-			print(mode_CONSOLE + "\n")
-			self.backend = backends.NewBackends()
-			self.backend.AddBackend(backends.NewBackendSTD(nil).SetModeNormal())
-			//			var lh *logging.LogBackend
-			//			lh = logging.NewLogBackend(os.Stderr, ``, 0)
-			//			lh.Color = true
-			//			self.bStderr = logging.AddModuleLevel(lh)
-			//			self.bStderr.SetLevel(level, ``)
-			//			self.backends = append(self.backends, self.bStderr)
-		case mode_SYSLOG:
-			print(mode_SYSLOG + "\n")
-			//			var lh *logging.SyslogBackend
-			//			lh, err = logging.NewSyslogBackend(self.HostName)
-			//			if err != nil {
-			//				Fatal("Can't initiate syslog backend %v", err)
-			//			}
-			//			self.bSyslog = logging.AddModuleLevel(lh)
-			//			self.bSyslog.SetLevel(level, ``)
-			//			self.backends = append(self.backends, self.bSyslog)
-		case mode_FILE:
-			print(mode_FILE + "\n")
-			//			var lh *fileBackend
-			//			if self.cnf.File == "" {
-			//				Warning("Not specified log file name but mode 'file' is setted")
-			//				continue
-			//			}
-			//			self.fH, err = os.OpenFile(self.cnf.File, syscall.O_APPEND|syscall.O_CREAT|syscall.O_WRONLY, 0644)
-			//			if err != nil {
-			//				Fatal("Can't initiate filelog backend %v", err)
-			//			}
-			//			lh = newFileBackend(self.fH)
-			//			self.bFile = logging.AddModuleLevel(lh)
-			//			self.bFile.SetLevel(level, ``)
-			//			self.backends = append(self.backends, self.bFile)
-		case mode_GRAYLOG2:
-			print(mode_GRAYLOG2 + "\n")
-			//			var hgpc gelf.GelfProtocolClient
-			//			var hG *gelf.GelfClient
-			//			var lh *gelfBackend
-			//			if strings.EqualFold(strings.ToLower(self.cnf.Graylog.Protocol), strings.ToLower(gelf.UDP_NETWORK)) == true {
-			//				hgpc = gelf.MustUdpClient(cnf.Graylog.Host, cnf.Graylog.Port, cnf.Graylog.ChunkSize)
-			//			}
-			//			if strings.EqualFold(strings.ToLower(self.cnf.Graylog.Protocol), strings.ToLower(gelf.TCP_NETWORK)) == true {
-			//				hgpc = gelf.MustTcpClient(cnf.Graylog.Host, cnf.Graylog.Port)
-			//			}
-			//			hG = gelf.NewGelfClient(hgpc, self.cnf.Graylog.Compression)
-			//			lh = newGelfBackend(hG, self.HostName, self.HostName)
-			//			self.bGraylog = logging.AddModuleLevel(lh)
-			//			self.bGraylog.SetLevel(level, ``)
-			//			self.backends = append(self.backends, self.bGraylog)
-		case mode_MEMPIPE:
-			print(mode_MEMPIPE + "\n")
-		case mode_TELEGRAM:
-			print(mode_TELEGRAM + "\n")
+	// Graylog2 protocol
+	switch strings.ToLower(cnf.Graylog2.Protocol) {
+	case "tcp":
+		cnf.Graylog2.Protocol = `tcp`
+	case "udp":
+		cnf.Graylog2.Protocol = `udp`
+	default:
+		cnf.Graylog2.Protocol = `udp`
+	}
+
+	return
+}
+
+// Apply new configuration
+func (self *Log) Configure(cnf *Configuration) (err error) {
+	var bname b.BackendName
+	var ok bool
+
+	// Паникаловка :)
+	defer func() {
+		if r := recover(); r != nil {
+			if e, ok := r.(error); ok {
+				if err != nil {
+					err = errors.New("failed to configure: " + e.Error() + ", " + err.Error())
+				} else {
+					err = errors.New("failed to configure: " + e.Error())
+				}
+			}
+			self.backend = nil
+			self.cnf = nil
+		}
+	}()
+
+	// Проверка и подготовка конфигурации
+	err = self.prepareConfigure(cnf)
+	if err != nil {
+		return
+	}
+
+	// Инициализация пула
+	self.backend = b.NewBackends()
+
+	for bname = range cnf.Mode {
+		var backend *b.Backend
+		var bmode b.Mode
+		var levels []l.Level
+		var level l.Level
+
+		switch bname {
+		case b.NAME_CONSOLE:
+			backend = b.NewBackendConsole(nil).SetFormat(cnf.Formats[bname])
+		case b.NAME_SYSLOG:
+			backend = b.NewBackendSyslog(self.HostName).SetFormat(cnf.Formats[bname])
+		case b.NAME_FILE:
+			var fh *os.File
+			if cnf.File == "" {
+				panic(ERROR_LOG_FILENAME_IS_EMPTY)
+				continue
+			}
+			fh, err = os.OpenFile(cnf.File, syscall.O_APPEND|syscall.O_CREAT|syscall.O_WRONLY, 0644)
+			if err != nil {
+				panic(ERROR_INIT_FILE_BACKEND)
+			}
+			backend = b.NewBackendFile(fh).SetFormat(cnf.Formats[bname])
+		case b.NAME_GRAYLOG2:
+			var hgpc g.GelfProtocolClient
+			var hG *g.GelfClient
+			if cnf.Graylog2.Protocol == g.UDP_NETWORK {
+				hgpc = g.MustUdpClient(cnf.Graylog2.Host, cnf.Graylog2.Port, cnf.Graylog2.ChunkSize)
+			}
+			if cnf.Graylog2.Protocol == g.TCP_NETWORK {
+				hgpc = g.MustTcpClient(cnf.Graylog2.Host, cnf.Graylog2.Port)
+			}
+			hG = g.NewGelfClient(hgpc, self.cnf.Graylog2.Compression)
+			backend = b.NewBackendGraylog2(hG).SetFormat(cnf.Formats[bname])
+		case b.NAME_MEMORYPIPE:
+			backend = b.NewBackendMemorypipe().SetFormat(cnf.Formats[bname])
+		case b.NAME_TELEGRAM:
+			backend = b.NewBackendTelegram().SetFormat(cnf.Formats[bname])
 		default:
-			err = errors.New(fmt.Sprintf("%s %v", ERROR_UNKNOWN_MODE.Error(), mode))
+			err = errors.New(fmt.Sprintf("%s %v", ERROR_UNKNOWN_MODE.Error(), bname))
 			return
 		}
+
+		// Устанавливаем режим работы backend: NORMAL or SELECT
+		// Устанавливаем уровень или уровни логирования: SetLevel() or SetSelectLevels()
+		if cnf.Mode[bname] == nil {
+			bmode = b.MODE_NORMAL
+		} else if len(cnf.Mode[bname]) == 0 {
+			bmode = b.MODE_NORMAL
+		} else {
+			bmode = b.MODE_SELECT
+			for n := range cnf.Mode[bname] {
+				if _, ok = l.Map2Level[cnf.Mode[bname][n]]; ok {
+					levels = append(levels, l.Map2Level[cnf.Mode[bname][n]])
+				}
+			}
+			if len(levels) == 0 {
+				bmode = b.MODE_NORMAL
+			}
+		}
+		if bmode == b.MODE_NORMAL {
+			if _, ok = cnf.Levels[bname]; ok {
+				if _, ok = l.Map2Level[cnf.Levels[bname]]; ok {
+					level = l.Map2Level[cnf.Levels[bname]]
+				} else {
+					level = default_LEVEL
+				}
+			} else {
+				level = default_LEVEL
+			}
+		}
+
+		// Если backend создан, добавляем его в pool
+		if backend != nil {
+			self.backend.AddBackend(
+				backend.SetLevel(level).
+					SetSelectLevels(levels...).
+					SetMode(bmode),
+			)
+		}
+
 	}
-	//logging.SetBackend(self.backends...)
-	//logFormatter = logging.MustStringFormatter(self.cnf.Format)
-	//logging.SetFormatter(logFormatter)
-	//debug.Dumper(self.cnf)
+	self.cnf = cnf
+
 	return
 }

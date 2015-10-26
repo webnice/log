@@ -4,8 +4,8 @@ import (
 	"container/list"
 	"runtime"
 
-	"github.com/webdeskltd/log/record"
-	"github.com/webdeskltd/log/uuid"
+	m "github.com/webdeskltd/log/message"
+	u "github.com/webdeskltd/log/uuid"
 
 	"github.com/webdeskltd/debug"
 )
@@ -36,21 +36,30 @@ func destructor(obj *Backends) {
 			err = err
 		}
 	}
+	close(obj.RecordsChan)
+	close(obj.exitChan)
+	close(obj.doneChan)
 }
 
 func NewBackends() (ret *Backends) {
 	ret = new(Backends)
 	ret.Pool = list.New()
-	ret.PoolIndex = make(map[uuid.UUID]*list.Element)
-	ret.RecordsChan = make(chan *record.Record, lengthRecords)
+	ret.PoolIndex = make(map[u.UUID]*list.Element)
+	ret.RecordsChan = make(chan *m.Message, lengthRecords)
+	ret.exitChan = make(chan bool)
+	ret.doneChan = make(chan bool)
+
+	// Log message reader
+	go ret.messageReader()
+
 	// Destructor
 	runtime.SetFinalizer(ret, destructor)
 	return
 }
 
 // Добавление в пул нового backend
-func (self *Backends) AddBackend(item *Backend) (ret *uuid.UUID, err error) {
-	var id uuid.UUID = uuid.TimeUUID()
+func (self *Backends) AddBackend(item *Backend) (ret *u.UUID, err error) {
+	var id u.UUID = u.TimeUUID()
 	if item == nil {
 		err = ErrBackendIsNull
 		return
@@ -61,7 +70,7 @@ func (self *Backends) AddBackend(item *Backend) (ret *uuid.UUID, err error) {
 }
 
 // Удаление из пула backend по его ID
-func (self *Backends) DelBackend(id *uuid.UUID) (err error) {
+func (self *Backends) DelBackend(id *u.UUID) (err error) {
 	var ok bool
 	var elm *list.Element
 	var item *Backend
@@ -91,16 +100,23 @@ func (self *Backends) DelBackend(id *uuid.UUID) (err error) {
 
 // Sending messages to registered backends
 // Для того чтобы максимально быстро вернуть управление главной программе используется буфферезированный канал
-func (self *Backends) Push(r *record.Record) {
+func (self *Backends) Push(msg *m.Message) {
 	// Предотвращение блокировки из за переполнения
 	if len(self.RecordsChan) == lengthRecords {
 		// TODO Надо организовать варианты обработки ситуации переполнения
 		// Варианты
 		// 1. Выдавать ошибки в STDERR
 		// 2. Падать в панику
-		// 3. Текущий варинт, все новые сообщения пропускать
+		panic("Очередь переполнена")
 		return
 	}
-	self.RecordsChan <- r
+
+	self.RecordsChan <- msg
 	return
+}
+
+// Wait for exit backend goroutine
+func (self *Backends) Close() {
+	self.exitChan <- true
+	<-self.doneChan
 }

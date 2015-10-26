@@ -4,9 +4,9 @@ import (
 	"os"
 )
 
-func NewBackendSTD(f *os.File) (ret *Backend) {
+func NewBackendConsole(f *os.File) (ret *Backend) {
 	ret = new(Backend)
-	ret.hType = BACKEND_STD
+	ret.hType = BACKEND_CONSOLE
 	if f != nil {
 		ret.fH = f
 	} else {

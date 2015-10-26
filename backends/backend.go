@@ -42,14 +42,26 @@ func (self *Backend) SetSelectLevels(levels ...l.Level) *Backend {
 	return self
 }
 
+func (self *Backend) SetFormat(format string) *Backend {
+	if format != "" {
+		self.format = format
+	} else {
+		self.format = DefaultFormat
+	}
+	return self
+}
+
 // Блокируемая функция сброса буффера бэкэнда и остановки логирования
 func (self *Backend) Stop() (err error) {
-	// Close file if open
-	if self.hType == BACKEND_FILE {
+	switch self.hType {
+	case BACKEND_FILE:
 		if self.fH != nil {
+			// Close file if open
 			err = self.fH.Close()
 		}
 	}
-	print(fmt.Sprintf("Stop() type: '%s', mode: '%s'\n", typeName[self.hType], modeName[self.hMode]))
+
+	fmt.Sprintf("")
+	print(fmt.Sprintf("Stop() backend: '%s', mode: '%s'%v|%v\n", MapTypeName[self.hType], modeName[self.hMode], l.Map[self.hLevelNormal], self.hLevelSelect))
 	return
 }

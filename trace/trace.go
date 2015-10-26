@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/webdeskltd/log/record"
+	r "github.com/webdeskltd/log/record"
 )
 
 const (
@@ -14,7 +14,7 @@ const (
 
 // Trace
 type Trace struct {
-	Record *record.Record
+	Record *r.Record
 }
 
 func NewTrace() *Trace {
@@ -29,7 +29,7 @@ func (this *Trace) Trace(level int) *Trace {
 	var tmp []string
 	var i int
 
-	this.Record = record.NewRecord()
+	this.Record = r.NewRecord()
 	if level == 0 {
 		level = STEP_BACK
 	}
@@ -68,21 +68,10 @@ func (this *Trace) Trace(level int) *Trace {
 		if len(tmp) > 0 {
 			this.Record.Module = tmp[len(tmp)-1]
 		}
-
-		// Custom module name
-		//		if _, ok = self.moduleNames[this.Record.Package]; ok == true {
-		//			this.Record.Module = self.moduleNames[this.Record.Package]
-		//		}
 	}
 	return this
 }
 
-func (this *Trace) GetRecord() *record.Record {
-	//	if self.AppName != "" {
-	//		this.Record.AppName = self.AppName
-	//	}
-	//	if self.HostName != "" {
-	//		this.Record.HostName = self.HostName
-	//	}
+func (this *Trace) GetRecord() *r.Record {
 	return this.Record
 }

@@ -4,7 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	stdLog "log"
+	"regexp"
 	"testing"
+)
+
+var (
+	rexSpaceFirst *regexp.Regexp = regexp.MustCompile(`^[\t\n\f\r ]+`)
+	rexSpaceLast  *regexp.Regexp = regexp.MustCompile(`[\t\n\f\r ]+$`)
 )
 
 type TestWriter struct {
@@ -22,7 +28,7 @@ func connect() (this *TestWriter) {
 	return
 }
 
-func TestStdLogConnectAndStdLogClose(t *testing.T) {
+func TestStdLogConnect(t *testing.T) {
 	var tmp1, tmp2 string
 	var wrt *TestWriter = connect()
 
