@@ -50,7 +50,8 @@ var (
 		MODE_NORMAL: `NORMAL`,
 		MODE_SELECT: `SELECT`,
 	}
-	DefaultFormat string = `` // Set from package log function init()
+	DefaultFormat string                    = `` // Set from package log function init()
+	LogError      func(args ...interface{})      // Функция log для отправки ERROR сообщений
 )
 
 var (

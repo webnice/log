@@ -182,17 +182,16 @@ func (this *Record) Format(tpl string) (ret string, err error) {
 		result.WriteString(tpl[pre:])
 	}
 
-	ret = result.String()
-
 	if this.color {
-		fmt.Print(colorReset)
-		fmt.Print(colorsBackground[colorLevelMap[this.Level].Background])
-		fmt.Print(colors[colorLevelMap[this.Level].Foreground])
+		ret = fmt.Sprintf("%s%s%s",
+			colorReset+
+				colorsBackground[colorLevelMap[this.Level].Background]+
+				colors[colorLevelMap[this.Level].Foreground],
+			result.String(),
+			colorReset,
+		)
+	} else {
+		ret = result.String()
 	}
-	fmt.Print(ret)
-	if this.color {
-		fmt.Print(colorReset)
-	}
-	fmt.Println()
 	return
 }

@@ -4,8 +4,9 @@ import (
 	"container/list"
 	"time"
 
-	l "github.com/webdeskltd/log/level"
+	//l "github.com/webdeskltd/log/level"
 	m "github.com/webdeskltd/log/message"
+	//r "github.com/webdeskltd/log/record"
 
 	"github.com/webdeskltd/debug"
 )
@@ -38,10 +39,10 @@ func (self *Backends) shuffle(msg *m.Message) *m.Message {
 	var item *list.Element
 	var bck *Backend
 	var pool []*Backend
+	var txt string
 	var i int
 	var ok bool
-
-	//debug.Dumper(l.Map[msg.Record.Level], msg.Record.FileNameShort, msg.Record.FileLine)
+	var err error
 
 	// Отбираем backend логгеры подходящие для уровня сообщения
 	for item = self.Pool.Front(); item != nil; item = item.Next() {
@@ -65,20 +66,39 @@ func (self *Backends) shuffle(msg *m.Message) *m.Message {
 		}
 	}
 
-	l.New(l.ALERT)
+	// Если есть backend обработчики, то готовим сообщение
+	if len(pool) > 0 {
+		msg.Prepare()
+	}
+
 	for i = range pool {
-		print(self.Pool.Len())
-		print(" ")
-		print(MapTypeName[pool[i].hType])
-		print(" ")
-		print(l.Map[msg.Record.Level])
-		print("\n")
+		// Форматируем сообщение
+		txt, err = msg.Record.Format(pool[i].format)
+		// Ошибка не должна никогда возникать так как формат проверяется при конфигуриговании
+		// Но лучше перебдеть и проинформировать, чем недобдеть
+		if err != nil {
+			if LogError != nil {
+				LogError("Error Record.Format(): %v", err)
+			}
+		}
+		txt = txt
+		print(pool[i].format); print("\n")
+		print(txt); print("\n")
+
+		//		print(self.Pool.Len())
+		//		print(" ")
+		//		print(MapTypeName[pool[i].hType])
+		//		print(" ")
+		//		print(l.Map[msg.Record.Level])
+		//		print(" '")
+		//		print(msg.Record.Message)
+		//		print("'\n")
 		//debug.Dumper(MapTypeName[pool[i].hType], modeName[pool[i].hMode], l.Map[pool[i].hLevelNormal], pool[i].hLevelSelect)
 
 	}
 
-	//debug.Dumper(msg)
-	msg.SetResult(100, nil)
+	// Устанавливаем длинну записанного сообщения
+	msg.SetResult(len(msg.Record.Message), nil)
 
 	return msg
 }

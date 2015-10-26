@@ -1,12 +1,14 @@
 package record
 
 import (
+	"fmt"
 	"syscall"
 	"time"
 
-	"github.com/webdeskltd/debug"
 	l "github.com/webdeskltd/log/level"
-	"github.com/webdeskltd/log/uuid"
+	u "github.com/webdeskltd/log/uuid"
+
+	"github.com/webdeskltd/debug"
 )
 
 // Игноритуются слеюующие поля структуры
@@ -15,7 +17,7 @@ import (
 // - Описанные как fmt:"-"
 // Если формат поля структуры не описан, то подставляется формат %v
 type Record struct {
-	Id            uuid.UUID `fmt:"id"`                    // %{id}                      - ([16]byte ) Time GUID(UUID) for log message
+	Id            u.UUID    `fmt:"id"`                    // %{id}                      - ([16]byte ) Time GUID(UUID) for log message
 	Pid           int       `fmt:"pid:d"`                 // %{pid}                     - (int      ) Process id
 	AppName       string    `fmt:"application:s"`         // %{application}             - (string   ) Application name basename of os.Args[0]
 	HostName      string    `fmt:"hostname:s"`            // %{hostname}                - (string   ) Server host name
@@ -46,7 +48,7 @@ func init() {
 
 func NewRecord() (this *Record) {
 	this = new(Record)
-	this.Id = uuid.TimeUUID()
+	this.Id = u.TimeUUID()
 	this.TodayAndNow = time.Now().In(time.Local)
 	this.Pid = syscall.Getpid()
 	return this
@@ -66,7 +68,26 @@ func (self *Record) Resolver(f RecordResolveFn) *Record {
 
 // Set message
 func (self *Record) SetMessage(args ...interface{}) *Record {
-	self.msgs = args
+	self.msgs = args[:]
+	return self
+}
+
+// Подготовка сообщения
+// Выполняется подготовка сообщения перед форматированием и выводом
+// На данном этапе из переданных ранее args формируется единое текстовое сообщение
+func (self *Record) Prepare() *Record {
+	var ok bool
+	if len(self.msgs) > 0 {
+		switch self.msgs[0].(type) {
+		case string:
+			ok = true
+		}
+	}
+	if ok && len(self.msgs) > 1 {
+		self.Message = fmt.Sprintf(self.msgs[0].(string), self.msgs[1:]...)
+	} else {
+		self.Message = fmt.Sprint(self.msgs[:]...)
+	}
 	return self
 }
 

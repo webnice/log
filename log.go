@@ -18,7 +18,11 @@ import (
 
 // Initialize default log settings
 func init() {
+	// Карта всех копий logger
 	singleton = make(map[string]*Log)
+
+	// Устанавливаем в зависимые пакеты функции информирования об ошибках
+	b.LogError = Error
 
 	// Defailt backend format
 	b.DefaultFormat = default_FORMAT
@@ -78,13 +82,16 @@ func (self *Log) Initialize() *Log {
 	cnf = self.defaultConfiguration()
 	err = self.Configure(cnf)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error Configure(): %v\n", err)
+		Error("Error Configure(): %v\n", err)
 	} else {
 		self.ready = true
 	}
 
 	// Default level writer
 	self.defaultLevelLogWriter = w.NewWriter(default_LEVEL).Resolver(self.ResolveNames).AttachBackends(self.backend)
+	if self.interceptStandardLog {
+		stdLogConnect(self.defaultLevelLogWriter)
+	}
 
 	return self
 }
@@ -134,6 +141,7 @@ func (self *Log) ResolveNames(rec *r.Record) {
 // flg=true  - intercept is enabled
 // flg=false - intercept is desabled
 func (self *Log) InterceptStandardLog(flg bool) *Log {
+	self.interceptStandardLog = flg
 	if flg {
 		stdLogConnect(self.defaultLevelLogWriter)
 	} else {

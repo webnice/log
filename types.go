@@ -13,7 +13,7 @@ import (
 
 const (
 	default_LOG    string  = `CB7D0E12-C1EC-49CB-A3DD-AD62DE7FB7D8`
-	default_FORMAT string  = `"%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00} (%{level:7s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})"`
+	default_FORMAT string  = `--- %{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00} (%{level:7s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
 	default_LEVEL  l.Level = l.NOTICE
 )
 
@@ -40,6 +40,7 @@ type Log struct {
 	cnf                    *Configuration    // Current configuration
 	backend                *b.Backends       // Backend workflow
 	defaultLevelLogWriter  *w.Writer         // Writer for standard logging and etc...
+	interceptStandardLog   bool              // Current state for standard logging
 	moduleNames            map[string]string // Кастомные названия модулей опубликованные через SetModuleName()
 }
 

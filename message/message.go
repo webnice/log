@@ -37,9 +37,19 @@ func (self *Message) Level(level l.Level) *Message {
 	return self
 }
 
+// Записываем сообщение в объект resord
+// Пока без какой-либо обработки чтобы ускорить возврат к основной программе
 // Сюда попадают все сообщения от всех уровней логирования
 func (self *Message) Write(args ...interface{}) *Message {
-	self.Record.SetMessage(args)
+	self.Record.SetMessage(args...)
+	return self
+}
+
+// Подготовка сообщения
+// Выполняется подготовка сообщения перед форматированием и выводом
+// На данном этапе из переданных ранее args формируется единое текстовое сообщение
+func (self *Message) Prepare() *Message {
+	self.Record.Prepare()
 	return self
 }
 

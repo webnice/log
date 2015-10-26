@@ -2,7 +2,7 @@ package record
 
 import (
 	"fmt"
-	
+
 	l "github.com/webdeskltd/log/level"
 )
 

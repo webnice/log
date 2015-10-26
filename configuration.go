@@ -11,6 +11,7 @@ import (
 	g "github.com/webdeskltd/log/gelf"
 	l "github.com/webdeskltd/log/level"
 	r "github.com/webdeskltd/log/record"
+	w "github.com/webdeskltd/log/writer"
 
 	"github.com/webdeskltd/debug"
 )
@@ -113,9 +114,12 @@ func (self *Log) Configure(cnf *Configuration) (err error) {
 		return
 	}
 
-	// Инициализация пула
+	// (Ре)Инициализация пула
 	self.backend = b.NewBackends()
-
+	if self.interceptStandardLog {
+		self.defaultLevelLogWriter = w.NewWriter(default_LEVEL).Resolver(self.ResolveNames).AttachBackends(self.backend)
+		stdLogConnect(self.defaultLevelLogWriter)
+	}
 	for bname = range cnf.Mode {
 		var backend *b.Backend
 		var bmode b.Mode
@@ -158,8 +162,7 @@ func (self *Log) Configure(cnf *Configuration) (err error) {
 			return
 		}
 
-		// Устанавливаем режим работы backend: NORMAL or SELECT
-		// Устанавливаем уровень или уровни логирования: SetLevel() or SetSelectLevels()
+		// Устанавливаем уровень или уровни логирования: SetLevel() для NORMAL or SetSelectLevels() для SELECT
 		if cnf.Mode[bname] == nil {
 			bmode = b.MODE_NORMAL
 		} else if len(cnf.Mode[bname]) == 0 {
@@ -198,6 +201,5 @@ func (self *Log) Configure(cnf *Configuration) (err error) {
 
 	}
 	self.cnf = cnf
-
 	return
 }
