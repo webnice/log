@@ -21,7 +21,7 @@ type Record struct {
 	Pid           int       `fmt:"pid:d"`                 // %{pid}                     - (int      ) Process id
 	AppName       string    `fmt:"application:s"`         // %{application}             - (string   ) Application name basename of os.Args[0]
 	HostName      string    `fmt:"hostname:s"`            // %{hostname}                - (string   ) Server host name
-	TodayAndNow   time.Time `fmt:"time"`                  // %{time}                    - (time.Time) Time when log occurred
+	TodayAndNow   time.Time `fmt:"time:t"`                // %{time}                    - (time.Time) Time when log occurred
 	Level         l.Level   `fmt:"level:d"`               // %{level}                   - (int8     ) Log level
 	Message       string    `fmt:"message:s"`             // %{message}                 - (string   ) Message
 	FileNameLong  string    `fmt:"longfile:s"`            // %{longfile}                - (string   ) Full file name and line number: /a/b/c/d.go
@@ -88,15 +88,5 @@ func (self *Record) Prepare() *Record {
 	} else {
 		self.Message = fmt.Sprint(self.msgs[:]...)
 	}
-	return self
-}
-
-// Finishing object
-func (self *Record) End() *Record {
-	if self.resolver != nil {
-		self.resolver(self)
-	}
-
-	//debug.Dumper(this)
 	return self
 }

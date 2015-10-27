@@ -6,17 +6,23 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
+
+	l "github.com/webdeskltd/log/level"
 
 	"github.com/webdeskltd/debug"
 )
 
 const (
-	tagName string = `fmt`
+	tagName           string = `fmt`
+	defaultTimeFormat string = `2006-01-02T15:04:05.999Z07:00`
 )
 
 var (
 	rexFormat          *regexp.Regexp    = regexp.MustCompile(`%{([a-z]+)(?::(.*?[^\\]))?}`) // Регулярное выражение поиска констант шаблона
+	rexTruncate        *regexp.Regexp    = regexp.MustCompile(`(.*?)(\d+?)s`)                // Регулярное выражение разбора формата строки
+	rexTime            *regexp.Regexp    = regexp.MustCompile(`^%(.*)t$`)                    // Регулярное выражение разбора формата времени
 	templateNames      map[string]recDic                                                     // Справочник доступных констант шаблона
 	errWrongTag        error             = errors.New(`Wrong tag`)                           // return if tag is incorrect
 	errUnknownVariable error             = errors.New(`Unknown variable`)                    // return if found unknown variable as prefix
@@ -63,7 +69,7 @@ func makeDictionary(v interface{}) (err error) {
 			if len(attr) == 2 {
 				templateNames[attr[0]] = recDic{
 					Index:  i,
-					Format: `%` + attr[1],
+					Format: attr[1],
 					Type:   rt.Field(i).Type.String(),
 					Name:   rt.Field(i).Name,
 				}
@@ -102,68 +108,173 @@ func CheckFormat(tpl string) (matches [][]int, err error) {
 	return
 }
 
-func (this *Record) getFormatedElement(elm recDic, layout string) (ret string) {
-	if layout == "" {
-		layout = elm.Format
-	}
-	// Вариант1 - Через reflect
-	// ... Удалён
+// Обрезание строки в соответствии с форматом
+func TruncateString(src, layout string) (ret string) {
+	var chanks []string
+	var err error
+	var l int64
 
-	// Вариант2 - без использования reflect
-	switch elm.Name {
-	case "Id":
-		ret = fmt.Sprintf(layout, this.Id)
-	case "Pid":
-		ret = fmt.Sprintf(layout, this.Pid)
-	case "AppName":
-		ret = fmt.Sprintf(layout, this.AppName)
-	case "HostName":
-		ret = fmt.Sprintf(layout, this.HostName)
-	case "TodayAndNow":
-		//ret = fmt.Sprintf(layout, this.TodayAndNow)
-	case "Level":
-		ret = fmt.Sprintf(layout, this.Level)
-	case "Message":
-		ret = fmt.Sprintf(layout, this.Message)
-	case "color":
-		this.color = true
-	case "colorBeg":
-		ret += fmt.Sprint(colorsBackground[colorLevelMap[this.Level].Background])
-		ret += fmt.Sprint(colors[colorLevelMap[this.Level].Foreground])
-	case "colorEnd":
-		if this.color == false {
-			ret += fmt.Sprint(colorReset)
+	ret = src
+	chanks = rexTruncate.FindStringSubmatch(layout)
+	if len(chanks) == 3 {
+		l, err = strconv.ParseInt(chanks[2], 0, 64)
+		if err == nil && int(l) <= len(src) {
+			ret = src[:int(l)]
 		}
-	case "FileNameLong":
-		ret = fmt.Sprintf(layout, this.FileNameLong)
-	case "FileNameShort":
-		ret = fmt.Sprintf(layout, this.FileNameShort)
-	case "FileLine":
-		ret = fmt.Sprintf(layout, this.FileLine)
-	case "Package":
-		ret = fmt.Sprintf(layout, this.Package)
-	case "Module":
-		ret = fmt.Sprintf(layout, this.Module)
-	case "Function":
-		ret = fmt.Sprintf(layout, this.Function)
-	case "CallStack":
-		ret = fmt.Sprintf(layout, this.CallStack)
 	}
 	return
 }
 
-func (this *Record) Format(tpl string) (ret string, err error) {
+func (self *Record) getFormatedElement(elm recDic, layout string) (ret string) {
+	var frm, timeFormat string
+	var parts []string
+	var ok bool
+
+	if layout == "" {
+		layout = `%` + elm.Format
+	}
+	if len(layout) > 0 {
+		frm = layout[len(layout)-1:]
+	}
+
+	// Вариант1 - Через reflect
+	// ... удалён
+
+	// Вариант2 - без использования reflect
+	// ... быстрее, но подразумевает что структура меняться не будет
+	switch elm.Name {
+	case "Id":
+		switch frm {
+		case `s`:
+			ret = fmt.Sprintf(layout, TruncateString(self.Id.String(), layout))
+		default:
+			ret = fmt.Sprintf(layout, self.Id)
+		}
+	case "Pid":
+		if elm.Format == frm {
+			ret = fmt.Sprintf(layout, self.Pid)
+		} else {
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "AppName":
+		if elm.Format == frm {
+			ret = fmt.Sprintf(layout, TruncateString(self.AppName, layout))
+		} else {
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "HostName":
+		if elm.Format == frm {
+			ret = fmt.Sprintf(layout, TruncateString(self.HostName, layout))
+		} else {
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "TodayAndNow":
+		switch frm {
+		case `t`:
+			parts = rexTime.FindStringSubmatch(layout)
+			if len(parts) == 2 {
+				timeFormat = parts[1]
+			}
+			if timeFormat == "" {
+				timeFormat = defaultTimeFormat
+			}
+			ret = fmt.Sprintf("%s", self.TodayAndNow.Format(timeFormat))
+		default:
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "Level":
+		switch frm {
+		case `s`:
+			if _, ok = l.Map[self.Level]; ok {
+				ret = fmt.Sprintf(layout, l.Map[self.Level])
+			} else {
+				ret = `-`
+			}
+			ret = fmt.Sprintf(layout, TruncateString(ret, layout))
+		case `d`:
+			ret = fmt.Sprintf(layout, self.Level)
+		default:
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "Message":
+		switch frm {
+		case `s`:
+			ret = fmt.Sprintf(layout, TruncateString(self.Message, layout))
+		default:
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "color":
+		self.color = true
+	case "colorBeg":
+		ret += fmt.Sprint(colorsBackground[colorLevelMap[self.Level].Background])
+		ret += fmt.Sprint(colors[colorLevelMap[self.Level].Foreground])
+	case "colorEnd":
+		if self.color == false {
+			ret += fmt.Sprint(colorReset)
+		}
+	case "FileNameLong":
+		switch frm {
+		case `s`:
+			ret = fmt.Sprintf(layout, TruncateString(self.FileNameLong, layout))
+		default:
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "FileNameShort":
+		switch frm {
+		case `s`:
+			ret = fmt.Sprintf(layout, TruncateString(self.FileNameShort, layout))
+		default:
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "FileLine":
+		switch frm {
+		case `d`:
+			ret = fmt.Sprintf(layout, self.FileLine)
+		default:
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "Package":
+		switch frm {
+		case `s`:
+			ret = fmt.Sprintf(layout, TruncateString(self.Package, layout))
+		default:
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "Module":
+		switch frm {
+		case `s`:
+			ret = fmt.Sprintf(layout, TruncateString(self.Module, layout))
+		default:
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "Function":
+		switch frm {
+		case `s`:
+			ret = fmt.Sprintf(layout, TruncateString(self.Function, layout))
+		default:
+			ret = fmt.Sprintf("BAD_FORMAT_'%s',_USE_'%%%s'", layout, elm.Format)
+		}
+	case "CallStack":
+		ret = fmt.Sprintf(layout, self.CallStack)
+	}
+	return
+}
+
+func (self *Record) Format(tpl string) (ret string, err error) {
 	var matches [][]int
 	var r []int
 	var pre, start, end int
 	var name, layout string
 	var resultTmp []byte
 	var result *bytes.Buffer
-
 	matches, err = CheckFormat(tpl)
 	if err != nil {
 		return
 	}
+	if self.resolver != nil {
+		self.resolver(self)
+	}
+
 	result = bytes.NewBuffer(resultTmp)
 	for _, r = range matches {
 		start, end = r[0], r[1]
@@ -175,18 +286,17 @@ func (this *Record) Format(tpl string) (ret string, err error) {
 		if r[4] != -1 {
 			layout = `%` + tpl[r[4]:r[5]]
 		}
-		result.WriteString(this.getFormatedElement(templateNames[name], layout))
+		result.WriteString(self.getFormatedElement(templateNames[name], layout))
 		pre = end
 	}
 	if tpl[pre:] != "" {
 		result.WriteString(tpl[pre:])
 	}
-
-	if this.color {
+	if self.color {
 		ret = fmt.Sprintf("%s%s%s",
 			colorReset+
-				colorsBackground[colorLevelMap[this.Level].Background]+
-				colors[colorLevelMap[this.Level].Foreground],
+				colorsBackground[colorLevelMap[self.Level].Background]+
+				colors[colorLevelMap[self.Level].Foreground],
 			result.String(),
 			colorReset,
 		)

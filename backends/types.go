@@ -35,7 +35,7 @@ const (
 	MODE_SELECT             // 1 Публикуются сообщения только выбранных уровней
 )
 
-const lengthRecords int = 20000 // The maximum size of the channel buffering incoming messages
+const lengthRecords int = 100000 // The maximum size of the channel buffering incoming messages
 
 var (
 	MapTypeName = map[Type]BackendName{
@@ -60,9 +60,12 @@ var (
 	ErrBackendIsNull    error = errors.New(`Passed object is null`)
 )
 
-type Type int           // Type of backend
-type Mode int8          // Mode filtering messages on the level of logging
-type BackendName string // Mode name in configuration
+type (
+	Type        int                // Type of backend
+	Mode        int8               // Mode filtering messages on the level of logging
+	BackendName string             // Mode name in configuration
+	FnReader    func(v *m.Message) // Функция чтения сообщений
+)
 
 type Backends struct {
 	RecordsChan chan *m.Message          // Buffered channel incoming messages
@@ -78,8 +81,9 @@ type Backend struct {
 	hLevelNormal l.Level        // Logging level (Mode = MODE_NORMAL)
 	hLevelSelect []l.Level      // The selected logging levels for a backend (Mode = MODE_SELECT)
 	fH           *os.File       // FH for CONSOLE and File backend
-	format       string         // String format for backend
 	hostname     string         // Hostname
 	wSyslog      *syslog.Writer // Writer for syslog backend
 	cGraylog2    *g.GelfClient  // Graylog2 client connection
+	format       string         // String format for backend
+	reader       FnReader       // Функция чтения сообщений
 }

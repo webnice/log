@@ -25,6 +25,7 @@ func (self *Log) prepareConfigure(cnf *Configuration) (err error) {
 	var i b.BackendName
 	var mode b.BackendName
 	var ok bool
+	var n int
 
 	if cnf == nil {
 		err = ERROR_CONFIGURATION_IS_NULL
@@ -35,6 +36,7 @@ func (self *Log) prepareConfigure(cnf *Configuration) (err error) {
 	if cnf.Format == "" {
 		cnf.Format = default_FORMAT
 	}
+	b.DefaultFormat = cnf.Format
 
 	// Проверка формата по умолчанию
 	_, err = r.CheckFormat(cnf.Format)
@@ -44,20 +46,22 @@ func (self *Log) prepareConfigure(cnf *Configuration) (err error) {
 
 	for i = range cnf.Mode {
 		mode = b.CheckMode(i)
+		for n = range cnf.Mode[i] {
+			cnf.Mode[i][n] = l.LevelName(strings.ToUpper(string(cnf.Mode[i][n])))
+		}
 		if mode != i {
 			cnf.Mode[mode] = cnf.Mode[i]
 			delete(cnf.Mode, i)
 		}
 	}
-
 	for i = range cnf.Levels {
+		cnf.Levels[i] = l.LevelName(strings.ToUpper(string(cnf.Levels[i])))
 		mode = b.CheckMode(i)
 		if mode != i {
 			cnf.Levels[mode] = cnf.Levels[i]
 			delete(cnf.Levels, i)
 		}
 	}
-
 	for i = range cnf.Formats {
 		mode = b.CheckMode(i)
 		if mode != i {
