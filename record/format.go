@@ -260,6 +260,7 @@ func (self *Record) getFormatedElement(elm recDic, layout string) (ret string) {
 	return
 }
 
+// Forming a formatted log message based on Record
 func (self *Record) Format(tpl string) (ret string, err error) {
 	var matches [][]int
 	var r []int
