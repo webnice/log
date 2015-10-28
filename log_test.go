@@ -1,7 +1,6 @@
 package log
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -91,17 +90,6 @@ func TestLogDelModuleName(t *testing.T) {
 }
 
 func TestLogResolveNames(t *testing.T) {
-	var fh *os.File
-	var err error
-
-	fh, err = ioutil.TempFile("", "TestLogResolveNames")
-	if err != nil {
-		t.Errorf("Error in testing. ioutil.TempDir(): %v", err)
-		return
-	}
-	//defer os.Remove(fh.Name())
-	defer fh.Close()
-
 	testing_mode_two = true
 	singleton[default_LOG].InterceptStandardLog(false)
 	singleton[default_LOG].backend = b.NewBackends()
