@@ -5,8 +5,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	//"github.com/webdeskltd/debug"
 )
 
 func TestUUIDNil(t *testing.T) {
@@ -38,12 +36,41 @@ var testsUUID = []struct {
 }
 
 func TestInit(t *testing.T) {
+	var expectedPanic bool
+
+	defer func() {
+		if recover() != nil {
+			if expectedPanic == false {
+				t.Errorf("Error init() unexpected panic")
+			}
+		}
+		testing_mode_one = false
+		testing_mode_two = false
+	}()
+
 	if len(hardwareAddr) != 6 {
 		t.Errorf("Error init() hardwareAddr is wrong")
 	}
 	if clockSeq == 0 {
 		t.Errorf("Error init() clockSeq is wrong")
 	}
+
+	// Test hardwareAddr = nil
+	testing_mode_one = true
+	initialize()
+	if len(hardwareAddr) != 6 {
+		t.Errorf("Error init() hardwareAddr is wrong")
+	}
+	if clockSeq == 0 {
+		t.Errorf("Error init() clockSeq is wrong")
+	}
+	testing_mode_one = false
+
+	// Test panic - random generator error
+	testing_mode_one = true
+	testing_mode_two = true
+	expectedPanic = true
+	initialize()
 }
 
 func TestPredefinedUUID(t *testing.T) {
@@ -121,6 +148,13 @@ func TestRandomUUID(t *testing.T) {
 			t.Errorf("wrong version. expected %d got %d", 4, version)
 		}
 	}
+
+	testing_mode_one = true
+	_, err := RandomUUID()
+	if err == nil {
+		t.Errorf("Error in RandomUUID()")
+	}
+	testing_mode_one = false
 }
 
 func TestRandomUUIDInvalidAPICalls(t *testing.T) {

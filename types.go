@@ -27,6 +27,9 @@ var (
 
 // Карта всех логгеров
 var singleton map[string]*Log
+var exit_func func(code int) = os.Exit // Function completed applications for Fatal. In test mode is replaced by Nop()... 100% code test coverage :)
+var testing_mode_one bool              // set true from test programm
+var testing_mode_two bool              // set true from test programm
 
 type Log struct {
 	ready                  bool              // =true - log ready to use

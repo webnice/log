@@ -101,6 +101,9 @@ func (self *Backends) DelBackend(id *u.UUID) (err error) {
 // Sending messages to registered backends
 // Для того чтобы максимально быстро вернуть управление главной программе используется буфферезированный канал
 func (self *Backends) Push(msg *m.Message) {
+	if self == nil {
+		return
+	}
 	// Предотвращение блокировки из за переполнения
 	if len(self.RecordsChan) == lengthRecords {
 		// TODO Надо организовать варианты обработки ситуации переполнения
@@ -110,8 +113,8 @@ func (self *Backends) Push(msg *m.Message) {
 		panic("Очередь переполнена")
 		return
 	}
-
 	self.RecordsChan <- msg
+
 	return
 }
 

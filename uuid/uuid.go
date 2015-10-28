@@ -16,6 +16,8 @@ type UUID [16]byte
 
 var hardwareAddr []byte
 var clockSeq uint32
+var testing_mode_one bool // set true from test programm
+var testing_mode_two bool // set true from test programm
 
 const (
 	VariantNCSCompat = 0
@@ -25,6 +27,10 @@ const (
 )
 
 func init() {
+	initialize()
+}
+
+func initialize() {
 	if interfaces, err := net.Interfaces(); err == nil {
 		for _, i := range interfaces {
 			if i.Flags&net.FlagLoopback == 0 && len(i.HardwareAddr) > 0 {
@@ -33,12 +39,18 @@ func init() {
 			}
 		}
 	}
+	if testing_mode_one {
+		hardwareAddr = nil
+	}
 	if hardwareAddr == nil {
 		// If we failed to obtain the MAC address of the current computer,
 		// we will use a randomly generated 6 byte sequence instead and set
 		// the multicast bit as recommended in RFC 4122.
 		hardwareAddr = make([]byte, 6)
 		_, err := io.ReadFull(rand.Reader, hardwareAddr)
+		if testing_mode_two {
+			err = errors.New("io.ReadFull() error resding from rand.Reader")
+		}
 		if err != nil {
 			panic(err)
 		}
@@ -93,6 +105,9 @@ func UUIDFromBytes(input []byte) (UUID, error) {
 func RandomUUID() (UUID, error) {
 	var u UUID
 	_, err := io.ReadFull(rand.Reader, u[:])
+	if testing_mode_one {
+		err = errors.New("Reader closed")
+	}
 	if err != nil {
 		return u, err
 	}

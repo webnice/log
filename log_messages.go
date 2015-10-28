@@ -1,8 +1,6 @@
 package log
 
 import (
-	"os"
-
 	l "github.com/webdeskltd/log/level"
 	m "github.com/webdeskltd/log/message"
 	t "github.com/webdeskltd/log/trace"
@@ -22,7 +20,7 @@ func (self *Log) Fatal(args ...interface{}) *Log {
 			Write(args...),
 	)
 	self.Close()
-	os.Exit(1)
+	exit_func(1)
 	return self
 }
 

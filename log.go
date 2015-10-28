@@ -1,7 +1,7 @@
 package log
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"runtime"
 	"strings"
@@ -46,6 +46,9 @@ func NewLog() (obj *Log) {
 
 // Create dafault configuration
 func (self *Log) defaultConfiguration() (cnf *Configuration) {
+	if testing_mode_one {
+		return
+	}
 	cnf = &Configuration{
 		BufferFlushImmediately: true,
 		BufferSize:             0,
@@ -73,11 +76,12 @@ func (self *Log) Initialize() *Log {
 
 	self.SetApplicationName(``)
 	self.HostName, err = os.Hostname()
+	if testing_mode_one {
+		err = errors.New("Hostname not defined")
+	}
 	if err != nil {
 		self.HostName = `undefined`
-		fmt.Fprintf(os.Stderr, "Error get os.Hostname(): %v\n", err)
 	}
-
 	// Create default configuration and apply
 	cnf = self.defaultConfiguration()
 	err = self.Configure(cnf)

@@ -27,18 +27,11 @@ func NewBackendConsole(f *os.File) (ret *Backend) {
 func (self *Backend) readerConsole(msg *m.Message) {
 	var txt string
 	var err error
-
-	// Форматируем сообщение
 	txt, err = msg.Record.Format(self.format)
-	// Ошибка не должна никогда возникать так как формат проверяется при конфигуриговании
-	// Но лучше перебдеть и проинформировать, чем недобдеть
 	if err != nil {
 		if LogError != nil {
 			LogError("Error Record.Format(): %v", err)
 		}
 	}
-	txt = txt
-	//print(self.format); print("\n")
-	print(txt); print("\n")
-
+	self.fH.WriteString(txt + "\n")
 }
