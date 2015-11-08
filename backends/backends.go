@@ -36,6 +36,7 @@ func destructor(obj *Backends) {
 			err = err
 		}
 	}
+	obj.Pool = nil
 	close(obj.RecordsChan)
 	close(obj.exitChan)
 	close(obj.doneChan)
@@ -50,7 +51,7 @@ func NewBackends() (ret *Backends) {
 	ret.doneChan = make(chan bool)
 
 	// Log message reader
-	go ret.messageReader()
+	go ret.messageWorker()
 
 	// Destructor
 	runtime.SetFinalizer(ret, destructor)
@@ -59,13 +60,14 @@ func NewBackends() (ret *Backends) {
 
 // Добавление в пул нового backend
 func (self *Backends) AddBackend(item *Backend) (ret *u.UUID, err error) {
-	var id u.UUID = u.TimeUUID()
+	ret = new(u.UUID)
+	*ret = u.TimeUUID()
+
 	if item == nil {
 		err = ErrBackendIsNull
 		return
 	}
-	self.PoolIndex[id] = self.Pool.PushBack(item)
-	ret = &id
+	self.PoolIndex[*ret] = self.Pool.PushBack(item)
 	return
 }
 

@@ -14,7 +14,7 @@ func init() {
 }
 
 // Процесс читает из канала сообщения
-func (self *Backends) messageReader() {
+func (self *Backends) messageWorker() {
 	var msg *m.Message
 	var exit bool
 	// Дочитать сообщения до конца только потом завершиться
