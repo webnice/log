@@ -36,10 +36,12 @@ func destructor(obj *Backends) {
 			err = err
 		}
 	}
-	obj.Pool = nil
-	close(obj.RecordsChan)
-	close(obj.exitChan)
-	close(obj.doneChan)
+	if obj.Pool != nil {
+		obj.Pool = nil
+		close(obj.RecordsChan)
+		close(obj.exitChan)
+		close(obj.doneChan)
+	}
 }
 
 func NewBackends() (ret *Backends) {
