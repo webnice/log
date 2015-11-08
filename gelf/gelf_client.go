@@ -8,8 +8,6 @@ import (
 	"encoding/json"
 	"compress/gzip"
 	"compress/flate"
-	
-	//"github.com/webdeskltd/debug"
 )
 
 type MessageData []byte

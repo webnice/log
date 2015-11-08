@@ -12,8 +12,6 @@ import (
 	r "github.com/webdeskltd/log/record"
 	t "github.com/webdeskltd/log/trace"
 	w "github.com/webdeskltd/log/writer"
-
-	"github.com/webdeskltd/debug"
 )
 
 // Initialize default log settings
@@ -32,8 +30,6 @@ func init() {
 
 	// Intercept standard logging only first
 	singleton[default_LOG].InterceptStandardLog(true)
-
-	debug.Nop()
 }
 
 // New log object

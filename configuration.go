@@ -12,13 +12,7 @@ import (
 	l "github.com/webdeskltd/log/level"
 	r "github.com/webdeskltd/log/record"
 	w "github.com/webdeskltd/log/writer"
-
-	"github.com/webdeskltd/debug"
 )
-
-func init() {
-	debug.Nop()
-}
 
 // Prepare configuration
 func (self *Log) prepareConfigure(cnf *Configuration) (err error) {

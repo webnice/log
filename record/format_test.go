@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/webdeskltd/log/uuid"
+
 	"github.com/webdeskltd/debug"
 )
 
@@ -32,7 +33,7 @@ type TestDictionary2 struct {
 }
 
 func init() {
-	//debug.Nop()
+	debug.Nop()
 }
 
 func TestMakeDictionary(t *testing.T) {
@@ -80,28 +81,28 @@ func TestMakeDictionary(t *testing.T) {
 	}
 
 	// Default format
-	if templateNames["one"].Format != "%v" {
-		t.Errorf("Error in makeDictionary(). %%{one} default format is '%s' expected '%%v'", templateNames["one"].Format)
+	if templateNames["one"].Format != "v" {
+		t.Errorf("Error in makeDictionary(). %%{one} default format is '%s' expected 'v'", templateNames["one"].Format)
 	}
-	if templateNames["five"].Format != "%v" {
-		t.Errorf("Error in makeDictionary(). %%{five} default format is '%s' expected '%%v'", templateNames["five"].Format)
+	if templateNames["five"].Format != "v" {
+		t.Errorf("Error in makeDictionary(). %%{five} default format is '%s' expected 'v'", templateNames["five"].Format)
 	}
-	if templateNames["seven"].Format != "%v" {
-		t.Errorf("Error in makeDictionary(). %%{seven} default format is '%s' expected '%%v'", templateNames["seven"].Format)
+	if templateNames["seven"].Format != "v" {
+		t.Errorf("Error in makeDictionary(). %%{seven} default format is '%s' expected 'v'", templateNames["seven"].Format)
 	}
 
 	// Format parse
-	if templateNames["two"].Format != "%s" {
-		t.Errorf("Error in makeDictionary(). %%{seven} format is '%s' expected '%%s'", templateNames["two"].Format)
+	if templateNames["two"].Format != "s" {
+		t.Errorf("Error in makeDictionary(). %%{seven} format is '%s' expected 's'", templateNames["two"].Format)
 	}
-	if templateNames["three"].Format != "%d" {
-		t.Errorf("Error in makeDictionary(). %%{seven} format is '%s' expected '%%d'", templateNames["three"].Format)
+	if templateNames["three"].Format != "d" {
+		t.Errorf("Error in makeDictionary(). %%{seven} format is '%s' expected 'd'", templateNames["three"].Format)
 	}
-	if templateNames["six"].Format != "%t" {
-		t.Errorf("Error in makeDictionary(). %%{seven} format is '%s' expected '%%t'", templateNames["six"].Format)
+	if templateNames["six"].Format != "t" {
+		t.Errorf("Error in makeDictionary(). %%{seven} format is '%s' expected 't'", templateNames["six"].Format)
 	}
-	if templateNames["seven"].Format != "%v" || templateNames["eight"].Format != "%d" {
-		t.Errorf("Error in makeDictionary(). %%{seven} format is '%s' expected '%%v' and %%{eight} format is '%s' expected '%%d'",
+	if templateNames["seven"].Format != "v" || templateNames["eight"].Format != "d" {
+		t.Errorf("Error in makeDictionary(). %%{seven} format is '%s' expected 'v' and %%{eight} format is '%s' expected 'd'",
 			templateNames["seven"].Format, templateNames["eight"].Format)
 	}
 
@@ -156,18 +157,26 @@ func TestCheckFormat(t *testing.T) {
 	}
 }
 
+func TestTruncateString(t *testing.T) {
+	var str string = "1234567890"
+	str = TruncateString(str, "%3s")
+	if str != "123" {
+		t.Errorf("Error in TruncateString()")
+	}
+}
+
 func TestRecordGetFormatedElement(t *testing.T) {
 	var obj *Record = new(Record)
-	var resp string
-	var err error
-	var matches [][]int
+	//	var resp string
+	//	var err error
+	//	var matches [][]int
 
 	makeDictionary(obj)
 	obj.Id = uuid.TimeUUID()
 
-	matches, err = CheckFormat(TestTpl1)
-	resp = obj.getFormatedElement(templateNames[`id`], ``)
+	//	matches, err = CheckFormat(TestTpl1)
+	//	resp = obj.getFormatedElement(templateNames[`id`], ``)
 
-	debug.Dumper(matches, err, resp)
-	
+	//debug.Dumper(matches, err, resp)
+
 }

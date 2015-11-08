@@ -7,13 +7,7 @@ import (
 	b "github.com/webdeskltd/log/backends"
 	g "github.com/webdeskltd/log/gelf"
 	l "github.com/webdeskltd/log/level"
-
-	"github.com/webdeskltd/debug"
 )
-
-func init() {
-	debug.Nop()
-}
 
 func TestLogPrepareConfigure(t *testing.T) {
 	var cnf *Configuration

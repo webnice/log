@@ -4,13 +4,8 @@ import (
 	//"time"
 	"fmt"
 
-	"github.com/webdeskltd/debug"
 	l "github.com/webdeskltd/log/level"
 )
-
-func init() {
-	debug.Nop()
-}
 
 // Set mode filtering messages on the level of logging
 // 	MODE_NORMAL - Публикуются сообщения начиная от выбранного уровня и ниже. Напримр выбран NOTICE, публковаться будут FATAL, ALERT, CRITICAL, ERROR, WARNING, NOTICE, игнорироваться INFO, DEBUG
