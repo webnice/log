@@ -127,7 +127,6 @@ func TestLogConfigure(t *testing.T) {
 
 	cnf.Mode = map[b.BackendName][]l.LevelName{
 		b.NAME_CONSOLE: []l.LevelName{},
-		b.NAME_SYSLOG:  []l.LevelName{"fatal"},
 	}
 	err = log.Configure(cnf)
 	if err != nil {
@@ -193,4 +192,15 @@ func TestLogConfigure(t *testing.T) {
 		t.Errorf("Error in Configure(): %v", err)
 	}
 
+	cnf.Mode = map[b.BackendName][]l.LevelName{
+		b.NAME_SYSLOG:  []l.LevelName{"fatal"},
+	}
+	err = log.Configure(cnf)
+	if err != nil {
+		if strings.Contains(err.Error(), "syslog delivery error") {
+			// Syslog is not supported.
+			t.Skip(err)
+		}
+		t.Errorf("Error in Configure(): %v", err)
+	}
 }
