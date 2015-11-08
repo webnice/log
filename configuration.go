@@ -24,7 +24,6 @@ func init() {
 func (self *Log) prepareConfigure(cnf *Configuration) (err error) {
 	var i b.BackendName
 	var mode b.BackendName
-	var ok bool
 	var n int
 
 	if cnf == nil {
@@ -67,10 +66,6 @@ func (self *Log) prepareConfigure(cnf *Configuration) (err error) {
 		if mode != i {
 			cnf.Formats[mode] = cnf.Formats[i]
 			delete(cnf.Formats, i)
-		}
-		// Если для режима логирования не определён формат, то присваиваем формат по умолчанию
-		if _, ok = cnf.Formats[mode]; ok == false {
-			cnf.Formats[mode] = cnf.Format
 		}
 		// Проверка формата
 		_, err = r.CheckFormat(cnf.Formats[mode])
@@ -139,7 +134,6 @@ func (self *Log) Configure(cnf *Configuration) (err error) {
 			var fh *os.File
 			if cnf.File == "" {
 				panic(ERROR_LOG_FILENAME_IS_EMPTY)
-				continue
 			}
 			fh, err = os.OpenFile(cnf.File, syscall.O_APPEND|syscall.O_CREAT|syscall.O_WRONLY, 0644)
 			if err != nil {
@@ -162,8 +156,7 @@ func (self *Log) Configure(cnf *Configuration) (err error) {
 		case b.NAME_TELEGRAM:
 			backend = b.NewBackendTelegram().SetFormat(cnf.Formats[bname])
 		default:
-			err = errors.New(fmt.Sprintf("%s %v", ERROR_UNKNOWN_MODE.Error(), bname))
-			return
+			panic(errors.New(fmt.Sprintf("%s %v", ERROR_UNKNOWN_MODE.Error(), bname)))
 		}
 
 		// Устанавливаем уровень или уровни логирования: SetLevel() для NORMAL or SetSelectLevels() для SELECT
@@ -178,17 +171,10 @@ func (self *Log) Configure(cnf *Configuration) (err error) {
 					levels = append(levels, l.Map2Level[cnf.Mode[bname][n]])
 				}
 			}
-			if len(levels) == 0 {
-				bmode = b.MODE_NORMAL
-			}
 		}
 		if bmode == b.MODE_NORMAL {
 			if _, ok = cnf.Levels[bname]; ok {
-				if _, ok = l.Map2Level[cnf.Levels[bname]]; ok {
-					level = l.Map2Level[cnf.Levels[bname]]
-				} else {
-					level = default_LEVEL
-				}
+				level = l.Map2Level[cnf.Levels[bname]]
 			} else {
 				level = default_LEVEL
 			}
