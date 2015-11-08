@@ -114,7 +114,6 @@ func TestLogConfigure(t *testing.T) {
 		},
 		Telegram: ConfigurationTelegram{},
 		Mode: map[b.BackendName][]l.LevelName{
-			b.NAME_SYSLOG:             []l.LevelName{"fatal"},
 			b.BackendName("FOR_TEST"): []l.LevelName{"fatal"},
 		},
 	}
@@ -193,14 +192,15 @@ func TestLogConfigure(t *testing.T) {
 	}
 
 	cnf.Mode = map[b.BackendName][]l.LevelName{
-		b.NAME_SYSLOG:  []l.LevelName{"fatal"},
+		b.NAME_SYSLOG: []l.LevelName{"fatal"},
 	}
 	err = log.Configure(cnf)
 	if err != nil {
 		if strings.Contains(err.Error(), "syslog delivery error") {
 			// Syslog is not supported.
 			t.Skip(err)
+		} else {
+			t.Errorf("Error in Configure(): %v", err)
 		}
-		t.Errorf("Error in Configure(): %v", err)
 	}
 }
