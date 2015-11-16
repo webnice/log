@@ -2,7 +2,7 @@ package backends
 
 import (
 	//"time"
-	"fmt"
+	//"fmt"
 
 	l "github.com/webdeskltd/log/level"
 )
@@ -55,8 +55,7 @@ func (self *Backend) Stop() (err error) {
 			err = self.fH.Close()
 		}
 	}
-
-	fmt.Sprintf("")
-	print(fmt.Sprintf("Stop() backend: '%s', mode: '%s'%v|%v\n", MapTypeName[self.hType], modeName[self.hMode], l.Map[self.hLevelNormal], self.hLevelSelect))
+	//fmt.Sprintf("")
+	//print(fmt.Sprintf("Stop() backend: '%s', mode: '%s'%v|%v\n", MapTypeName[self.hType], modeName[self.hMode], l.Map[self.hLevelNormal], self.hLevelSelect))
 	return
 }
