@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	l "github.com/webdeskltd/log/level"
 
@@ -118,8 +119,15 @@ func TruncateString(src, layout string) (ret string) {
 	chanks = rexTruncate.FindStringSubmatch(layout)
 	if len(chanks) == 3 {
 		l, err = strconv.ParseInt(chanks[2], 0, 64)
-		if err == nil && int(l) <= len(src) {
-			ret = src[:int(l)]
+		if err == nil {
+			for i, w, c := 0, 0, int64(0); i < len(src); i += w {
+				_, w = utf8.DecodeRuneInString(src[i:])
+				c++
+				if c >= l {
+					ret = src[:i+w]
+					break
+				}
+			}
 		}
 	}
 	return

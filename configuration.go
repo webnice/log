@@ -15,7 +15,7 @@ import (
 )
 
 // Prepare configuration
-func (self *Log) prepareConfigure(cnf *Configuration) (err error) {
+func (self *LogEssence) prepareConfigure(cnf *Configuration) (err error) {
 	var i b.BackendName
 	var mode b.BackendName
 	var n int
@@ -82,7 +82,7 @@ func (self *Log) prepareConfigure(cnf *Configuration) (err error) {
 }
 
 // Apply new configuration
-func (self *Log) Configure(cnf *Configuration) (err error) {
+func (self *LogEssence) Configure(cnf *Configuration) (err error) {
 	var bname b.BackendName
 	var ok bool
 

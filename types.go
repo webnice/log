@@ -8,17 +8,19 @@ import (
 	b "github.com/webdeskltd/log/backends"
 	g "github.com/webdeskltd/log/gelf"
 	l "github.com/webdeskltd/log/level"
+	u "github.com/webdeskltd/log/uuid"
 	w "github.com/webdeskltd/log/writer"
 )
 
 const (
-	default_LOG    string  = `CB7D0E12-C1EC-49CB-A3DD-AD62DE7FB7D8`
-	default_FORMAT string  = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
-	default_LEVEL  l.Level = l.NOTICE
+	default_LOGUUID string  = `CB7D0E12-C1EC-49CB-A3DD-AD62DE7FB7D8`
+	default_FORMAT  string  = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
+	default_LEVEL   l.Level = l.NOTICE
 )
 
+// Standart exported errors
 var (
-	ERROR_LEVEL_UNKNOWN         = errors.New(`Unknown or not supported logging level`)                                     // В конфигурации указан не известный уровень логирования
+	ERROR_LEVEL_UNKNOWN         = errors.New(`Unknown or not supported logging level`)                                     // Указан не известный уровень логирования
 	ERROR_CONFIGURATION_IS_NULL = errors.New(`The configuration does not initialized. Received nil instead of the object`) // The configuration does not initialized. Received nil instead of the object
 	ERROR_UNKNOWN_MODE          = errors.New(`Unknown logging mode`)                                                       // Unknown logging mode
 	ERROR_LOG_FILENAME_IS_EMPTY = errors.New(`Log file name not specified`)                                                // Log file name not specified
@@ -26,12 +28,33 @@ var (
 )
 
 // Карта всех логгеров
-var singleton map[string]*Log
-var exit_func func(code int) = os.Exit // Function completed applications for Fatal. In test mode is replaced by Nop()... 100% code test coverage :)
-var testing_mode_one bool              // set true from test programm
-var testing_mode_two bool              // set true from test programm
+var singleton map[string]Log
 
-type Log struct {
+var exit_func func(code int) = os.Exit // Function completed applications for call Fatal(). In test mode is replaced by Nop()... 100% code test coverage :)
+var testing_mode_one bool              // Set true when testing. Partly it intended to simulate errors in the branches dependent on external factors
+var testing_mode_two bool              // Set true when testing. Partly it intended to simulate errors in the branches dependent on external factors
+
+// Log
+type Log interface {
+	Fatal(...interface{})           //
+	Alert(...interface{}) Log       //
+	Critical(...interface{}) Log    //
+	Error(...interface{}) Log       //
+	Warning(...interface{}) Log     //
+	Notice(...interface{}) Log      //
+	Info(...interface{}) Log        //
+	Debug(...interface{}) Log       //
+	Configure(*Configuration) error //
+	Close() error                   //
+	SetApplicationName(string) Log  //
+	SetModuleName(string) Log       //
+	DelModuleName() Log             //
+	InterceptStandardLog(bool) Log  //
+}
+
+// LogEssence
+type LogEssence struct {
+	Id                     u.UUID            // The object identifier
 	ready                  bool              // =true - log ready to use
 	rescueSTDOUT           *os.File          // Save original STDOUT
 	rescueSTDERR           *os.File          // Save original STDERR
@@ -45,6 +68,7 @@ type Log struct {
 	defaultLevelLogWriter  *w.Writer         // Writer for standard logging and etc...
 	interceptStandardLog   bool              // Current state for standard logging
 	moduleNames            map[string]string // Кастомные названия модулей опубликованные через SetModuleName()
+	Interface              Log               // The interface of the object
 }
 
 // Graylog server configuration
