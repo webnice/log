@@ -110,7 +110,7 @@ func (self *LogEssence) Configure(cnf *Configuration) (err error) {
 	// (Ре)Инициализация пула
 	self.backend = b.NewBackends()
 	if self.interceptStandardLog {
-		self.defaultLevelLogWriter = w.NewWriter(default_LEVEL).Resolver(self.ResolveNames).AttachBackends(self.backend)
+		self.defaultLevelLogWriter = w.NewWriter(l.DEFAULT_LEVEL).Resolver(self.ResolveNames).AttachBackends(self.backend)
 		stdLogConnect(self.defaultLevelLogWriter)
 	}
 	for bname = range cnf.Mode {
@@ -170,7 +170,7 @@ func (self *LogEssence) Configure(cnf *Configuration) (err error) {
 			if _, ok = cnf.Levels[bname]; ok {
 				level = l.Map2Level[cnf.Levels[bname]]
 			} else {
-				level = default_LEVEL
+				level = l.DEFAULT_LEVEL
 			}
 		}
 

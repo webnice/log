@@ -11,6 +11,11 @@ const (
 	DEBUG                 // 7 Debug: debug-level messages
 )
 
+const (
+	// The level of logging by default for messages without specifying the level
+	DEFAULT_LEVEL Level = NOTICE
+)
+
 var (
 	Map map[Level]LevelName = map[Level]LevelName{
 		FATAL:    `FATAL`,    // Система не стабильна, проолжение работы не возможно

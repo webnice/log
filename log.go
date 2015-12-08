@@ -66,7 +66,7 @@ func (log *LogEssence) defaultConfiguration() (cnf *Configuration) {
 		Telegram: ConfigurationTelegram{},
 	}
 	cnf.Mode[b.NAME_CONSOLE] = nil
-	cnf.Levels[b.NAME_CONSOLE] = l.LevelName(l.Map[default_LEVEL])
+	cnf.Levels[b.NAME_CONSOLE] = l.LevelName(l.Map[l.DEFAULT_LEVEL])
 	return
 }
 
@@ -93,7 +93,7 @@ func (log *LogEssence) Initialize() *LogEssence {
 	}
 
 	// Default level writer
-	log.defaultLevelLogWriter = w.NewWriter(default_LEVEL).Resolver(log.ResolveNames).AttachBackends(log.backend)
+	log.defaultLevelLogWriter = w.NewWriter(l.DEFAULT_LEVEL).Resolver(log.ResolveNames).AttachBackends(log.backend)
 	if log.interceptStandardLog {
 		stdLogConnect(log.defaultLevelLogWriter)
 	}

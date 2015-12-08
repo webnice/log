@@ -7,9 +7,20 @@ func init() {
 	}
 }
 
+// New - Creating an object, level logging
 func New(l Level) *LevelObject {
 	var self *LevelObject = new(LevelObject)
 	self.Level = l
+	return self
+}
+
+// NewFromMesssage - Determines the level of logging on the first word of the message
+func NewFromMesssage(str string, deflt Level) *LevelObject {
+	var self *LevelObject = new(LevelObject)
+	self.Level = deflt
+
+	// Опредяеляем уровень
+
 	return self
 }
 

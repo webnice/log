@@ -63,13 +63,17 @@ func (self *Writer) Write(buf []byte) (ln int, err error) {
 			Trace(t.STEP_BACK + 2).
 			GetRecord().
 			Resolver(self.resolver),
-	).Level(self.level).
+	).
+		Level(
+		l.NewFromMesssage(string(buf), self.level).Level,
+	).
 		Write(self.cleanSpace(string(buf)))
+
 	if self.backends != nil {
 		self.backends.Push(msg)
 		ln, err = msg.GetResult()
 	} else {
-		// backend не инициализирован, отправлять сообщения некуда
+		// backend is not initialized, no place to send messages
 	}
 	return
 }
@@ -82,13 +86,17 @@ func (self *Writer) WriteString(buf string) (ln int, err error) {
 			Trace(t.STEP_BACK + 2).
 			GetRecord().
 			Resolver(self.resolver),
-	).Level(self.level).
+	).
+		Level(
+		l.NewFromMesssage(buf, self.level).Level,
+	).
 		Write(self.cleanSpace(buf))
+
 	if self.backends != nil {
 		self.backends.Push(msg)
 		ln, err = msg.GetResult()
 	} else {
-		// backend не инициализирован, отправлять сообщения некуда
+		// backend is not initialized, no place to send messages
 	}
 	return
 }
