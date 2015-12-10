@@ -11,6 +11,7 @@ import (
 	r "github.com/webdeskltd/log/record"
 	t "github.com/webdeskltd/log/trace"
 	u "github.com/webdeskltd/log/uuid"
+	w "github.com/webdeskltd/log/writer"
 
 	//"github.com/webdeskltd/debug"
 )
@@ -149,4 +150,9 @@ func (self *LogEssence) InterceptStandardLog(flg bool) Log {
 		stdLogClose()
 	}
 	return self.Interface
+}
+
+// GetWriter Returns the standard writer to logging
+func (self *LogEssence) GetWriter() *w.Writer {
+	return self.defaultLevelLogWriter
 }

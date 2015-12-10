@@ -1,6 +1,7 @@
 package log
 
 import u "github.com/webdeskltd/log/uuid"
+import w "github.com/webdeskltd/log/writer"
 
 // Configure log
 func Configure(cnf *Configuration) error {
@@ -98,4 +99,9 @@ func InterceptStandardLog(flg bool) {
 // Get default log object
 func GetDefaultLog() Log {
 	return singleton[default_LOGUUID]
+}
+
+// GetWriter Returns the standard writer to logging
+func GetWriter() *w.Writer {
+	return singleton[default_LOGUUID].GetWriter()
 }

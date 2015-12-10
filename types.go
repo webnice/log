@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	default_LOGUUID string  = `CB7D0E12-C1EC-49CB-A3DD-AD62DE7FB7D8`
-	default_FORMAT  string  = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
+	default_LOGUUID string = `CB7D0E12-C1EC-49CB-A3DD-AD62DE7FB7D8`
+	default_FORMAT  string = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
 )
 
 // Standart exported errors
@@ -49,6 +49,7 @@ type Log interface {
 	SetModuleName(string) Log       //
 	DelModuleName() Log             //
 	InterceptStandardLog(bool) Log  //
+	GetWriter() *w.Writer           //
 }
 
 // LogEssence
