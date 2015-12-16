@@ -1,11 +1,17 @@
 package log
 
+import l "github.com/webdeskltd/log/level"
 import u "github.com/webdeskltd/log/uuid"
 import w "github.com/webdeskltd/log/writer"
 
 // Configure log
 func Configure(cnf *Configuration) error {
 	return singleton[default_LOGUUID].Configure(cnf)
+}
+
+// Message To send a message to the log with the level of logging
+func Message(level l.Level, args ...interface{}) {
+	singleton[default_LOGUUID].Message(level, args...)
 }
 
 // Level 0

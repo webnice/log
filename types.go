@@ -35,21 +35,22 @@ var testing_mode_two bool              // Set true when testing. Partly it inten
 
 // Log
 type Log interface {
-	Fatal(...interface{})           //
-	Alert(...interface{}) Log       //
-	Critical(...interface{}) Log    //
-	Error(...interface{}) Log       //
-	Warning(...interface{}) Log     //
-	Notice(...interface{}) Log      //
-	Info(...interface{}) Log        //
-	Debug(...interface{}) Log       //
-	Configure(*Configuration) error //
-	Close() error                   //
-	SetApplicationName(string) Log  //
-	SetModuleName(string) Log       //
-	DelModuleName() Log             //
-	InterceptStandardLog(bool) Log  //
-	GetWriter() *w.Writer           //
+	Message(l.Level, ...interface{}) //
+	Fatal(...interface{})            //
+	Alert(...interface{}) Log        //
+	Critical(...interface{}) Log     //
+	Error(...interface{}) Log        //
+	Warning(...interface{}) Log      //
+	Notice(...interface{}) Log       //
+	Info(...interface{}) Log         //
+	Debug(...interface{}) Log        //
+	Configure(*Configuration) error  //
+	Close() error                    //
+	SetApplicationName(string) Log   //
+	SetModuleName(string) Log        //
+	DelModuleName() Log              //
+	InterceptStandardLog(bool) Log   //
+	GetWriter() *w.Writer            //
 }
 
 // LogEssence
