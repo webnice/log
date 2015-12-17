@@ -29,15 +29,6 @@ func (log *LogEssence) leveled(level l.Level, args ...interface{}) *LogEssence {
 	return log
 }
 
-// Message To send a message to the log with the level of logging
-func (log *LogEssence) Message(level l.Level, args ...interface{}) {
-	log.leveled(level, args...).Close()
-	if level == l.FATAL {
-		exit_func(1)
-	}
-	return
-}
-
 // Level 0
 // Fatal: system is unusable
 // A "panic" condition - notify all tech staff on call? (earthquake? tornado?) - affects multiple apps/servers/sites...
@@ -94,6 +85,16 @@ func (log *LogEssence) Info(args ...interface{}) Log {
 // Info useful to developers for debugging the app, not useful during operations
 func (log *LogEssence) Debug(args ...interface{}) Log {
 	return log.leveled(l.DEBUG, args...).Interface
+}
+
+// Message To send a message to the log with the level of logging
+func (log *LogEssence) Message(level l.Level, args ...interface{}) Log {
+	ll := log.leveled(level, args...)
+	if level == l.FATAL {
+		ll.Close()
+		exit_func(1)
+	}
+	return ll.Interface
 }
 
 // Close logging

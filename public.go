@@ -9,11 +9,6 @@ func Configure(cnf *Configuration) error {
 	return singleton[default_LOGUUID].Configure(cnf)
 }
 
-// Message To send a message to the log with the level of logging
-func Message(level l.Level, args ...interface{}) {
-	singleton[default_LOGUUID].Message(level, args...)
-}
-
 // Level 0
 // Fatal: system is unusable
 // A "panic" condition - notify all tech staff on call? (earthquake? tornado?) - affects multiple apps/servers/sites...
@@ -68,6 +63,11 @@ func Info(args ...interface{}) {
 // Info useful to developers for debugging the app, not useful during operations
 func Debug(args ...interface{}) {
 	singleton[default_LOGUUID].Debug(args...)
+}
+
+// Message To send a message to the log with the level of logging
+func Message(level l.Level, args ...interface{}) {
+	singleton[default_LOGUUID].Message(level, args...)
 }
 
 // Close logging and reinitialisation defailt log
