@@ -45,6 +45,11 @@ func NewLog() Log {
 	return newLogEssence(u.TimeUUID()).Interface
 }
 
+// getEssence
+func (le *LogEssence) getEssence() *LogEssence {
+	return le
+}
+
 // Create dafault configuration
 func (log *LogEssence) defaultConfiguration() (cnf *Configuration) {
 	if testing_mode_one {

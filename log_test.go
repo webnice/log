@@ -13,8 +13,8 @@ import (
 
 func TestLogInitialize(t *testing.T) {
 	testing_mode_two = true
-	singleton[default_LOG].InterceptStandardLog(false)
-	singleton[default_LOG].backend = b.NewBackends()
+	singleton[default_LOGUUID].getEssence().InterceptStandardLog(false)
+	singleton[default_LOGUUID].getEssence().backend = b.NewBackends()
 	testing_mode_two = false
 
 	testing_mode_one = true
@@ -23,7 +23,8 @@ func TestLogInitialize(t *testing.T) {
 		t.Errorf("Error os.Hostname()")
 		return
 	}
-	lg := NewLog()
+
+	lg := NewLog().getEssence()
 	if lg.HostName != `undefined` {
 		t.Errorf("Error Initialize() os.Hostname() doesn't work")
 		return
@@ -34,7 +35,7 @@ func TestLogInitialize(t *testing.T) {
 	}
 	testing_mode_one = false
 
-	lg = NewLog()
+	lg = NewLog().getEssence()
 	lg.defaultLevelLogWriter = w.NewWriter(l.NOTICE)
 	lg.InterceptStandardLog(true)
 	lg.Initialize()
@@ -52,10 +53,10 @@ func TestLogInitialize(t *testing.T) {
 
 func TestLogSetModuleName(t *testing.T) {
 	testing_mode_two = true
-	singleton[default_LOG].InterceptStandardLog(false)
-	singleton[default_LOG].backend = b.NewBackends()
+	singleton[default_LOGUUID].getEssence().InterceptStandardLog(false)
+	singleton[default_LOGUUID].getEssence().backend = b.NewBackends()
 
-	lg := NewLog()
+	lg := NewLog().getEssence()
 	lg.backend = b.NewBackends()
 	if len(lg.moduleNames) != 0 {
 		t.Errorf("Error in moduleNames (map[string]string)")
@@ -76,7 +77,7 @@ func TestLogSetModuleName(t *testing.T) {
 }
 
 func TestLogDelModuleName(t *testing.T) {
-	lg := NewLog()
+	lg := NewLog().getEssence()
 	lg.SetModuleName("TestLogDelModuleName")
 	if nm, ok := lg.moduleNames["testing"]; !ok || nm != "TestLogDelModuleName" {
 		t.Errorf("Error in SetModuleName()")
@@ -91,10 +92,10 @@ func TestLogDelModuleName(t *testing.T) {
 
 func TestLogResolveNames(t *testing.T) {
 	testing_mode_two = true
-	singleton[default_LOG].InterceptStandardLog(false)
-	singleton[default_LOG].backend = b.NewBackends()
+	singleton[default_LOGUUID].getEssence().InterceptStandardLog(false)
+	singleton[default_LOGUUID].getEssence().backend = b.NewBackends()
 
-	lg := NewLog()
+	lg := NewLog().getEssence()
 	lg.backend = b.NewBackends()
 	lg.moduleNames["testing"] = "TestLogResolveNames"
 	txt, _ := m.NewMessage(

@@ -12,7 +12,7 @@ import (
 func TestLogPrepareConfigure(t *testing.T) {
 	var cnf *Configuration
 	var err error
-	var log *Log = NewLog()
+	var log *LogEssence = NewLog().getEssence()
 
 	cnf = &Configuration{
 		BufferFlushImmediately: true,
@@ -97,8 +97,8 @@ func TestLogPrepareConfigure(t *testing.T) {
 
 func TestLogConfigure(t *testing.T) {
 	var err error
-	var log *Log = NewLog()
 	var cnf *Configuration
+	var log *LogEssence = NewLog().getEssence()
 
 	cnf = &Configuration{
 		BufferFlushImmediately: true,

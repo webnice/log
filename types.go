@@ -51,6 +51,7 @@ type Log interface {
 	DelModuleName() Log                  //
 	InterceptStandardLog(bool) Log       //
 	GetWriter() *w.Writer                //
+	getEssence() *LogEssence             //
 }
 
 // LogEssence
