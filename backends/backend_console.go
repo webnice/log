@@ -4,13 +4,7 @@ import (
 	"os"
 
 	m "github.com/webdeskltd/log/message"
-
-	"github.com/webdeskltd/debug"
 )
-
-func init() {
-	debug.Nop()
-}
 
 func NewBackendConsole(f *os.File) (ret *Backend) {
 	ret = new(Backend)
