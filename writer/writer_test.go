@@ -26,6 +26,7 @@ func TestWriterResolver(t *testing.T) {
 
 	obj.Resolver(func(rec *r.Record) {}).Write([]byte{})
 	obj.Resolver(func(rec *r.Record) {}).WriteString("")
+	obj.Resolver(func(rec *r.Record) {}).Println("", "", "")
 	if obj.resolver == nil {
 		t.Errorf("Error Resolver() not work")
 		return

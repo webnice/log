@@ -1,6 +1,7 @@
 package writer
 
 import (
+	"fmt"
 	"regexp"
 	"runtime"
 
@@ -55,22 +56,20 @@ func (self *Writer) cleanSpace(buf string) string {
 // Writer for third party loggers, messages from third-party data loggers are intercepted and sent to this writer
 // All messages assigned to the default logging level
 
-// Writer for []byte
-func (self *Writer) Write(buf []byte) (ln int, err error) {
+func (wr *Writer) write(buf string) (ln int, err error) {
 	var msg *m.Message
 	msg = m.NewMessage(
 		t.NewTrace().
-			Trace(t.STEP_BACK + 2).
+			Trace(t.STEP_BACK + 3).
 			GetRecord().
-			Resolver(self.resolver),
+			Resolver(wr.resolver),
 	).
 		Level(
-		l.NewFromMesssage(string(buf), self.level).Level,
+		l.NewFromMesssage(buf, wr.level).Level,
 	).
-		Write(self.cleanSpace(string(buf)))
-
-	if self.backends != nil {
-		self.backends.Push(msg)
+		Write(wr.cleanSpace(buf))
+	if wr.backends != nil {
+		wr.backends.Push(msg)
 		ln, err = msg.GetResult()
 	} else {
 		// backend is not initialized, no place to send messages
@@ -78,25 +77,17 @@ func (self *Writer) Write(buf []byte) (ln int, err error) {
 	return
 }
 
-// Writer for string
-func (self *Writer) WriteString(buf string) (ln int, err error) {
-	var msg *m.Message
-	msg = m.NewMessage(
-		t.NewTrace().
-			Trace(t.STEP_BACK + 2).
-			GetRecord().
-			Resolver(self.resolver),
-	).
-		Level(
-		l.NewFromMesssage(buf, self.level).Level,
-	).
-		Write(self.cleanSpace(buf))
+// Writer for []byte
+func (wr *Writer) Write(buf []byte) (ln int, err error) {
+	return wr.write(string(buf))
+}
 
-	if self.backends != nil {
-		self.backends.Push(msg)
-		ln, err = msg.GetResult()
-	} else {
-		// backend is not initialized, no place to send messages
-	}
-	return
+// Writer for string
+func (wr *Writer) WriteString(buf string) (ln int, err error) {
+	return wr.write(buf)
+}
+
+// Writer for ...any
+func (wr *Writer) Println(v ...interface{}) {
+	wr.write(fmt.Sprint(v...))
 }
