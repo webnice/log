@@ -129,7 +129,7 @@ func (self *LogEssence) Configure(cnf *Configuration) (err error) {
 			if cnf.File == "" {
 				panic(ERROR_LOG_FILENAME_IS_EMPTY)
 			}
-			fh, err = os.OpenFile(cnf.File, syscall.O_APPEND|syscall.O_CREAT|syscall.O_WRONLY, 0644)
+			fh, err = os.OpenFile(cnf.File, syscall.O_CREAT|syscall.O_APPEND|syscall.O_WRONLY, 0644)
 			if err != nil {
 				panic(ERROR_INIT_FILE_BACKEND)
 			}
