@@ -1,4 +1,4 @@
-package level
+package level // import "github.com/webdeskltd/log/level"
 
 const (
 	FATAL    Level = iota // 0 Fatal: system is unusable

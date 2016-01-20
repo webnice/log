@@ -1,4 +1,4 @@
-package backends
+package backends // import "github.com/webdeskltd/log/backends"
 
 import (
 	"container/list"

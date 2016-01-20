@@ -1,4 +1,4 @@
-package writer
+package writer // import "github.com/webdeskltd/log/writer"
 
 import (
 	"fmt"

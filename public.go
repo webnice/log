@@ -1,4 +1,4 @@
-package log
+package log // import "github.com/webdeskltd/log"
 
 import l "github.com/webdeskltd/log/level"
 import u "github.com/webdeskltd/log/uuid"

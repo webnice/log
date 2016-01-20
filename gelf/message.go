@@ -1,4 +1,4 @@
-package gelf
+package gelf // import "github.com/webdeskltd/log/gelf"
 
 import (
 	"time"

@@ -1,6 +1,5 @@
 // Graylog2 GELF client
-
-package gelf
+package gelf // import "github.com/webdeskltd/log/gelf"
 
 import (
 	"fmt"

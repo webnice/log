@@ -1,4 +1,4 @@
-package level
+package level // import "github.com/webdeskltd/log/level"
 
 func init() {
 	Map2Level = make(map[LevelName]Level)

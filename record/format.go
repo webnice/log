@@ -1,4 +1,4 @@
-package record
+package record // import "github.com/webdeskltd/log/record"
 
 import (
 	"bytes"

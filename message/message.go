@@ -1,4 +1,4 @@
-package message
+package message // import "github.com/webdeskltd/log/message"
 
 import (
 	"runtime"

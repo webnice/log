@@ -1,4 +1,4 @@
-package trace
+package trace // import "github.com/webdeskltd/log/trace"
 
 import (
 	"runtime"
