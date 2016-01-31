@@ -8,7 +8,6 @@ Logging
 [![Circle CI](https://circleci.com/gh/webdeskltd/log/tree/master.svg?style=svg)](https://circleci.com/gh/webdeskltd/log/tree/master)
 win: [![Build status](https://ci.appveyor.com/api/projects/status/r5pqqhlik806w0t7/branch/master?svg=true)](https://ci.appveyor.com/project/monoflash/log/branch/master)
 
-
 Disclaimer
 ---
 This library is just a prototype at the moment. **It's not ready for you to use.**
