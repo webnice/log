@@ -5,6 +5,8 @@ import (
 
 	b "github.com/webdeskltd/log/backends"
 	l "github.com/webdeskltd/log/level"
+	m "github.com/webdeskltd/log/message"
+	t "github.com/webdeskltd/log/trace"
 )
 
 func TestConfigure(t *testing.T) {
@@ -86,6 +88,19 @@ func TestMessage(t *testing.T) {
 		t.Errorf("Error Fatal()")
 		return
 	}
+}
+
+func TestCustomMessage(tst *testing.T) {
+	singleton[default_LOGUUID].getEssence().InterceptStandardLog(false)
+	singleton[default_LOGUUID].getEssence().backend = b.NewBackends()
+	CustomMessage(m.NewMessage(
+		t.NewTrace().
+			Trace(t.STEP_BACK + 2).
+			GetRecord().
+			Resolver(singleton[default_LOGUUID].getEssence().ResolveNames),
+	).Level(l.NOTICE).
+		Write(""),
+	)
 }
 
 func TestClose(t *testing.T) {

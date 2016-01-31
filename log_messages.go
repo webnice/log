@@ -1,5 +1,6 @@
 package log // import "github.com/webdeskltd/log"
 
+//import "github.com/webdeskltd/debug"
 import (
 	"os"
 	"runtime"
@@ -12,12 +13,16 @@ import (
 	t "github.com/webdeskltd/log/trace"
 	u "github.com/webdeskltd/log/uuid"
 	w "github.com/webdeskltd/log/writer"
-
-	//"github.com/webdeskltd/debug"
 )
 
+// CustomMessage Push custom created log message
+func (log *LogEssence) CustomMessage(msg *m.Message) *LogEssence {
+	log.backend.Push(msg)
+	return log
+}
+
 func (log *LogEssence) leveled(level l.Level, args ...interface{}) *LogEssence {
-	log.backend.Push(
+	log.CustomMessage(
 		m.NewMessage(
 			t.NewTrace().
 				Trace(t.STEP_BACK + 2).
@@ -142,27 +147,27 @@ func (log *LogEssence) SetModuleName(name string) Log {
 }
 
 // Remove module name
-func (self *LogEssence) DelModuleName() Log {
+func (log *LogEssence) DelModuleName() Log {
 	var rec *r.Record
 	rec = t.NewTrace().Trace(t.STEP_BACK + 1).GetRecord()
-	delete(self.moduleNames, rec.Package)
-	return self.Interface
+	delete(log.moduleNames, rec.Package)
+	return log.Interface
 }
 
 // Configuring the interception of communications of a standard log
 // flg=true  - intercept is enabled
 // flg=false - intercept is desabled
-func (self *LogEssence) InterceptStandardLog(flg bool) Log {
-	self.interceptStandardLog = flg
+func (log *LogEssence) InterceptStandardLog(flg bool) Log {
+	log.interceptStandardLog = flg
 	if flg {
-		stdLogConnect(self.defaultLevelLogWriter)
+		stdLogConnect(log.defaultLevelLogWriter)
 	} else {
 		stdLogClose()
 	}
-	return self.Interface
+	return log.Interface
 }
 
 // GetWriter Returns the standard writer to logging
-func (self *LogEssence) GetWriter() *w.Writer {
-	return self.defaultLevelLogWriter
+func (log *LogEssence) GetWriter() *w.Writer {
+	return log.defaultLevelLogWriter
 }

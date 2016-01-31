@@ -1,6 +1,7 @@
 package log // import "github.com/webdeskltd/log"
 
 import l "github.com/webdeskltd/log/level"
+import m "github.com/webdeskltd/log/message"
 import u "github.com/webdeskltd/log/uuid"
 import w "github.com/webdeskltd/log/writer"
 
@@ -68,6 +69,11 @@ func Debug(args ...interface{}) {
 // Message To send a message to the log with the level of logging
 func Message(level l.Level, args ...interface{}) {
 	singleton[default_LOGUUID].Message(level, args...)
+}
+
+// CustomMessage Push custom created log message
+func CustomMessage(msg *m.Message) {
+	singleton[default_LOGUUID].getEssence().CustomMessage(msg)
 }
 
 // Close logging and reinitialisation defailt log
