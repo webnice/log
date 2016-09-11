@@ -3,25 +3,16 @@ package trace // import "github.com/webdeskltd/log/trace"
 import (
 	"runtime"
 	"strings"
-
-	r "github.com/webdeskltd/log/record"
 )
 
-const (
-	STEP_BACK        int    = 2
-	packageSeparator string = `/`
-)
-
-// Trace
-type Trace struct {
-	Record *r.Record
+// New Create new object
+func New() Interface {
+	var trc = new(impl)
+	return trc
 }
 
-func NewTrace() *Trace {
-	return new(Trace)
-}
-
-func (this *Trace) Trace(level int) *Trace {
+// Trace Get call information with stack back level
+func (trc *impl) Trace(stackLevel int) Interface {
 	var ok bool
 	var pc uintptr
 	var fn *runtime.Func
@@ -29,49 +20,47 @@ func (this *Trace) Trace(level int) *Trace {
 	var tmp []string
 	var i int
 
-	this.Record = r.NewRecord()
-	if level == 0 {
-		level = STEP_BACK
+	if stackLevel == 0 {
+		stackLevel = _STACKBACK
 	}
 	buf = make([]byte, 1<<16)
-	pc, this.Record.FileNameLong, this.Record.FileLine, ok = runtime.Caller(level)
+	pc, trc.info.FileNameLong, trc.info.FileLine, ok = runtime.Caller(stackLevel)
 	if ok == true {
 		fn = runtime.FuncForPC(pc)
 		if fn != nil {
-			this.Record.Function = fn.Name()
+			trc.info.Function = fn.Name()
 		}
 		i = runtime.Stack(buf, true)
-		this.Record.CallStack = string(buf[:i])
+		trc.info.CallStack = string(buf[:i])
 
-		tmp = strings.Split(this.Record.Function, packageSeparator)
+		tmp = strings.Split(trc.info.Function, _PACKAGESEPARATOR)
 		if len(tmp) > 1 {
-			this.Record.Package += strings.Join(tmp[:len(tmp)-1], packageSeparator)
-			this.Record.Function = tmp[len(tmp)-1]
+			trc.info.Package += strings.Join(tmp[:len(tmp)-1], _PACKAGESEPARATOR)
+			trc.info.Function = tmp[len(tmp)-1]
 		}
-		tmp = strings.SplitN(this.Record.Function, `.`, 2)
+		tmp = strings.SplitN(trc.info.Function, `.`, 2)
 		if len(tmp) == 2 {
-			if this.Record.Package != "" {
-				this.Record.Package += packageSeparator
+			if trc.info.Package != "" {
+				trc.info.Package += _PACKAGESEPARATOR
 			}
-			this.Record.Package += tmp[0]
-			this.Record.Function = tmp[1]
+			trc.info.Package += tmp[0]
+			trc.info.Function = tmp[1]
 		}
 
 		// Filename short
-		tmp = strings.Split(this.Record.FileNameLong, packageSeparator)
+		tmp = strings.Split(trc.info.FileNameLong, _PACKAGESEPARATOR)
 		if len(tmp) > 0 {
-			this.Record.FileNameShort = tmp[len(tmp)-1]
+			trc.info.FileNameShort = tmp[len(tmp)-1]
 		}
 
 		// Module name
-		tmp = strings.Split(this.Record.Package, packageSeparator)
+		tmp = strings.Split(trc.info.Package, _PACKAGESEPARATOR)
 		if len(tmp) > 0 {
-			this.Record.Module = tmp[len(tmp)-1]
+			trc.info.Module = tmp[len(tmp)-1]
 		}
 	}
-	return this
+	return trc
 }
 
-func (this *Trace) GetRecord() *r.Record {
-	return this.Record
-}
+// Info Return trace information
+func (trc *impl) Info() *Info { return &trc.info }

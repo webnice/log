@@ -1,35 +1,54 @@
 package level // import "github.com/webdeskltd/log/level"
 
-func init() {
-	Map2Level = make(map[LevelName]Level)
-	for n := range Map {
-		Map2Level[Map[n]] = n
-	}
+// New Create new level object
+func New() Interface {
+	var level = new(impl)
+	return level
 }
 
-// New - Creating an object, level logging
-func New(l Level) *LevelObject {
-	var self *LevelObject = new(LevelObject)
-	self.Level = l
-	return self
+// -------
+// Interface
+// -------
+
+// Fatal system is unusable
+func (l *impl) Fatal() Level { return _FATAL }
+
+// Alert action must be taken immediately
+func (l *impl) Alert() Level { return _ALERT }
+
+// Critical conditions
+func (l *impl) Critical() Level { return _CRITICAL }
+
+// Error conditions
+func (l *impl) Error() Level { return _ERROR }
+
+// Warning conditions
+func (l *impl) Warning() Level { return _WARNING }
+
+// Notice normal but significant condition
+func (l *impl) Notice() Level { return _NOTICE }
+
+// Informational messages
+func (l *impl) Informational() Level { return _INFO }
+
+// Debug debug-level messages
+func (l *impl) Debug() Level { return _DEBUG }
+
+// -------
+// Level
+// -------
+
+// String Return Level as string
+func (lvl Level) String() string {
+	return levelMap[lvl]
 }
 
-// NewFromMesssage - Determines the level of logging on the first word of the message
-func NewFromMesssage(str string, deflt Level) *LevelObject {
-	var self *LevelObject = new(LevelObject)
-	self.Level = deflt
-
-	// Опредяеляем уровень
-
-	return self
+// String Return Level as int8
+func (lvl Level) Int() int8 {
+	return int8(lvl)
 }
 
-func (self *LevelObject) String() (ret string) {
-	resp, _ := Map[self.Level]
-	ret = string(resp)
-	return
-}
-
-func (self *LevelObject) Int8() int8 {
-	return int8(self.Level)
+// String Return Level as int64
+func (lvl Level) Int64() int64 {
+	return int64(lvl)
 }

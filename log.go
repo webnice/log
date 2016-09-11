@@ -1,117 +1,84 @@
 package log // import "github.com/webdeskltd/log"
 
-import (
-	"errors"
-	"os"
+import m "github.com/webdeskltd/log/message"
+import l "github.com/webdeskltd/log/level"
 
-	b "github.com/webdeskltd/log/backends"
-	g "github.com/webdeskltd/log/gelf"
-	l "github.com/webdeskltd/log/level"
-	r "github.com/webdeskltd/log/record"
-	u "github.com/webdeskltd/log/uuid"
-	w "github.com/webdeskltd/log/writer"
+// Fatal Level 0: system is unusable
+// A "panic" condition - notify all tech staff on call? (earthquake? tornado?) - affects multiple apps/servers/sites...
+func Fatal(args ...interface{}) { ess.NewMsg().Fatal(args...) }
 
-	//"github.com/webdeskltd/debug"
-)
+// Fatalf Level 0: system is unusable
+// A "panic" condition - notify all tech staff on call? (earthquake? tornado?) - affects multiple apps/servers/sites...
+func Fatalf(pattern string, args ...interface{}) { ess.NewMsg().Fatalf(pattern, args...) }
 
-// Initialize default log settings
-func init() {
-	// Карта всех копий logger
-	singleton = make(map[string]Log)
+// Alert Level 1: action must be taken immediately
+// Should be corrected immediately - notify staff who can fix the problem - example is loss of backup ISP connection
+func Alert(args ...interface{}) { ess.NewMsg().Alert(args...) }
 
-	// Устанавливаем в зависимые пакеты функции информирования об ошибках
-	b.LogError = Error
+// Alertf Level 1: action must be taken immediately
+// Should be corrected immediately - notify staff who can fix the problem - example is loss of backup ISP connection
+func Alertf(pattern string, args ...interface{}) { ess.NewMsg().Alertf(pattern, args...) }
 
-	// Defailt backend format
-	b.DefaultFormat = default_FORMAT
+// Critical Level 2: critical conditions
+// Should be corrected immediately, but indicates failure in a primary system - fix CRITICAL problems before ALERT - example is loss of primary ISP connection
+func Critical(args ...interface{}) { ess.NewMsg().Critical(args...) }
 
-	// Default public log object
-	var uuid, _ = u.ParseUUID(default_LOGUUID)
-	singleton[default_LOGUUID] = newLogEssence(uuid)
+// Criticalf Level 2: critical conditions
+// Should be corrected immediately, but indicates failure in a primary system - fix CRITICAL problems before ALERT - example is loss of primary ISP connection
+func Criticalf(pattern string, args ...interface{}) { ess.NewMsg().Criticalf(pattern, args...) }
+
+// Error Level 3: error conditions
+// Non-urgent failures - these should be relayed to developers or admins; each item must be resolved within a given time
+func Error(args ...interface{}) { ess.NewMsg().Error(args...) }
+
+// Errorf Level 3: error conditions
+// Non-urgent failures - these should be relayed to developers or admins; each item must be resolved within a given time
+func Errorf(pattern string, args ...interface{}) { ess.NewMsg().Errorf(pattern, args...) }
+
+// Warning Level 4: warning conditions
+// Warning messages - not an error, but indication that an error will occur if action is not taken, e.g. file system 85% full - each item must be resolved within a given time
+func Warning(args ...interface{}) { ess.NewMsg().Warning(args...) }
+
+// Warningf Level 4: warning conditions
+// Warning messages - not an error, but indication that an error will occur if action is not taken, e.g. file system 85% full - each item must be resolved within a given time
+func Warningf(pattern string, args ...interface{}) { ess.NewMsg().Warningf(pattern, args...) }
+
+// Notice Level 5: normal but significant condition
+// Events that are unusual but not error conditions - might be summarized in an email to developers or admins to spot potential problems - no immediate action required
+func Notice(args ...interface{}) { ess.NewMsg().Notice(args...) }
+
+// Noticef Level 5: normal but significant condition
+// Events that are unusual but not error conditions - might be summarized in an email to developers or admins to spot potential problems - no immediate action required
+func Noticef(pattern string, args ...interface{}) { ess.NewMsg().Noticef(pattern, args...) }
+
+// Info Level 6: informational messages
+// Normal operational messages - may be harvested for reporting, measuring throughput, etc - no action required
+func Info(args ...interface{}) { ess.NewMsg().Info(args...) }
+
+// Infof Level 6: informational messages
+// Normal operational messages - may be harvested for reporting, measuring throughput, etc - no action required
+func Infof(pattern string, args ...interface{}) { ess.NewMsg().Infof(pattern, args...) }
+
+// Debug Level 7: debug-level messages
+// Info useful to developers for debugging the app, not useful during operations
+func Debug(args ...interface{}) { ess.NewMsg().Debug(args...) }
+
+// DebDebugfug Level 7: debug-level messages
+// Info useful to developers for debugging the app, not useful during operations
+func Debugf(pattern string, args ...interface{}) { ess.NewMsg().Debugf(pattern, args...) }
+
+// Keys Передача в сообщения лога дополнительных информационных полей в виде ключ/значение
+func Keys(keys ...Key) Log {
+	var tmp []map[string]interface{}
+	var i int
+	for i = range keys {
+		tmp = append(tmp, map[string]interface{}(keys[i]))
+	}
+	return ess.NewMsg().(m.Interface).Keys(tmp...)
 }
 
-func newLogEssence(uuid u.UUID) *LogEssence {
-	var obj = new(LogEssence)
-	obj.Id = uuid
-	obj.moduleNames = make(map[string]string)
-	obj.Initialize()
-	var log = []Log{obj}
-	obj.Interface = log[0]
-	return obj
-}
+// Message send with level and format
+func Message(lv l.Level, pat string, args ...interface{}) { ess.NewMsg().Message(lv, pat, args...) }
 
-// New log object
-func NewLog() Log {
-	return newLogEssence(u.TimeUUID()).Interface
-}
-
-// getEssence
-func (le *LogEssence) getEssence() *LogEssence {
-	return le
-}
-
-// Create dafault configuration
-func (log *LogEssence) defaultConfiguration() (cnf *Configuration) {
-	if testing_mode_one {
-		return
-	}
-	cnf = &Configuration{
-		BufferFlushImmediately: true,
-		BufferSize:             0,
-		Mode:                   make(map[b.BackendName][]l.LevelName),
-		Levels:                 make(map[b.BackendName]l.LevelName),
-		Formats:                make(map[b.BackendName]string),
-		Format:                 default_FORMAT,
-		Graylog2: ConfigurationGraylog2{
-			Compression: g.COMPRESSION_NONE,
-			Source:      log.HostName,
-			Protocol:    g.UDP_NETWORK,
-			BufferSize:  1000,
-		},
-		Telegram: ConfigurationTelegram{},
-	}
-	cnf.Mode[b.NAME_CONSOLE] = nil
-	cnf.Levels[b.NAME_CONSOLE] = l.LevelName(l.Map[l.DEFAULT_LEVEL])
-	return
-}
-
-// Initialize default configuration
-func (log *LogEssence) Initialize() *LogEssence {
-	var err error
-	var cnf *Configuration
-
-	log.SetApplicationName(``)
-	log.HostName, err = os.Hostname()
-	if testing_mode_one {
-		err = errors.New("Hostname not defined")
-	}
-	if err != nil {
-		log.HostName = `undefined`
-	}
-	// Create default configuration and apply
-	cnf = log.defaultConfiguration()
-	err = log.Configure(cnf)
-	if err != nil {
-		Error("Error Configure(): %v\n", err)
-	} else {
-		log.ready = true
-	}
-
-	// Default level writer
-	log.defaultLevelLogWriter = w.NewWriter(l.DEFAULT_LEVEL).Resolver(log.ResolveNames).AttachBackends(log.backend)
-	if log.interceptStandardLog {
-		stdLogConnect(log.defaultLevelLogWriter)
-	}
-
-	return log
-}
-
-// Resolve resord
-func (self *LogEssence) ResolveNames(rec *r.Record) {
-	rec.AppName = self.AppName
-	rec.HostName = self.HostName
-	if _, ok := self.moduleNames[rec.Package]; ok == true {
-		rec.Package = self.moduleNames[rec.Package]
-	}
-	return
-}
+// Gist get interface
+func Gist() Essence { return ess }

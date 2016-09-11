@@ -1,17 +1,12 @@
-package log // import "github.com/webdeskltd/log"
+package message // import "github.com/webdeskltd/log/message"
 
-import l "github.com/webdeskltd/log/level"
-import w "github.com/webdeskltd/log/writer"
-import s "github.com/webdeskltd/log/sender"
-import f "github.com/webdeskltd/log/formater"
+//import "github.com/webdeskltd/debug"
+import (
+	l "github.com/webdeskltd/log/level"
+)
 
-const defaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
-
-// Key type, used in Keys(Key{})
-type Key map[string]interface{}
-
-// Log interface
-type Log interface {
+// Interface is an interface of package
+type Interface interface {
 	// Fatal Level 0: system is unusable
 	Fatal(...interface{})
 	// Fatalf Level 0: system is unusable
@@ -45,25 +40,17 @@ type Log interface {
 	// Debugf Level 7: debug-level messages
 	Debugf(string, ...interface{})
 
+	// Keys add to message
+	Keys(...map[string]interface{}) Interface
+	// CallStackCorrect Correction detect original call function
+	CallStackCorrect(int) Interface
+
 	// Message send with level and format
 	Message(l.Level, string, ...interface{})
 }
 
-// Объект логера
+// impl is an implementation of package
 type impl struct {
-	level    l.Level     // Log level severity or below
-	writer   w.Interface // Writer interface
-	sender   s.Interface // Sender interface
-	formater f.Interface // Formater interface
-	tplText  string      // Шаблон форматирования текста
-}
-
-// Essence interface
-type Essence interface {
-	// Return writer interface
-	Writer() w.Interface
-	// StandardLogSet Put io writer to log
-	StandardLogSet() Essence
-	// StandardLogUnset Reset to defailt
-	StandardLogUnset() Essence
+	callStack int                    // Глубина стэка
+	keys      map[string]interface{} // Ключи сообщения
 }
