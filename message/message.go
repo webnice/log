@@ -157,7 +157,11 @@ func (msg *impl) Message(level l.Level, pattern string, args ...interface{}) {
 	}
 	rec.Trace.TodayAndNow = time.Now().In(time.Local)
 	rec.Trace.Level = level
-	rec.Trace.Message = fmt.Sprintf(pattern, args...)
+	if pattern == "" {
+		rec.Trace.Message = fmt.Sprint(args...)
+	} else {
+		rec.Trace.Message = fmt.Sprintf(pattern, args...)
+	}
 
 	s.Gist().Channel() <- rec
 }
