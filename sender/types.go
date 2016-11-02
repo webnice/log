@@ -3,12 +3,14 @@ package sender // import "github.com/webdeskltd/log/sender"
 //import "github.com/webdeskltd/debug"
 import (
 	"container/list"
+	"os"
 
 	l "github.com/webdeskltd/log/level"
 	t "github.com/webdeskltd/log/trace"
 )
 
 var singleton *impl
+var fatalFn func(code int) = os.Exit // Function fatal exit with error code
 
 // Interface is an interface of package
 type Interface interface {

@@ -43,12 +43,17 @@ func (lvl Level) String() string {
 	return levelMap[lvl]
 }
 
-// String Return Level as int8
-func (lvl Level) Int() int8 {
+// Int8 Return Level as int8
+func (lvl Level) Int8() int8 {
 	return int8(lvl)
 }
 
-// String Return Level as int64
+// Int Return Level as int
+func (lvl Level) Int() int {
+	return int(lvl)
+}
+
+// Int64 Return Level as int64
 func (lvl Level) Int64() int64 {
 	return int64(lvl)
 }

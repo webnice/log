@@ -3,6 +3,8 @@ package sender // import "github.com/webdeskltd/log/sender"
 //import "github.com/webdeskltd/debug"
 import (
 	"container/list"
+
+	l "github.com/webdeskltd/log/level"
 )
 
 func init() {
@@ -57,6 +59,10 @@ func (snd *impl) Receiver() {
 
 			} else if snd.defaultReceiver != nil {
 				snd.defaultReceiver(msg)
+			}
+			// Call fatal function
+			if msg.Level == l.New().Fatal() {
+				fatalFn(msg.Level.Int())
 			}
 		case <-snd.cancel:
 			return
