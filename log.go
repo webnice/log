@@ -80,5 +80,8 @@ func Keys(keys ...Key) Log {
 // Message send with level and format
 func Message(lv l.Level, pat string, args ...interface{}) { ess.NewMsg().Message(lv, pat, args...) }
 
+// Done Flush all buffered messages and exit
+func Done() { ess.NewMsg().Done() }
+
 // Gist get interface
 func Gist() Essence { return ess }

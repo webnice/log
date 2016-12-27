@@ -1,6 +1,6 @@
 package message // import "github.com/webdeskltd/log/message"
 
-// import "github.com/webdeskltd/debug"
+//import "github.com/webdeskltd/debug"
 import (
 	"fmt"
 	"os"
@@ -165,3 +165,6 @@ func (msg *impl) Message(level l.Level, pattern string, args ...interface{}) {
 
 	s.Gist().Channel() <- rec
 }
+
+// Done Flush all buffered messages and exit
+func (msg *impl) Done() { s.Gist().Flush() }

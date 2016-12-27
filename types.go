@@ -48,6 +48,8 @@ type Log interface {
 
 	// Message send with level and format
 	Message(l.Level, string, ...interface{})
+	// Done Flush all buffered messages and exit
+	Done()
 }
 
 // Объект логера

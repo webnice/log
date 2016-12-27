@@ -9,7 +9,7 @@ import (
 
 func init() {
 	singleton = newSender()
-	go singleton.Receiver()
+	newReceiver()
 }
 
 // newSender Create new message object
@@ -19,6 +19,14 @@ func newSender() *impl {
 	snd.input = make(chan Message, 100000)
 	snd.cancel = make(chan interface{})
 	return snd
+}
+
+func newReceiver() {
+	singleton.doCancelDone.Add(1)
+	go func() {
+		defer singleton.doCancelDone.Done()
+		singleton.Receiver()
+	}()
 }
 
 // Gist Sender singleton object interface
@@ -41,14 +49,13 @@ func (snd *impl) AddSender(fn Receiver) {
 }
 
 // Удаление всех отправителей сообщений, переключение на дефолтовый отправитель
-func (snd *impl) RemoveAllSender() {
-	snd.receivers.Init()
-}
+func (snd *impl) RemoveAllSender() { snd.receivers.Init() }
 
 // Receiver Горутина получающая и обрабатывающая сообщения
 func (snd *impl) Receiver() {
 	var msg Message
 	var rec *list.Element
+	var exit bool
 	for {
 		select {
 		case msg = <-snd.input:
@@ -56,7 +63,6 @@ func (snd *impl) Receiver() {
 				for rec = snd.receivers.Front(); rec != nil; rec = rec.Next() {
 					rec.Value.(Receiver)(msg)
 				}
-
 			} else if snd.defaultReceiver != nil {
 				snd.defaultReceiver(msg)
 			}
@@ -64,8 +70,19 @@ func (snd *impl) Receiver() {
 			if msg.Level == l.New().Fatal() {
 				fatalFn(msg.Level.Int())
 			}
+			if len(snd.input) == 0 && exit {
+				return
+			}
 		case <-snd.cancel:
-			return
+			exit = true
 		}
 	}
+}
+
+// Ожидание обработки всех буфферизированных сообщений
+// Перезапуск Receiver и выход
+func (snd *impl) Flush() {
+	snd.cancel <- true
+	snd.doCancelDone.Wait()
+	newReceiver()
 }
