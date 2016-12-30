@@ -1,6 +1,8 @@
 package receiver // import "github.com/webdeskltd/log/receiver"
 
+//import "github.com/webdeskltd/debug"
 import (
+	"github.com/webdeskltd/log/receiver/filelogrotation"
 	"github.com/webdeskltd/log/receiver/stderr"
 	"github.com/webdeskltd/log/receiver/stdout"
 	"github.com/webdeskltd/log/receiver/syslog"
@@ -15,6 +17,9 @@ var (
 
 	// SyslogReceiver Read message and output to SYSLOG
 	SyslogReceiver = syslog.New()
+
+	// FilelogrotationReceiver Read message and output to file with time rotation
+	FilelogrotationReceiver = filelogrotation.New()
 )
 
 // Default receiver

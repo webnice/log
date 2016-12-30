@@ -82,7 +82,7 @@ func (rcv *impl) Receiver(msg s.Message) {
 	}
 	defer wr.Close()
 	if buf, err = rcv.Formater.Text(msg, rcv.TplText); err != nil {
-		buf = bytes.NewBufferString(fmt.Sprintf("Error formationg log message: %s", err.Error()))
+		buf = bytes.NewBufferString(fmt.Sprintf("Error formatting log message: %s", err.Error()))
 	}
 	switch msg.Level {
 	case level.Fatal():

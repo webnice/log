@@ -37,8 +37,7 @@ func (rcv *impl) Receiver(msg s.Message) {
 	var buf *bytes.Buffer
 	var err error
 	if buf, err = rcv.Formater.Text(msg, rcv.TplText); err != nil {
-		fmt.Fprintf(os.Stderr, "Error formationg log message: %s", err.Error())
-		return
+		buf = bytes.NewBufferString(fmt.Sprintf("Error formatting log message: %s", err.Error()))
 	}
 	fmt.Fprintln(os.Stderr, buf.String())
 }
