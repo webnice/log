@@ -2,38 +2,30 @@ package log // import "github.com/webdeskltd/log"
 
 //import "github.com/webdeskltd/debug"
 import (
-	"bytes"
-	"fmt"
 	standardLog "log"
 	"os"
 
-	f "github.com/webdeskltd/log/formater"
 	m "github.com/webdeskltd/log/message"
+	r "github.com/webdeskltd/log/receiver"
 	s "github.com/webdeskltd/log/sender"
 	w "github.com/webdeskltd/log/writer"
 )
 
 var ess *impl
 
-func init() {
-	ess = newEssence()
-}
+func init() { ess = newEssence() }
 
 // Create new log object
 func newEssence() *impl {
 	ess = new(impl)
-	ess.formater = f.New()
 	ess.writer = w.New()
 	ess.sender = s.Gist()
-	ess.sender.SetDefaultReceiver(ess.DefaultReceiver)
-	ess.tplText = defaultTextFORMAT
+	ess.sender.SetDefaultReceiver(r.Default.Receiver)
 	return ess
 }
 
 // NewMsg Create new message
-func (ess *impl) NewMsg() Log {
-	return m.New()
-}
+func (ess *impl) NewMsg() Log { return m.New() }
 
 // Return writer interface
 func (ess *impl) Writer() w.Interface { return ess.writer }
@@ -52,15 +44,4 @@ func (ess *impl) StandardLogUnset() Essence {
 	standardLog.SetFlags(standardLog.LstdFlags)
 	standardLog.SetOutput(os.Stderr)
 	return ess
-}
-
-// DefaultReceiver Default message receiver
-func (ess *impl) DefaultReceiver(msg s.Message) {
-	var buf *bytes.Buffer
-	var err error
-	if buf, err = ess.formater.Text(msg, ess.tplText); err != nil {
-		fmt.Fprintf(os.Stderr, "Error formationg log message: %s", err.Error())
-		return
-	}
-	fmt.Fprintln(os.Stderr, buf.String())
 }
