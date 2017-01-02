@@ -1,0 +1,219 @@
+package fsfilerotation // import "github.com/webdeskltd/log/receiver/fsfilerotation"
+
+//import "github.com/webdeskltd/debug"
+import (
+	"bytes"
+	"fmt"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"time"
+
+	f "github.com/webdeskltd/log/formater"
+	s "github.com/webdeskltd/log/sender"
+
+	"github.com/webdeskltd/log/middleware/fswriter"
+)
+
+// New Create new
+func New() Interface {
+	var rcv = new(impl)
+	rcv.Formater = f.New()
+	rcv.TplText = _DefaultTextFORMAT
+	rcv.Timezone = time.Local
+	rcv.RotationTime = time.Hour * 24
+	rcv.SetUnlinkFunc(os.Remove)
+	rcv.SetFilenamePattern(rcv.defaultFilenamePattern())
+	rcv.FsWriter = fswriter.New()
+	return rcv
+}
+
+// Имя файла журнала по умолчанию
+func (rcv *impl) defaultFilenamePattern() (ret string) {
+	var tmp []string
+	tmp = strings.Split(os.Args[0], string(os.PathSeparator))
+	if len(tmp) > 0 {
+		ret = tmp[len(tmp)-1] + `-%Y%m%d.log`
+	} else {
+		ret = os.Args[0] + `-%Y%m%d.log`
+	}
+	return
+}
+
+// SetPath Установка пути к папке фалов журнала
+func (rcv *impl) SetPath(pth string) Interface { rcv.Path = pth; return rcv }
+
+// SetFilenamePattern Установка шаблона имени файла журнала
+func (rcv *impl) SetFilenamePattern(fnm string) Interface {
+	var tmp = fnm
+	for _, rex := range patternConversion {
+		tmp = rex.ReplaceAllString(tmp, "*")
+	}
+	rcv.Filename = fnm
+	rcv.FilenamePattern = tmp
+	return rcv
+}
+
+// SetTimezone Установка таймзоны для отображения времени в лог файле
+// По умолчанию time.Local
+func (rcv *impl) SetTimezone(tz *time.Location) Interface { rcv.Timezone = time.Local; return rcv }
+
+// SetSymlink Установка имени симлинка ведущего на текущий лог файл в ротации (только для *nix OS)
+func (rcv *impl) SetSymlink(slnk string) Interface {
+	rcv.SymbolicLinkName = rcv.absPath(path.Join(rcv.Path, slnk))
+	return rcv
+}
+
+// SetMaxAge Установка максимального возраста файла журнала до его удаления
+// По умолчанию =0 - файлы журналов не удаляются
+func (rcv *impl) SetMaxAge(ma time.Duration) Interface { rcv.MaxAge = ma; return rcv }
+
+// SetRotationTime Установка промежутков времени между ротацией файлов
+// Значение по умолчанию одни сутки
+func (rcv *impl) SetRotationTime(rt time.Duration) Interface { rcv.RotationTime = rt; return rcv }
+
+// SetUnlinkFunc Установка пользовательской функции удаления файлов журнала
+// Если приложению требуется не просто удалить файлы, а куда-то их отправить или заархивировать
+// Вызывается для каждого файла лога отдельно
+func (rcv *impl) SetUnlinkFunc(fn UnlinkFn) Interface { rcv.UnlinkFn = fn; return rcv }
+
+// GetFilename Получение текущего имени файла журнала
+func (rcv *impl) GetFilename() string { rcv.Lock(); defer rcv.Unlock(); return rcv.FilenameCurrent }
+
+// Получение абсолютного пути к файлу
+func (rcv *impl) absPath(pth string) (ret string) {
+	var err error
+	if len(pth) > 0 {
+		switch pth[0] {
+		case '/':
+			ret = pth
+		default:
+			if ret, err = os.Getwd(); err != nil {
+				ret = pth
+				return
+			}
+			ret = path.Join(ret, pth)
+		}
+	}
+	return
+}
+
+// Генерация имени лог файла
+func (rcv *impl) filename() (ret string, err error) {
+	var tn, tf time.Time
+	var diff time.Duration
+	tn = time.Now().In(rcv.Timezone)
+	diff = time.Duration(tn.UnixNano()) % rcv.RotationTime
+	tf = tn.Add(diff * -1)
+	if ret, err = Format(rcv.Filename, tf); err != nil {
+		ret = ``
+		return
+	}
+	ret = rcv.absPath(path.Join(rcv.Path, ret))
+	return
+}
+
+// Rotation Ротация файлов
+func (rcv *impl) Rotation(fnm string) (err error) {
+	var lockfn, tmpLinkName, pth string
+	var fh *os.File
+	var fi os.FileInfo
+	var guard fnGuard
+	var matches, toUnlink []string
+	var cutoff time.Time
+
+	lockfn = fmt.Sprintf("%s_lock", fnm)
+	if fh, err = os.OpenFile(lockfn, os.O_CREATE|os.O_EXCL, 0644); err != nil {
+		return
+	}
+	guard.fn = func() {
+		fh.Close()
+		os.Remove(lockfn)
+	}
+	defer guard.Run()
+	if rcv.SymbolicLinkName != "" {
+		tmpLinkName = fmt.Sprintf("%s_symlink", fnm)
+		if err = os.Symlink(fnm, tmpLinkName); err != nil {
+			return
+		}
+		if err = os.Rename(tmpLinkName, rcv.SymbolicLinkName); err != nil {
+			return
+		}
+	}
+	// MaxAge is not set, not rotating
+	if rcv.MaxAge <= 0 {
+		return
+	}
+	if matches, err = filepath.Glob(rcv.absPath(path.Join(rcv.Path, rcv.FilenamePattern))); err != nil {
+		return
+	}
+	cutoff = time.Now().In(rcv.Timezone).Add(rcv.MaxAge * -1)
+	for _, pth = range matches {
+		// Ignore lock files
+		if strings.HasSuffix(pth, "_lock") || strings.HasSuffix(pth, "_symlink") {
+			continue
+		}
+		if fi, err = os.Stat(pth); err != nil {
+			continue
+		}
+		if fi.ModTime().After(cutoff) {
+			continue
+		}
+		toUnlink = append(toUnlink, pth)
+	}
+	if len(toUnlink) <= 0 {
+		return
+	}
+	guard.Enable()
+	go func() {
+		for _, pth = range toUnlink {
+			_ = rcv.UnlinkFn(pth)
+		}
+	}()
+	return
+}
+
+// Ticker Внешний таймер для ротации лог файлов.
+// Смена имени файла журнала
+func (rcv *impl) Ticker() {
+	var err error
+	var fnm string
+	var isNew bool
+	rcv.Lock()
+	defer rcv.Unlock()
+	if fnm, err = rcv.filename(); err != nil {
+		return
+	}
+	if fnm == rcv.FilenameCurrent {
+		return
+	}
+	isNew = true
+	if _, err = os.Stat(fnm); err == nil {
+		if rcv.SymbolicLinkName != "" {
+			if _, err = os.Lstat(rcv.SymbolicLinkName); err == nil {
+				isNew = false
+			}
+		}
+	}
+	if isNew {
+		if err = rcv.Rotation(fnm); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to rotate: %s\n", err.Error())
+		}
+	}
+	rcv.FilenameCurrent = fnm
+}
+
+// Receiver Message receiver. Output to STDERR
+func (rcv *impl) Receiver(msg s.Message) {
+	var err error
+	var buf *bytes.Buffer
+	if buf, err = rcv.Formater.Text(msg, rcv.TplText); err != nil {
+		buf = bytes.NewBufferString(fmt.Sprintf("Error formatting log message: %s", err.Error()))
+	}
+	buf.WriteString("\r\n")
+	rcv.Ticker()
+	if _, err = rcv.FsWriter.SetFilename(rcv.FilenameCurrent).Write(buf.Bytes()); err != nil {
+		fmt.Fprintf(os.Stderr, "Error write log message: %s\n", err.Error())
+	}
+}

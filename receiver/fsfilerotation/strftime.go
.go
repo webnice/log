@@ -1,4 +1,4 @@
-package filelogrotation // import "github.com/webdeskltd/log/receiver/filelogrotation"
+package fsfilerotation // import "github.com/webdeskltd/log/receiver/fsfilerotation"
 
 /*
 Example:
@@ -40,6 +40,7 @@ const (
 )
 
 var (
+	// Map for golang template
 	conv = map[string]string{
 		"%a": "Mon",        // Locale’s abbreviated weekday name
 		"%A": "Monday",     // Locale’s full weekday name

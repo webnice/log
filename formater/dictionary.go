@@ -13,7 +13,7 @@ func init() {
 	makeDictionary(new(t.Info))
 }
 
-// Создание на основе структуры констант используемых при работе
+// Создание на основе структуры констант используемых в качестве формата
 func makeDictionary(v interface{}) (err error) {
 	var rv reflect.Value
 	var rt reflect.Type

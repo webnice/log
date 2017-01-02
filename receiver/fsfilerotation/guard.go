@@ -1,4 +1,4 @@
-package filelogrotation // import "github.com/webdeskltd/log/receiver/filelogrotation"
+package fsfilerotation // import "github.com/webdeskltd/log/receiver/fsfilerotation"
 
 //import "github.com/webdeskltd/debug"
 import "sync"
