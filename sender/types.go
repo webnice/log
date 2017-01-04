@@ -47,13 +47,13 @@ type impl struct {
 // Message data structure
 type Message struct {
 	// Level Уровень сообщения
-	Level l.Level
+	Level l.Level `json:"level"`
 	// Trace stack information
-	Trace *t.Info
+	Trace *t.Info `json:"trace"`
 	// Шаблон сообщения
-	Pattern string
+	Pattern string `json:"pattern"`
 	// Аргументы шаблона сообщения
-	Args []interface{}
+	Args []interface{} `json:"args"`
 	// Ключи сообщения
-	Keys map[string]interface{}
+	Keys map[string]interface{} `json:"keys"`
 }
