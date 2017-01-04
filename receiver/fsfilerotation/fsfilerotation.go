@@ -2,7 +2,6 @@ package fsfilerotation // import "github.com/webdeskltd/log/receiver/fsfilerotat
 
 //import "github.com/webdeskltd/debug"
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path"
@@ -10,22 +9,21 @@ import (
 	"strings"
 	"time"
 
-	f "github.com/webdeskltd/log/formater"
-	s "github.com/webdeskltd/log/sender"
+	"github.com/webdeskltd/log/middleware"
+	"github.com/webdeskltd/log/middleware/fswformattext"
 
-	"github.com/webdeskltd/log/middleware/fswriter"
+	s "github.com/webdeskltd/log/sender"
 )
 
 // New Create new
 func New() Interface {
 	var rcv = new(impl)
-	rcv.Formater = f.New()
 	rcv.TplText = _DefaultTextFORMAT
 	rcv.Timezone = time.Local
 	rcv.RotationTime = time.Hour * 24
 	rcv.SetUnlinkFunc(os.Remove)
 	rcv.SetFilenamePattern(rcv.defaultFilenamePattern())
-	rcv.FsWriter = fswriter.New()
+	rcv.FsWriter = fswformattext.New()
 	return rcv
 }
 
@@ -77,6 +75,9 @@ func (rcv *impl) SetRotationTime(rt time.Duration) Interface { rcv.RotationTime 
 // Если приложению требуется не просто удалить файлы, а куда-то их отправить или заархивировать
 // Вызывается для каждого файла лога отдельно
 func (rcv *impl) SetUnlinkFunc(fn UnlinkFn) Interface { rcv.UnlinkFn = fn; return rcv }
+
+// SetFsWriter Установка функции записи в файл с форматированием
+func (rcv *impl) SetFsWriter(fn middleware.FsWriter) Interface { rcv.FsWriter = fn; return rcv }
 
 // GetFilename Получение текущего имени файла журнала
 func (rcv *impl) GetFilename() string { rcv.Lock(); defer rcv.Unlock(); return rcv.FilenameCurrent }
@@ -204,16 +205,14 @@ func (rcv *impl) Ticker() {
 	rcv.FilenameCurrent = fnm
 }
 
-// Receiver Message receiver. Output to STDERR
+// Receiver Message receiver
 func (rcv *impl) Receiver(msg s.Message) {
 	var err error
-	var buf *bytes.Buffer
-	if buf, err = rcv.Formater.Text(msg, rcv.TplText); err != nil {
-		buf = bytes.NewBufferString(fmt.Sprintf("Error formatting log message: %s", err.Error()))
-	}
-	buf.WriteString("\r\n")
 	rcv.Ticker()
-	if _, err = rcv.FsWriter.SetFilename(rcv.FilenameCurrent).Write(buf.Bytes()); err != nil {
-		fmt.Fprintf(os.Stderr, "Error write log message: %s\n", err.Error())
+	if _, err = rcv.FsWriter.
+		SetFilename(rcv.FilenameCurrent).
+		SetFormat(rcv.TplText).
+		Write(msg); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
 	}
 }

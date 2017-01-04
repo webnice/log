@@ -6,10 +6,9 @@ import (
 	"sync"
 	"time"
 
-	f "github.com/webdeskltd/log/formater"
-	s "github.com/webdeskltd/log/sender"
+	"github.com/webdeskltd/log/middleware"
 
-	"github.com/webdeskltd/log/middleware/fswriter"
+	s "github.com/webdeskltd/log/sender"
 )
 
 // const _DefaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
@@ -53,6 +52,9 @@ type Interface interface {
 	// Вызывается для каждого файла лога отдельно
 	SetUnlinkFunc(UnlinkFn) Interface
 
+	// SetFsWriter Установка функции записи в файл с форматированием
+	SetFsWriter(middleware.FsWriter) Interface
+
 	// GetFilename Получение текущего имени файла журнала
 	GetFilename() string
 
@@ -63,17 +65,16 @@ type Interface interface {
 
 // impl is an implementation of package
 type impl struct {
-	Formater         f.Interface        // Formater interface
-	TplText          string             // Шаблон форматирования текста
-	Timezone         *time.Location     // Таймзона для отображения даты и времени файлов журнала (лога)
-	MaxAge           time.Duration      // Максимальный возраст файла журнала до его удаления/очистки
-	RotationTime     time.Duration      // Промежутки времени ротации файлов журнала
-	Path             string             // Путь к папке размещения файлов журнала
-	Filename         string             // Шаблон имени файла журнала
-	FilenamePattern  string             // Шаблон файловой системы
-	FilenameCurrent  string             // Текущее имя файла журнала в ротации
-	SymbolicLinkName string             // Имя симлинка ведущего на текущий лог файл в ротации
-	UnlinkFn         UnlinkFn           // Функция удаления файлов журнала
-	FsWriter         fswriter.Interface // Интерфейс записи
+	TplText          string              // Шаблон форматирования текста
+	Timezone         *time.Location      // Таймзона для отображения даты и времени файлов журнала (лога)
+	MaxAge           time.Duration       // Максимальный возраст файла журнала до его удаления/очистки
+	RotationTime     time.Duration       // Промежутки времени ротации файлов журнала
+	Path             string              // Путь к папке размещения файлов журнала
+	Filename         string              // Шаблон имени файла журнала
+	FilenamePattern  string              // Шаблон файловой системы
+	FilenameCurrent  string              // Текущее имя файла журнала в ротации
+	SymbolicLinkName string              // Имя симлинка ведущего на текущий лог файл в ротации
+	UnlinkFn         UnlinkFn            // Функция удаления файлов журнала
+	FsWriter         middleware.FsWriter // Интерфейс записи
 	sync.RWMutex
 }
