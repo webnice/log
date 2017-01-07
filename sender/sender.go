@@ -57,6 +57,9 @@ func (snd *impl) Receiver() {
 	var rec *list.Element
 	var exit bool
 	for {
+		if len(snd.input) == 0 && exit {
+			return
+		}
 		select {
 		case msg = <-snd.input:
 			if snd.receivers.Len() > 0 {
@@ -69,9 +72,6 @@ func (snd *impl) Receiver() {
 			// Call fatal function
 			if msg.Level == l.New().Fatal() {
 				fatalFn(msg.Level.Int())
-			}
-			if len(snd.input) == 0 && exit {
-				return
 			}
 		case <-snd.cancel:
 			exit = true
