@@ -27,6 +27,9 @@ type Interface interface {
 	// Receiver Message receiver
 	Receiver(s.Message)
 
+	// Write Запись среза байт
+	Write([]byte) (int, error)
+
 	// SetPath Установка шаблона файла журнала
 	SetPath(string) Interface
 

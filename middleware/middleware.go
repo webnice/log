@@ -17,6 +17,9 @@ type FsWriter interface {
 	// SetFormat Set template line formating
 	SetFormat(string) FsWriter
 
-	// Write Запись с форматированием
-	Write(s.Message) (int, error)
+	// WriteMessage Запись структуры данных с форматированием
+	WriteMessage(s.Message) (int, error)
+
+	// Write Запись среза байт
+	Write([]byte) (int, error)
 }

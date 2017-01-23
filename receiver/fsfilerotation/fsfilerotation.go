@@ -212,7 +212,19 @@ func (rcv *impl) Receiver(msg s.Message) {
 	if _, err = rcv.FsWriter.
 		SetFilename(rcv.FilenameCurrent).
 		SetFormat(rcv.TplText).
-		Write(msg); err != nil {
+		WriteMessage(msg); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
+}
+
+// Write Запись среза байт
+func (rcv *impl) Write(buf []byte) (n int, err error) {
+	rcv.Ticker()
+	if n, err = rcv.
+		FsWriter.
+		SetFilename(rcv.FilenameCurrent).
+		Write(buf); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+	}
+	return
 }

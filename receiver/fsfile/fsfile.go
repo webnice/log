@@ -26,6 +26,9 @@ type Interface interface {
 
 	// Receiver Message receiver
 	Receiver(s.Message)
+
+	// Write Запись среза байт
+	Write([]byte) (int, error)
 }
 
 // impl is an implementation of package
@@ -62,7 +65,15 @@ func (rcv *impl) SetFsWriter(fn middleware.FsWriter) Interface { rcv.FsWriter = 
 func (rcv *impl) Receiver(msg s.Message) {
 	var err error
 	rcv.FsWriter.SetFormat(rcv.TplText)
-	if _, err = rcv.FsWriter.Write(msg); err != nil {
+	if _, err = rcv.FsWriter.WriteMessage(msg); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
+}
+
+// Write Запись среза байт
+func (rcv *impl) Write(buf []byte) (n int, err error) {
+	if n, err = rcv.FsWriter.Write(buf); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+	}
+	return
 }

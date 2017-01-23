@@ -48,21 +48,27 @@ func (fsw *impl) SetFilemode(filemode os.FileMode) middleware.FsWriter {
 // SetFormat Set template line formating
 func (fsw *impl) SetFormat(format string) middleware.FsWriter { fsw.TplText = format; return fsw }
 
-// Write Запись среза байт в файл
-func (fsw *impl) Write(msg s.Message) (n int, err error) {
-	var out *os.File
+// WriteMessage Запись среза байт в файл
+func (fsw *impl) WriteMessage(msg s.Message) (n int, err error) {
 	var buf *bytes.Buffer
-	fsw.Lock()
-	defer fsw.Unlock()
 	if buf, err = fsw.Formater.Text(msg, fsw.TplText); err != nil {
 		buf = bytes.NewBufferString(fmt.Sprintf("Error formatting log message: %s", err.Error()))
 	}
 	buf.WriteString("\r\n")
+	n, err = fsw.Write(buf.Bytes())
+	return
+}
+
+// Write Запись среза байт как есть
+func (fsw *impl) Write(buf []byte) (n int, err error) {
+	var out *os.File
+	fsw.Lock()
+	defer fsw.Unlock()
 	if out, err = os.OpenFile(fsw.Filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.FileMode(0644)); err != nil {
 		err = fmt.Errorf("Failed to open file '%s': %s", fsw.Filename, err.Error())
 		return
 	}
 	defer out.Close()
-	n, err = out.Write(buf.Bytes())
+	n, err = out.Write(buf)
 	return
 }
