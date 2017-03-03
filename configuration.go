@@ -1,4 +1,4 @@
-package log // import "github.com/webdeskltd/log"
+package log
 
 import (
 	"errors"

@@ -127,18 +127,18 @@ func TestSetApplicationName(t *testing.T) {
 
 func TestSetModuleName(t *testing.T) {
 	SetModuleName(`242A9053-CA60-4733-A0BB-F446FF5AD124`)
-	if singleton[default_LOGUUID].getEssence().moduleNames["github.com/webdeskltd/log"] != `242A9053-CA60-4733-A0BB-F446FF5AD124` {
+	if singleton[default_LOGUUID].getEssence().moduleNames["gopkg.in/webnice/log.v1"] != `242A9053-CA60-4733-A0BB-F446FF5AD124` {
 		t.Errorf("Error SetModuleName()")
 	}
 }
 
 func TestDelModuleName(t *testing.T) {
 	SetModuleName(`242A9053-CA60-4733-A0BB-F446FF5AD124`)
-	if singleton[default_LOGUUID].getEssence().moduleNames["github.com/webdeskltd/log"] != `242A9053-CA60-4733-A0BB-F446FF5AD124` {
+	if singleton[default_LOGUUID].getEssence().moduleNames["gopkg.in/webnice/log.v1"] != `242A9053-CA60-4733-A0BB-F446FF5AD124` {
 		t.Errorf("Error SetModuleName()")
 	} else {
 		DelModuleName()
-		if _, ok := singleton[default_LOGUUID].getEssence().moduleNames["github.com/webdeskltd/log"]; ok {
+		if _, ok := singleton[default_LOGUUID].getEssence().moduleNames["gopkg.in/webnice/log.v1"]; ok {
 			t.Errorf("Error DelModuleName()")
 		}
 	}

@@ -1,4 +1,4 @@
-package log // import "github.com/webdeskltd/log"
+package log
 
 import l "github.com/webdeskltd/log/level"
 import m "github.com/webdeskltd/log/message"
