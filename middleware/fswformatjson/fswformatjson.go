@@ -1,4 +1,4 @@
-package fswformatjson // import "github.com/webdeskltd/log/middleware/fswformatjson"
+package fswformatjson
 
 //import "github.com/webdeskltd/debug"
 import (
@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/webdeskltd/log/middleware"
+	"gopkg.in/webnice/log.v2/middleware"
 
-	s "github.com/webdeskltd/log/sender"
+	s "gopkg.in/webnice/log.v2/sender"
 )
 
 // New Create new package implementation and return interface

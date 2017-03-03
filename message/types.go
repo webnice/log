@@ -1,8 +1,8 @@
-package message // import "github.com/webdeskltd/log/message"
+package message
 
 //import "github.com/webdeskltd/debug"
 import (
-	l "github.com/webdeskltd/log/level"
+	l "gopkg.in/webnice/log.v2/level"
 )
 
 // Interface is an interface of package

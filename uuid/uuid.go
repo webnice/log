@@ -1,5 +1,5 @@
 // http://tools.ietf.org/html/rfc4122
-package uuid // import "github.com/webdeskltd/log/uuid"
+package uuid
 
 import (
 	"crypto/rand"

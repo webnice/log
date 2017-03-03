@@ -1,12 +1,12 @@
-package writer // import "github.com/webdeskltd/log/writer"
+package writer
 
-// import "github.com/webdeskltd/debug"
+// import "gopkg.in/webnice/debug.v1"
 import (
 	"bytes"
 	"fmt"
 
-	l "github.com/webdeskltd/log/level"
-	m "github.com/webdeskltd/log/message"
+	l "gopkg.in/webnice/log.v2/level"
+	m "gopkg.in/webnice/log.v2/message"
 )
 
 // New Create new object

@@ -1,7 +1,7 @@
-package log // import "github.com/webdeskltd/log"
+package log
 
-import m "github.com/webdeskltd/log/message"
-import l "github.com/webdeskltd/log/level"
+import m "gopkg.in/webnice/log.v2/message"
+import l "gopkg.in/webnice/log.v2/level"
 
 // Fatal Level 0: system is unusable
 // A "panic" condition - notify all tech staff on call? (earthquake? tornado?) - affects multiple apps/servers/sites...

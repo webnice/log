@@ -1,10 +1,10 @@
-package sender // import "github.com/webdeskltd/log/sender"
+package sender
 
 //import "github.com/webdeskltd/debug"
 import (
 	"container/list"
 
-	l "github.com/webdeskltd/log/level"
+	l "gopkg.in/webnice/log.v2/level"
 )
 
 func init() {

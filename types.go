@@ -1,8 +1,8 @@
-package log // import "github.com/webdeskltd/log"
+package log
 
-import l "github.com/webdeskltd/log/level"
-import w "github.com/webdeskltd/log/writer"
-import s "github.com/webdeskltd/log/sender"
+import l "gopkg.in/webnice/log.v2/level"
+import w "gopkg.in/webnice/log.v2/writer"
+import s "gopkg.in/webnice/log.v2/sender"
 
 // Key type, used in Keys(Key{})
 type Key map[string]interface{}

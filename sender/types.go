@@ -1,4 +1,4 @@
-package sender // import "github.com/webdeskltd/log/sender"
+package sender
 
 //import "github.com/webdeskltd/debug"
 import (
@@ -6,8 +6,8 @@ import (
 	"os"
 	"sync"
 
-	l "github.com/webdeskltd/log/level"
-	t "github.com/webdeskltd/log/trace"
+	l "gopkg.in/webnice/log.v2/level"
+	t "gopkg.in/webnice/log.v2/trace"
 )
 
 var singleton *impl

@@ -1,11 +1,11 @@
-package lfilter // import "github.com/webdeskltd/log/middleware/lfilter"
+package lfilter
 
 //import "github.com/webdeskltd/debug"
 import (
 	"sync"
 
-	l "github.com/webdeskltd/log/level"
-	s "github.com/webdeskltd/log/sender"
+	l "gopkg.in/webnice/log.v2/level"
+	s "gopkg.in/webnice/log.v2/sender"
 )
 
 // Interface is an interface of package

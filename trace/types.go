@@ -1,8 +1,8 @@
-package trace // import "github.com/webdeskltd/log/trace"
+package trace
 
 import "time"
-import u "github.com/webdeskltd/log/uuid"
-import l "github.com/webdeskltd/log/level"
+import u "gopkg.in/webnice/log.v2/uuid"
+import l "gopkg.in/webnice/log.v2/level"
 
 const (
 	_STACKBACK        int    = 2
@@ -40,7 +40,7 @@ type Info struct {
 	FileNameLong  string    `fmt:"longfile:s"             json:"filenameLong"`  // %{longfile}                - (string   ) Full file name and line number: /a/b/c/d.go
 	FileNameShort string    `fmt:"shortfile:s"            json:"filenameShort"` // %{shortfile}               - (string   ) Final file name element and line number: d.go
 	FileLine      int       `fmt:"line:d"                 json:"fileLine"`      // %{line}                    - (int      ) Line number in file
-	Package       string    `fmt:"package:s"              json:"package"`       // %{package}                 - (string   ) Full package path, eg. github.com/webdeskltd/log
+	Package       string    `fmt:"package:s"              json:"package"`       // %{package}                 - (string   ) Full package path, eg. gopkg.in/webnice/log.v2
 	Module        string    `fmt:"module:s,shortpkg:s"    json:"module"`        // %{module} or %{shortpkg}   - (string   ) Module name base package path, eg. log
 	Function      string    `fmt:"function:s,facility:s"  json:"function"`      // %{function} or %{facility} - (string   ) Full function name, eg. PutUint32
 	CallStack     string    `fmt:"callstack:s"            json:"callStack"`     // %{callstack}               - (string   ) Full call stack

@@ -1,4 +1,4 @@
-package formater // import "github.com/webdeskltd/log/formater"
+package formater
 
 //import "github.com/webdeskltd/debug"
 import (
@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	s "github.com/webdeskltd/log/sender"
-	t "github.com/webdeskltd/log/trace"
+	s "gopkg.in/webnice/log.v2/sender"
+	t "gopkg.in/webnice/log.v2/trace"
 )
 
 // New Create new object

@@ -1,4 +1,4 @@
-package formater // import "github.com/webdeskltd/log/formater"
+package formater
 
 //import "github.com/webdeskltd/debug"
 import (
@@ -6,7 +6,7 @@ import (
 	"errors"
 	"regexp"
 
-	s "github.com/webdeskltd/log/sender"
+	s "gopkg.in/webnice/log.v2/sender"
 )
 
 const tagName = `fmt`

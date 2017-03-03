@@ -1,4 +1,4 @@
-package fsfilerotation // import "github.com/webdeskltd/log/receiver/fsfilerotation"
+package fsfilerotation
 
 //import "github.com/webdeskltd/debug"
 import (
@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/webdeskltd/log/middleware"
-	"github.com/webdeskltd/log/middleware/fswformattext"
+	"gopkg.in/webnice/log.v2/middleware"
+	"gopkg.in/webnice/log.v2/middleware/fswformattext"
 
-	s "github.com/webdeskltd/log/sender"
+	s "gopkg.in/webnice/log.v2/sender"
 )
 
 // New Create new

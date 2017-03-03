@@ -1,4 +1,4 @@
-package syslog // import "github.com/webdeskltd/log/receiver/syslog"
+package syslog
 
 import (
 	"bytes"
@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
-	f "github.com/webdeskltd/log/formater"
-	l "github.com/webdeskltd/log/level"
-	s "github.com/webdeskltd/log/sender"
+	f "gopkg.in/webnice/log.v2/formater"
+	l "gopkg.in/webnice/log.v2/level"
+	s "gopkg.in/webnice/log.v2/sender"
 )
 
 // const _DefaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`

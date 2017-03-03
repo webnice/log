@@ -1,4 +1,4 @@
-package fswformattext // import "github.com/webdeskltd/log/middleware/fswformattext"
+package fswformattext
 
 //import "github.com/webdeskltd/debug"
 import (
@@ -7,10 +7,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/webdeskltd/log/middleware"
+	"gopkg.in/webnice/log.v2/middleware"
 
-	f "github.com/webdeskltd/log/formater"
-	s "github.com/webdeskltd/log/sender"
+	f "gopkg.in/webnice/log.v2/formater"
+	s "gopkg.in/webnice/log.v2/sender"
 )
 
 // New Create new package implementation and return interface

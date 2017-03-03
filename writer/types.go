@@ -1,8 +1,8 @@
-package writer // import "github.com/webdeskltd/log/writer"
+package writer
 
 import "regexp"
 import (
-	l "github.com/webdeskltd/log/level"
+	l "gopkg.in/webnice/log.v2/level"
 )
 
 var (

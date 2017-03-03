@@ -1,4 +1,4 @@
-package message // import "github.com/webdeskltd/log/message"
+package message
 
 //import "github.com/webdeskltd/debug"
 import (
@@ -8,10 +8,10 @@ import (
 	"syscall"
 	"time"
 
-	l "github.com/webdeskltd/log/level"
-	s "github.com/webdeskltd/log/sender"
-	t "github.com/webdeskltd/log/trace"
-	u "github.com/webdeskltd/log/uuid"
+	l "gopkg.in/webnice/log.v2/level"
+	s "gopkg.in/webnice/log.v2/sender"
+	t "gopkg.in/webnice/log.v2/trace"
+	u "gopkg.in/webnice/log.v2/uuid"
 )
 
 // New Create new message object

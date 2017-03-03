@@ -1,4 +1,4 @@
-package formater // import "github.com/webdeskltd/log/formater"
+package formater
 
 //import "github.com/webdeskltd/debug"
 import (
@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	t "github.com/webdeskltd/log/trace"
+	t "gopkg.in/webnice/log.v2/trace"
 )
 
 func init() {

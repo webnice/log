@@ -1,9 +1,9 @@
-package formater // import "github.com/webdeskltd/log/formater"
+package formater
 
 import (
 	"fmt"
 
-	l "github.com/webdeskltd/log/level"
+	l "gopkg.in/webnice/log.v2/level"
 )
 
 const (

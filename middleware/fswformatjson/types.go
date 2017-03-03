@@ -1,4 +1,4 @@
-package fswformatjson // import "github.com/webdeskltd/log/middleware/fswformatjson"
+package fswformatjson
 
 //import "github.com/webdeskltd/debug"
 import (
