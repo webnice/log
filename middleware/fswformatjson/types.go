@@ -1,6 +1,6 @@
 package fswformatjson
 
-//import "github.com/webdeskltd/debug"
+//import "gopkg.in/webnice/debug.v1"
 import (
 	"os"
 	"sync"

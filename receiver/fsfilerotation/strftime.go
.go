@@ -28,7 +28,7 @@ Directives:
 	%Z - Time zone name (no characters if no time zone exists)
 */
 
-//import "github.com/webdeskltd/debug"
+//import "gopkg.in/webnice/debug.v1"
 import (
 	"fmt"
 	"regexp"

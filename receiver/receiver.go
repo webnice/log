@@ -1,6 +1,6 @@
 package receiver
 
-//import "github.com/webdeskltd/debug"
+//import "gopkg.in/webnice/debug.v1"
 import (
 	"gopkg.in/webnice/log.v2/receiver/fsfile"
 	"gopkg.in/webnice/log.v2/receiver/fsfilerotation"

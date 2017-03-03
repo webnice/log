@@ -1,6 +1,6 @@
 package fswformattext
 
-//import "github.com/webdeskltd/debug"
+//import "gopkg.in/webnice/debug.v1"
 import (
 	"bytes"
 	"fmt"

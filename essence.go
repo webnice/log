@@ -1,6 +1,6 @@
 package log
 
-//import "github.com/webdeskltd/debug"
+//import "gopkg.in/webnice/debug.v1"
 import (
 	standardLog "log"
 	"os"
