@@ -14,18 +14,17 @@ type TcpConnMng struct {
 	tcpConnection *net.TCPConn
 }
 
-func DialTcpMng(net string, laddr, raddr *net.TCPAddr) (*TcpConnMng, error) {
-	tcpConnMng := &TcpConnMng{
+func DialTcpMng(net string, laddr, raddr *net.TCPAddr) (ret *TcpConnMng, err error) {
+	ret = &TcpConnMng{
 		net:   net,
 		laddr: laddr,
 		raddr: raddr,
 	}
-
-	if connErr := tcpConnMng.reconnect(); nil != connErr {
-		return nil, connErr
-	} else {
-		return tcpConnMng, nil
+	if err = ret.reconnect(); err != nil {
+		ret = nil
+		return
 	}
+	return
 }
 
 func (tcpConnMng *TcpConnMng) connection() *net.TCPConn {
@@ -34,65 +33,51 @@ func (tcpConnMng *TcpConnMng) connection() *net.TCPConn {
 	return tcpConnMng.tcpConnection
 }
 
-func (tcpConnMng *TcpConnMng) reconnect() error {
+func (tcpConnMng *TcpConnMng) reconnect() (err error) {
+	var tcpConnection *net.TCPConn
 	tcpConnMng.Lock()
 	defer tcpConnMng.Unlock()
-
 	if tcpConnMng.tcpConnection != nil {
 		tcpConnMng.tcpConnection.Close()
 		tcpConnMng.tcpConnection = nil
 	}
-
-	tcpConnection, tcpErr := net.DialTCP(
-		tcpConnMng.net,
-		tcpConnMng.laddr,
-		tcpConnMng.raddr,
-	)
-
-	if nil != tcpErr {
-		return tcpErr
+	tcpConnection, err = net.DialTCP(tcpConnMng.net, tcpConnMng.laddr, tcpConnMng.raddr)
+	if err != nil {
+		return
 	}
-
 	tcpConnMng.tcpConnection = tcpConnection
-
-	return nil
+	return
 }
 
 func (tcpConnMng *TcpConnMng) Read(b []byte) (n int, err error) {
-	if n, err := tcpConnMng.connection().Read(b); nil == err {
-		return n, err
+	if n, err = tcpConnMng.connection().Read(b); err == nil {
+		return
 	}
-
-	if connErr := tcpConnMng.reconnect(); nil != connErr {
-		return 0, connErr
+	if err = tcpConnMng.reconnect(); err != nil {
+		n = 0
+		return
 	}
-
-	return tcpConnMng.connection().Read(b)
+	n, err = tcpConnMng.connection().Read(b)
+	return
 }
 
 func (tcpConnMng *TcpConnMng) Write(b []byte) (n int, err error) {
-	if n, err := tcpConnMng.connection().Write(b); nil == err {
-		return n, err
+	if n, err = tcpConnMng.connection().Write(b); err == nil {
+		return
 	}
-
-	if connErr := tcpConnMng.reconnect(); nil != connErr {
-		return 0, connErr
+	if err = tcpConnMng.reconnect(); err != nil {
+		n = 0
+		return
 	}
-
-	return tcpConnMng.connection().Write(b)
+	n, err = tcpConnMng.connection().Write(b)
+	return
 }
 
-func (tcpConnMng *TcpConnMng) Close() error {
-	return tcpConnMng.connection().Close()
-}
+func (tcpConnMng *TcpConnMng) Close() error { return tcpConnMng.connection().Close() }
 
-func (tcpConnMng *TcpConnMng) LocalAddr() net.Addr {
-	return tcpConnMng.connection().LocalAddr()
-}
+func (tcpConnMng *TcpConnMng) LocalAddr() net.Addr { return tcpConnMng.connection().LocalAddr() }
 
-func (tcpConnMng *TcpConnMng) RemoteAddr() net.Addr {
-	return tcpConnMng.connection().RemoteAddr()
-}
+func (tcpConnMng *TcpConnMng) RemoteAddr() net.Addr { return tcpConnMng.connection().RemoteAddr() }
 
 func (tcpConnMng *TcpConnMng) SetDeadline(t time.Time) error {
 	return tcpConnMng.connection().SetDeadline(t)

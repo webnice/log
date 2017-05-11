@@ -26,90 +26,90 @@ type UdpClient struct {
 
 type MessageId []byte
 
-func NewUdpClient(host string, port uint16, chunkSize uint) (*UdpClient, error) {
-	udpClient := UdpClient{
-		ChunkSize: chunkSize,
+func NewUdpClient(host string, port uint16, chunkSize uint) (ret *UdpClient, err error) {
+	var address string
+	var addr *net.UDPAddr
+	address = net.JoinHostPort(host, strconv.FormatUint(uint64(port), 10))
+	addr, err = net.ResolveUDPAddr(UDP_NETWORK, address)
+	if err != nil {
+		return
 	}
-
-	hostWithPort := net.JoinHostPort(host, strconv.FormatUint(uint64(port), 10))
-	if addr, addrErr := net.ResolveUDPAddr(UDP_NETWORK, hostWithPort); nil != addrErr {
-		return nil, addrErr
-	} else {
-		udpClient.ServerAddr = addr
+	ret = &UdpClient{
+		ServerAddr: addr,
+		ChunkSize:  chunkSize,
 	}
-
-	return &udpClient, nil
+	return
 }
 
-func MustUdpClient(host string, port uint16, chunkSize uint) *UdpClient {
-	udpClient, err := NewUdpClient(host, port, chunkSize)
-	if nil != err {
+func MustUdpClient(host string, port uint16, chunkSize uint) (ret *UdpClient) {
+	var err error
+	if ret, err = NewUdpClient(host, port, chunkSize); err != nil {
 		panic(err.Error())
 	}
-	return udpClient
+	return
 }
 
-func (udpClient *UdpClient) SendMessageData(messageData MessageData) error {
-	messageSize := uint(len(messageData))
+func (udpClient *UdpClient) Close() error { return nil }
 
-	chunkCount := byte(messageSize / udpClient.ChunkSize)
+func createMessageId() (ret MessageId, err error) {
+	ret = make(MessageId, MESSAGE_ID_SIZE)
+	_, err = rand.Read(ret)
+	return
+}
+
+func (udpClient *UdpClient) SendMessageData(messageData MessageData) (err error) {
+	var messageSize, chunkStart, chunkEnd uint
+	var chunkCount, chunkIndex byte
+	var messageId MessageId
+	var messageChunk []byte
+
+	messageSize = uint(len(messageData))
+	chunkCount = byte(messageSize / udpClient.ChunkSize)
 	if messageSize%udpClient.ChunkSize > 0 {
 		chunkCount++
 	}
 	if chunkCount > maxChunkCount {
 		return fmt.Errorf("Chunk count is %d, but max possible chunk count is %d", chunkCount, maxChunkCount)
 	}
-
-	messageId, idErr := createMessageId()
-	if nil != idErr {
-		return idErr
+	if messageId, err = createMessageId(); err != nil {
+		return
 	}
-
-	for chunkIndex := byte(0); chunkIndex < chunkCount; chunkIndex++ {
-		chunkStart := uint(chunkIndex) * udpClient.ChunkSize
-		chunkEnd := chunkStart + udpClient.ChunkSize
+	for chunkIndex = byte(0); chunkIndex < chunkCount; chunkIndex++ {
+		chunkStart = uint(chunkIndex) * udpClient.ChunkSize
+		chunkEnd = chunkStart + udpClient.ChunkSize
 		if chunkEnd >= messageSize {
 			chunkEnd = messageSize
 		}
-		messageChunk := messageData[chunkStart:chunkEnd]
-		sendErr := udpClient.sendChunk(messageId, chunkIndex, chunkCount, messageChunk)
-		if nil != sendErr {
-			return sendErr
+		messageChunk = messageData[chunkStart:chunkEnd]
+		err = udpClient.sendChunk(messageId, chunkIndex, chunkCount, messageChunk)
+		if err != nil {
+			return
 		}
 	}
-
-	return nil
+	return
 }
 
-func (udpClient *UdpClient) sendChunk(messageId MessageId, chunkIndex, chunkCount byte, messageChunk []byte) error {
+func (udpClient *UdpClient) sendChunk(messageId MessageId, chunkIndex, chunkCount byte, messageChunk []byte) (err error) {
+	var udpConn *net.UDPConn
+	var sequenceInfo, chunkData []byte
+	var start int
 
-	udpConn, connErr := net.DialUDP(UDP_NETWORK, nil, udpClient.ServerAddr)
-	if nil != connErr {
-		return connErr
+	if udpConn, err = net.DialUDP(UDP_NETWORK, nil, udpClient.ServerAddr); err != nil {
+		return
 	}
 	defer udpConn.Close()
 
-	sequenceInfo := []byte{chunkIndex, chunkCount}
-	chunkData := make([]byte, HEADER_SIZE+len(messageChunk))
+	sequenceInfo = []byte{chunkIndex, chunkCount}
+	chunkData = make([]byte, HEADER_SIZE+len(messageChunk))
 
-	start := 0
+	start = 0
 	start += copy(chunkData[start:], CHUNCK_MAGIC_DATA)
 	start += copy(chunkData[start:], messageId)
 	start += copy(chunkData[start:], sequenceInfo)
 	start += copy(chunkData[start:], messageChunk)
-
-	if _, writeErr := udpConn.Write(chunkData); nil == writeErr {
-		return writeErr
+	if _, err = udpConn.Write(chunkData); err != nil {
+		return
 	}
 
-	return nil
-}
-
-func createMessageId() (MessageId, error) {
-	messageId := make(MessageId, MESSAGE_ID_SIZE)
-	if _, randErr := rand.Read(messageId); nil == randErr {
-		return messageId, nil
-	} else {
-		return nil, randErr
-	}
+	return
 }

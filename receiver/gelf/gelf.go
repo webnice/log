@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
-	g "gopkg.in/webnice/log.v1/gelf"
 	f "gopkg.in/webnice/log.v2/formater"
+	g "gopkg.in/webnice/log.v2/gelf"
 	s "gopkg.in/webnice/log.v2/sender"
 	t "gopkg.in/webnice/log.v2/trace"
 )
@@ -34,8 +35,9 @@ type Interface interface {
 
 // impl is an implementation of package
 type impl struct {
-	Formater    f.Interface // Formater interface
-	TplText     string      // Шаблон форматирования текста
+	Formater    f.Interface   // Formater interface
+	TplText     string        // Шаблон форматирования текста
+	Client      *g.GelfClient // GELF client interface
 	Network     string
 	Host        string
 	Port        uint16
@@ -62,7 +64,15 @@ func New() Interface {
 	rcv.Network = _DefaultNetwork
 	rcv.ChunkSize = _DefaultChunkSize
 	rcv.Compression = _DefaultCompression
+	runtime.SetFinalizer(rcv, destructor)
 	return rcv
+}
+
+func destructor(obj *impl) {
+	if obj.Client == nil {
+		return
+	}
+	defer obj.Client.Close()
 }
 
 // SetAddress Назначение адреса syslog сервера
@@ -84,7 +94,7 @@ func (rcv *impl) SetCompression(compress string) Interface {
 	return rcv
 }
 
-func (rcv *impl) Client() (ret *g.GelfClient, err error) {
+func (rcv *impl) client() (ret *g.GelfClient, err error) {
 	var pc g.GelfProtocolClient
 	switch rcv.Network {
 	case "udp":
@@ -106,7 +116,10 @@ func (rcv *impl) Receiver(inp s.Message) {
 	var buf *bytes.Buffer
 	var client *g.GelfClient
 
-	if client, err = rcv.Client(); err != nil {
+	if rcv.Client == nil {
+		rcv.Client, err = rcv.client()
+	}
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error create graylog GELF client: %s", err.Error())
 		return
 	}

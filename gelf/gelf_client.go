@@ -8,10 +8,6 @@ import (
 	"fmt"
 )
 
-type MessageData []byte
-
-type CompressionType string
-
 const (
 	COMPRESSION_NONE CompressionType = "none"
 	COMPRESSION_GZIP CompressionType = "gzip"
@@ -24,8 +20,13 @@ var (
 
 var GZIP_MAGIC_PREFIX = []byte{0x1F, 0x8B}
 
+type MessageData []byte
+
+type CompressionType string
+
 type GelfProtocolClient interface {
 	SendMessageData(messageData MessageData) error
+	Close() error
 }
 
 type GelfClient struct {
@@ -42,39 +43,36 @@ func NewGelfClient(gelfProtocolClient GelfProtocolClient, compressionType Compre
 	}
 }
 
-func (gelfClient *GelfClient) SendMessage(message interface{}) error {
-	marshaledMessage, marshalErr := json.Marshal(message)
-	if nil != marshalErr {
-		return marshalErr
-	}
-
-	//debug.Dumper(message)
-
+func (gelfClient *GelfClient) SendMessage(message interface{}) (err error) {
+	var buf []byte
 	var messageData MessageData
-
+	if buf, err = json.Marshal(message); err != nil {
+		return
+	}
 	switch gelfClient.CompressionType {
 	case COMPRESSION_NONE:
-		messageData = MessageData(marshaledMessage)
+		messageData = MessageData(buf)
 	case COMPRESSION_GZIP:
-		var gzipErr error
-		if messageData, gzipErr = gelfClient.gzipMessageData(marshaledMessage); nil != gzipErr {
-			return gzipErr
+		messageData, err = gelfClient.gzipMessageData(buf)
+		if err != nil {
+			return
 		}
 	default:
 		return UNSUPPORTED_COMPRESSION_TYPE
 	}
-
 	return gelfClient.SendMessageData(messageData)
 }
 
-func (gelfClient *GelfClient) gzipMessageData(messageData []byte) (MessageData, error) {
-	buff := new(bytes.Buffer)
-	gzipWriter, _ := gzip.NewWriterLevel(buff, gelfClient.CompressionLevel)
-	if _, writerErr := gzipWriter.Write(messageData); writerErr != nil {
-		return nil, writerErr
-	} else if closeErr := gzipWriter.Close(); nil != closeErr {
-		return nil, closeErr
-	} else {
-		return MessageData(buff.Bytes()), nil
+func (gelfClient *GelfClient) gzipMessageData(messageData []byte) (ret MessageData, err error) {
+	var buff *bytes.Buffer
+	var gzipWriter *gzip.Writer
+	buff = bytes.NewBufferString(``)
+	gzipWriter, _ = gzip.NewWriterLevel(buff, gelfClient.CompressionLevel)
+	if _, err = gzipWriter.Write(messageData); err != nil {
+		return
+	} else if err = gzipWriter.Close(); err != nil {
+		return
 	}
+	ret = MessageData(buff.Bytes())
+	return
 }
