@@ -1,5 +1,6 @@
 package gelf
 
+//import "gopkg.in/webnice/debug.v1"
 import (
 	"bytes"
 	"compress/flate"
@@ -11,7 +12,6 @@ import (
 const (
 	COMPRESSION_NONE CompressionType = "none"
 	COMPRESSION_GZIP CompressionType = "gzip"
-	// COMPRESSION_ZLIB Compression = "zlib"
 )
 
 var (

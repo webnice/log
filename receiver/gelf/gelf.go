@@ -1,5 +1,6 @@
 package gelf
 
+//import "gopkg.in/webnice/debug.v1"
 import (
 	"bytes"
 	"fmt"
@@ -114,7 +115,6 @@ func (rcv *impl) Receiver(inp s.Message) {
 	var err error
 	var msb *msg
 	var buf *bytes.Buffer
-	var client *g.GelfClient
 
 	if rcv.Client == nil {
 		rcv.Client, err = rcv.client()
@@ -144,7 +144,7 @@ func (rcv *impl) Receiver(inp s.Message) {
 	}
 	msb.Message = buf.String()
 
-	if err = client.SendMessage(msb); err != nil {
+	if err = rcv.Client.SendMessage(msb); err != nil {
 		fmt.Fprintf(os.Stderr, "Error send message to graylog: %s", err.Error())
 		return
 	}
