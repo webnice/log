@@ -6,7 +6,7 @@ import (
 	s "gopkg.in/webnice/log.v2/sender"
 )
 
-// Interface of filesystem writer
+// FsWriter Interface of filesystem writer
 type FsWriter interface {
 	// SetFilename Set filename
 	SetFilename(string) FsWriter

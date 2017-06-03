@@ -91,7 +91,7 @@ func replaces(match string, t time.Time) (ret string, err error) {
 		st = time.Date(t.Year(), time.January, 1, 23, 0, 0, 0, time.UTC)
 		week = 0
 		for st.Before(t) {
-			week += 1
+			week++
 			st = st.Add(_Week)
 		}
 		ret = fmt.Sprintf("%02d", week)

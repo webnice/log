@@ -11,7 +11,7 @@ test:
 	echo "mode: set" > coverage.log
 	for pkg in `cat .testpackages`; do \
 		touch coverage-tmp.log; \
-		GOPATH=${GOPATH} go test -v -covermode=count -coverprofile=coverage-tmp.log -coverpkg=$$pkg; \
+		GOPATH=${GOPATH} go test -v -covermode=count -coverprofile=coverage-tmp.log $$pkg; \
 		tail -n +2 coverage-tmp.log | sort -r | awk '{if($$1 != last) {print $$0;last=$$1}}' >> coverage.log; \
 		rm -f coverage-tmp.log; true; \
 	done
@@ -26,8 +26,10 @@ lint:
 	gometalinter \
 	--vendor \
 	--deadline=15m \
-	--cyclo-over=15 \
+	--cyclo-over=20 \
 	--disable=aligncheck \
+	--disable=gotype \
+	--disable=structcheck \
 	--skip=src/vendor \
 	--linter="vet:go tool vet -printf {path}/*.go:PATH:LINE:MESSAGE" \
 	./...
