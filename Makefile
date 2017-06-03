@@ -22,11 +22,11 @@ lint:
 	gometalinter \
 	--vendor \
 	--deadline=15m \
-	--cyclo-over=10 \
+	--cyclo-over=15 \
 	--disable=aligncheck \
 	--skip=src/vendor \
 	--linter="vet:go tool vet -printf {path}/*.go:PATH:LINE:MESSAGE" \
-	counter/...
+	./...
 .PHONY: lint
 
 clean:
