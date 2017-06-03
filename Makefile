@@ -18,6 +18,10 @@ test:
 
 .PHONY: test
 
+cover: test
+	GOPATH=${GOPATH} go tool cover -html=coverage.log
+.PHONY: test
+
 lint:
 	gometalinter \
 	--vendor \
