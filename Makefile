@@ -15,7 +15,6 @@ test:
 		tail -n +2 coverage-tmp.log | sort -r | awk '{if($$1 != last) {print $$0;last=$$1}}' >> coverage.log; \
 		rm -f coverage-tmp.log; true; \
 	done
-	# go tool cover -html=coverage.log
 
 .PHONY: test
 
