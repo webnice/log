@@ -1,0 +1,6 @@
+package stdout
+
+import (
+
+)
+
