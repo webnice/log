@@ -5,7 +5,8 @@ install:
   - go get gopkg.in/webnice/debug.v1
 
 script:
-  - make test && $HOME/gopath/bin/goveralls -coverprofile=coverage.log -service=travis-ci -repotoken $COVERALLS_TOKEN
+  - make test
+  - GOPATH=`pwd` $HOME/gopath/bin/goveralls -coverprofile=coverage.log -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 go:
   - 1.4
