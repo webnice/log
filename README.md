@@ -1,17 +1,18 @@
 # log
 Logging
 
-[![GoDoc](https://godoc.org/github.com/webnice/log?status.png)](http://godoc.org/github.com/webnice/log)
+[![GoDoc](https://godoc.org/gopkg.in/webnice/log.v2?status.png)](http://godoc.org/gopkg.in/webnice/log.v2)
 
-#### Disclaimer
-This library is just a prototype at the moment. **It's not ready for you to use.**
-... work in progress.
+#### Description
+Golang library for logging of messages an application with support for all levels of logging.
+With structured data and pluggable modules.
+
 
 #### Dependencies
 
 	NONE
 
-#### Install
+#### Installation
 ```bash
 go get gopkg.in/webnice/log.v2
 ```
