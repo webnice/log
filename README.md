@@ -2,8 +2,9 @@
 Logging
 
 [![GoDoc](https://godoc.org/gopkg.in/webnice/log.v2?status.png)](http://godoc.org/gopkg.in/webnice/log.v2)
-[![Build Status](https://travis-ci.org/webnice/log.svg?branch=v2)](https://travis-ci.org/webnice/log)
 [![Coverage Status](https://coveralls.io/repos/github/webnice/log/badge.svg?branch=v2)](https://coveralls.io/github/webnice/log?branch=v2)
+[![Build Status](https://travis-ci.org/webnice/log.svg?branch=v2)](https://travis-ci.org/webnice/log)
+[![CircleCI](https://circleci.com/gh/webnice/log/tree/v2.svg?style=svg)](https://circleci.com/gh/webnice/log/tree/v2)
 
 #### Description
 Golang library for logging of messages an application with support for all levels of logging.
