@@ -6,19 +6,26 @@ PACKETS=$(shell cat .testpackages)
 
 default: lint test
 
+## Generate code by go generate or other utilities
 generate:
-	#GOPATH=${GOPATH} go generate
-	#GOPATH=${GOPATH} easyjson -output_filename configuration.go src/gopkg.in/webnice/web.v1/types.go
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2 2>/dev/null; true
+	# GOPATH=${GOPATH} go generate
+	# GOPATH=${GOPATH} easyjson -output_filename gelf/gelf_client_gen.go src/gopkg.in/webnice/log.v2/gelf/gelf_client.go
 .PHONY: generate
 
+## Dependence managers
+dep:
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2 2>/dev/null; true
+	GOPATH=${GOPATH} glide install
+.PHONY: dep
+
 test:
-	clear
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2; true
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2 2>/dev/null; true
 	echo "mode: set" > coverage.log
 	for PACKET in $(PACKETS); do \
 		touch coverage-tmp.log; \
 		GOPATH=${GOPATH} go test -v -covermode=count -coverprofile=coverage-tmp.log $$PACKET; \
-		if [ ! $$? == 0 ]; then exit $$?; fi; \
+		if [ "$$?" -ne "0" ]; then exit $$?; fi; \
 		tail -n +2 coverage-tmp.log | sort -r | awk '{if($$1 != last) {print $$0;last=$$1}}' >> coverage.log; \
 		rm -f coverage-tmp.log; true; \
 	done
@@ -27,6 +34,11 @@ test:
 cover: test
 	GOPATH=${GOPATH} go tool cover -html=coverage.log
 .PHONY: cover
+
+bench:
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2 2>/dev/null; true
+	GOPATH=${GOPATH} go test -race -bench=. -benchmem ./...
+.PHONY: bench
 
 lint:
 	gometalinter \
@@ -46,4 +58,5 @@ clean:
 	rm -rf ${DIR}/bin/*; true
 	rm -rf ${DIR}/pkg/*; true
 	rm -rf ${DIR}/*.log; true
+	rm -rf ${DIR}/*.lock; true
 .PHONY: clean
