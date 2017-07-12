@@ -6,21 +6,22 @@ PACKETS=$(shell cat .testpackages)
 
 default: lint test
 
-## Generate code by go generate or other utilities
-generate:
+link:
 	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2 2>/dev/null; true
+.PHONY: link
+
+## Generate code by go generate or other utilities
+generate: link
 	# GOPATH=${GOPATH} go generate
 	# GOPATH=${GOPATH} easyjson -output_filename gelf/gelf_client_gen.go src/gopkg.in/webnice/log.v2/gelf/gelf_client.go
 .PHONY: generate
 
 ## Dependence managers
-dep:
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2 2>/dev/null; true
+dep: link
 	GOPATH=${GOPATH} glide install
 .PHONY: dep
 
-test:
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2 2>/dev/null; true
+test: link
 	echo "mode: set" > coverage.log
 	for PACKET in $(PACKETS); do \
 		touch coverage-tmp.log; \
@@ -35,12 +36,11 @@ cover: test
 	GOPATH=${GOPATH} go tool cover -html=coverage.log
 .PHONY: cover
 
-bench:
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2 2>/dev/null; true
+bench: link
 	GOPATH=${GOPATH} go test -race -bench=. -benchmem ./...
 .PHONY: bench
 
-lint:
+lint: link
 	gometalinter \
 	--vendor \
 	--deadline=15m \
