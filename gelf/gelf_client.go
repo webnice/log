@@ -12,6 +12,7 @@ import (
 const (
 	COMPRESSION_NONE CompressionType = "none"
 	COMPRESSION_GZIP CompressionType = "gzip"
+	// COMPRESSION_ZLIB CompressionType = "zlib" // Не реализовано
 )
 
 var (

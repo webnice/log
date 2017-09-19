@@ -47,13 +47,15 @@ type impl struct {
 }
 
 type msg struct {
-	Version     string                 `json:"version"`
-	Timestamp   float64                `json:"timestamp"`
-	Host        string                 `json:"host"`
-	LevelString string                 `json:"levelString"`
-	Facility    string                 `json:"facility,omitempty"`
-	Message     string                 `json:"message,omitempty"`
-	Keys        map[string]interface{} `json:"keys"`
+	Version      string                 `json:"version"`                // [required] GELF spec version
+	Host         string                 `json:"host"`                   // [required] he name of the host, source or application that sent this message
+	ShortMessage string                 `json:"short_message"`          // [required] A short descriptive message
+	FullMessage  string                 `json:"full_message,omitempty"` // A long message that can i.e. contain a backtrace
+	Timestamp    float64                `json:"timestamp"`              // [required] Seconds since UNIX epoch with optional decimal places for milliseconds; SHOULD be set by client library
+	Level        int8                   `json:"level"`                  // [required] The level equal to the standard syslog levels
+	LevelString  string                 `json:"levelString"`            // Уровень лога в строковом эквиваленте
+	Facility     string                 `json:"facility,omitempty"`     // [deprecated] Объект или пакет отправляющий сообщение
+	Keys         map[string]interface{} `json:"keys,omitempty"`         // Дополнительные ключи сообщения и их значения
 	t.Info
 }
 
@@ -114,7 +116,9 @@ func (rcv *impl) client() (ret *g.GelfClient, err error) {
 func (rcv *impl) Receiver(inp s.Message) {
 	var err error
 	var msb *msg
-	var buf *bytes.Buffer
+	var buf, short *bytes.Buffer
+	var i int
+	var rn rune
 
 	if rcv.Client == nil {
 		rcv.Client, err = rcv.client()
@@ -123,29 +127,43 @@ func (rcv *impl) Receiver(inp s.Message) {
 		fmt.Fprintf(os.Stderr, "Error create graylog GELF client: %s", err.Error())
 		return
 	}
-
+	// Create object to send
 	msb = new(msg)
 	msb.Info = *inp.Trace
 	msb.Version = _GelfVersion
-	msb.Timestamp = float64(msb.TodayAndNow.Unix()) + float64(time.Second)/float64(msb.TodayAndNow.Nanosecond())
 	msb.Host = inp.Trace.HostName
+	msb.Timestamp = float64(msb.TodayAndNow.Unix()) + float64(time.Second)/float64(msb.TodayAndNow.Nanosecond())
+	msb.Level = inp.Level.Int8()
 	msb.LevelString = inp.Level.String()
 	msb.Facility = inp.Trace.Package
+	// Copy keys
 	msb.Keys = make(map[string]interface{})
 	for key := range inp.Keys {
 		msb.Keys[key] = inp.Keys[key]
 	}
-
+	// Create full message by template
 	buf, err = rcv.Formater.Text(inp, rcv.TplText)
 	if err != nil {
 		buf = bytes.NewBufferString(fmt.Sprintf("Error formatting log message: %s", err.Error()))
 		fmt.Fprintln(os.Stderr, buf.String())
 		return
 	}
-	msb.Message = buf.String()
-
+	msb.FullMessage = buf.String()
+	// Create short message
+	short = bytes.NewBuffer(bytes.Replace(bytes.Replace(buf.Bytes(), []byte("\r"), []byte{}, -1), []byte("\n"), []byte(" "), -1))
+	for i = 0; i < 76 && short.Len() > 0; i++ {
+		if rn, _, err = short.ReadRune(); err != nil {
+			break
+		}
+		msb.ShortMessage += string(rn)
+	}
+	if len(msb.ShortMessage) < len(msb.FullMessage) {
+		msb.ShortMessage += "..."
+	}
+	// Send object
 	if err = rcv.Client.SendMessage(msb); err != nil {
 		fmt.Fprintf(os.Stderr, "Error send message to graylog: %s", err.Error())
 		return
 	}
+
 }
