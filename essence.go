@@ -1,14 +1,13 @@
-package log
+package log // import "github.com/webnice/log/v2"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	standardLog "log"
 	"os"
 
-	m "gopkg.in/webnice/log.v2/message"
-	r "gopkg.in/webnice/log.v2/receiver"
-	s "gopkg.in/webnice/log.v2/sender"
-	w "gopkg.in/webnice/log.v2/writer"
+	m "github.com/webnice/log/v2/message"
+	r "github.com/webnice/log/v2/receiver"
+	s "github.com/webnice/log/v2/sender"
+	w "github.com/webnice/log/v2/writer"
 )
 
 var ess *impl
@@ -35,6 +34,7 @@ func (ess *impl) StandardLogSet() Essence {
 	standardLog.SetPrefix(``)
 	standardLog.SetFlags(0)
 	standardLog.SetOutput(ess.writer)
+
 	return ess
 }
 
@@ -43,5 +43,6 @@ func (ess *impl) StandardLogUnset() Essence {
 	standardLog.SetPrefix(``)
 	standardLog.SetFlags(standardLog.LstdFlags)
 	standardLog.SetOutput(os.Stderr)
+
 	return ess
 }

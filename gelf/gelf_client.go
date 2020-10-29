@@ -1,6 +1,5 @@
-package gelf
+package gelf // import "github.com/webnice/log/v2/gelf"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	"bytes"
 	"compress/flate"
@@ -16,10 +15,9 @@ const (
 )
 
 var (
-	UNSUPPORTED_COMPRESSION_TYPE = fmt.Errorf("Unsupported compression type")
+	UNSUPPORTED_COMPRESSION_TYPE = fmt.Errorf("unsupported compression type")
+	GZIP_MAGIC_PREFIX            = []byte{0x1F, 0x8B}
 )
-
-var GZIP_MAGIC_PREFIX = []byte{0x1F, 0x8B}
 
 type MessageData []byte
 
@@ -45,8 +43,11 @@ func NewGelfClient(gelfProtocolClient GelfProtocolClient, compressionType Compre
 }
 
 func (gelfClient *GelfClient) SendMessage(message interface{}) (err error) {
-	var buf []byte
-	var messageData MessageData
+	var (
+		buf         []byte
+		messageData MessageData
+	)
+
 	if buf, err = json.Marshal(message); err != nil {
 		return
 	}
@@ -61,12 +62,16 @@ func (gelfClient *GelfClient) SendMessage(message interface{}) (err error) {
 	default:
 		return UNSUPPORTED_COMPRESSION_TYPE
 	}
+
 	return gelfClient.SendMessageData(messageData)
 }
 
 func (gelfClient *GelfClient) gzipMessageData(messageData []byte) (ret MessageData, err error) {
-	var buff *bytes.Buffer
-	var gzipWriter *gzip.Writer
+	var (
+		buff       *bytes.Buffer
+		gzipWriter *gzip.Writer
+	)
+
 	buff = bytes.NewBufferString(``)
 	gzipWriter, _ = gzip.NewWriterLevel(buff, gelfClient.CompressionLevel)
 	if _, err = gzipWriter.Write(messageData); err != nil {
@@ -75,5 +80,6 @@ func (gelfClient *GelfClient) gzipMessageData(messageData []byte) (ret MessageDa
 		return
 	}
 	ret = MessageData(buff.Bytes())
+
 	return
 }

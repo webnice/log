@@ -1,17 +1,18 @@
-package sender
+package sender // import "github.com/webnice/log/v2/sender"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	"container/list"
 	"os"
 	"sync"
 
-	l "gopkg.in/webnice/log.v2/level"
-	t "gopkg.in/webnice/log.v2/trace"
+	l "github.com/webnice/log/v2/level"
+	t "github.com/webnice/log/v2/trace"
 )
 
-var singleton *impl
-var fatalFn func(code int) = os.Exit // Function fatal exit with error code
+var (
+	singleton *impl
+	fatalFn   func(code int) = os.Exit // Function fatal exit with error code
+)
 
 // Interface is an interface of package
 type Interface interface {
@@ -48,12 +49,16 @@ type impl struct {
 type Message struct {
 	// Level Уровень сообщения
 	Level l.Level `json:"level"`
+
 	// Trace stack information
 	Trace *t.Info `json:"trace"`
+
 	// Шаблон сообщения
 	Pattern string `json:"pattern"`
+
 	// Аргументы шаблона сообщения
 	Args []interface{} `json:"args"`
+
 	// Ключи сообщения
 	Keys map[string]interface{} `json:"keys"`
 }

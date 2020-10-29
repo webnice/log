@@ -1,9 +1,9 @@
-package formater
+package formater // import "github.com/webnice/log/v2/formater"
 
 import (
 	"fmt"
 
-	l "gopkg.in/webnice/log.v2/level"
+	l "github.com/webnice/log/v2/level"
 )
 
 const (
@@ -57,7 +57,9 @@ var (
 type (
 	ansiColor int16
 	ansiStyle struct {
-		Background ansiColor // Background color
-		Foreground ansiColor // Foreground color
+		// Background color
+		Background ansiColor
+		// Foreground color
+		Foreground ansiColor
 	}
 )

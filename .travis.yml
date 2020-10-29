@@ -2,7 +2,7 @@ language: go
 
 install:
   - go get github.com/mattn/goveralls
-  - go get gopkg.in/webnice/debug.v1
+  - go get github.com/webnice/debug/v1
 
 script:
   - make test
@@ -16,4 +16,9 @@ go:
   - 1.8
   - 1.9
   - "1.10"
+  - "1.11"
+  - "1.12"
+  - "1.13"
+  - "1.14"
+  - "1.15"
   - tip

@@ -1,6 +1,5 @@
-package message
+package message // import "github.com/webnice/log/v2/message"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	"fmt"
 	"os"
@@ -8,11 +7,13 @@ import (
 	"syscall"
 	"time"
 
-	l "gopkg.in/webnice/log.v2/level"
-	s "gopkg.in/webnice/log.v2/sender"
-	t "gopkg.in/webnice/log.v2/trace"
-	u "gopkg.in/webnice/log.v2/uuid"
+	l "github.com/webnice/log/v2/level"
+	s "github.com/webnice/log/v2/sender"
+	t "github.com/webnice/log/v2/trace"
+	u "github.com/webnice/log/v2/uuid"
 )
+
+//import "github.com/webnice/debug/v1"
 
 // New Create new message object
 func New() Interface {
@@ -120,12 +121,18 @@ func (msg *impl) Debugf(pattern string, args ...interface{}) {
 
 // Keys add to message
 func (msg *impl) Keys(keys ...map[string]interface{}) Interface {
-	for i := range keys {
-		for k := range keys[i] {
-			msg.keys[k] = keys[i][k]
+	var (
+		n int
+		k string
+	)
+
+	for n = range keys {
+		for k = range keys[n] {
+			msg.keys[k] = keys[n][k]
 		}
 	}
 	msg.CallStackCorrect(-1)
+
 	return msg
 }
 
@@ -137,9 +144,11 @@ func (msg *impl) CallStackCorrect(delta int) Interface {
 
 // Message send with level and format
 func (msg *impl) Message(level l.Level, pattern string, args ...interface{}) {
-	var rec s.Message
-	var err error
-	var tmp []string
+	var (
+		rec s.Message
+		err error
+		tmp []string
+	)
 
 	rec.Level = level
 	rec.Trace = t.New().Trace(msg.callStack).Info()

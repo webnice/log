@@ -1,26 +1,28 @@
-package formater
+package formater // import "github.com/webnice/log/v2/formater"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	"errors"
 	"reflect"
 	"strings"
 
-	t "gopkg.in/webnice/log.v2/trace"
+	t "github.com/webnice/log/v2/trace"
 )
 
 func init() {
-	makeDictionary(new(t.Info))
+	_ = makeDictionary(new(t.Info))
 }
 
 // Создание на основе структуры констант используемых в качестве формата
 func makeDictionary(v interface{}) (err error) {
-	var rv reflect.Value
-	var rt reflect.Type
-	var rs reflect.StructField
-	var i, n int
-	var s string
-	var names, attr []string
+	var (
+		rv          reflect.Value
+		rt          reflect.Type
+		rs          reflect.StructField
+		i, n        int
+		s           string
+		names, attr []string
+	)
+
 	templateNames = make(map[string]recDic)
 	rv = reflect.Indirect(reflect.ValueOf(v))
 	rt = rv.Type()
@@ -51,5 +53,6 @@ func makeDictionary(v interface{}) (err error) {
 		}
 	}
 	v = nil
+
 	return
 }

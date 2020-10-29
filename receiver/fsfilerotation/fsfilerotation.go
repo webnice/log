@@ -1,41 +1,45 @@
-package fsfilerotation
+package fsfilerotation // import "github.com/webnice/log/v2/receiver/fsfilerotation"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
-	"gopkg.in/webnice/log.v2/middleware"
-	"gopkg.in/webnice/log.v2/middleware/fswformattext"
+	"github.com/webnice/log/v2/middleware"
+	"github.com/webnice/log/v2/middleware/fswformattext"
 
-	s "gopkg.in/webnice/log.v2/sender"
+	s "github.com/webnice/log/v2/sender"
 )
 
 // New Create new
 func New() Interface {
-	var rcv = new(impl)
-	rcv.TplText = _DefaultTextFORMAT
-	rcv.Timezone = time.Local
-	rcv.RotationTime = time.Hour * 24
+	var rcv = &impl{
+		TplText:      _DefaultTextFORMAT,
+		Timezone:     time.Local,
+		RotationTime: time.Hour * 24,
+		FsWriter:     fswformattext.New(),
+	}
+
 	rcv.SetUnlinkFunc(os.Remove)
 	rcv.SetFilenamePattern(rcv.defaultFilenamePattern())
-	rcv.FsWriter = fswformattext.New()
+
 	return rcv
 }
 
 // Имя файла журнала по умолчанию
 func (rcv *impl) defaultFilenamePattern() (ret string) {
 	var tmp []string
-	tmp = strings.Split(os.Args[0], string(os.PathSeparator))
-	if len(tmp) > 0 {
+
+	if tmp = strings.Split(os.Args[0], string(os.PathSeparator)); len(tmp) > 0 {
 		ret = tmp[len(tmp)-1] + `-%Y%m%d.log`
 	} else {
 		ret = os.Args[0] + `-%Y%m%d.log`
 	}
+
 	return
 }
 
@@ -44,12 +48,18 @@ func (rcv *impl) SetPath(pth string) Interface { rcv.Path = pth; return rcv }
 
 // SetFilenamePattern Установка шаблона имени файла журнала
 func (rcv *impl) SetFilenamePattern(fnm string) Interface {
-	var tmp = fnm
-	for _, rex := range patternConversion {
+	var (
+		tmp string
+		rex *regexp.Regexp
+	)
+
+	tmp = fnm
+	for _, rex = range patternConversion {
 		tmp = rex.ReplaceAllString(tmp, "*")
 	}
 	rcv.Filename = fnm
 	rcv.FilenamePattern = tmp
+
 	return rcv
 }
 
@@ -85,6 +95,7 @@ func (rcv *impl) GetFilename() string { rcv.Lock(); defer rcv.Unlock(); return r
 // Получение абсолютного пути к файлу
 func (rcv *impl) absPath(pth string) (ret string) {
 	var err error
+
 	if len(pth) > 0 {
 		switch pth[0] {
 		case '/':
@@ -97,6 +108,7 @@ func (rcv *impl) absPath(pth string) (ret string) {
 			ret = path.Join(ret, pth)
 		}
 	}
+
 	return
 }
 
@@ -112,25 +124,28 @@ func (rcv *impl) filename() (ret string, err error) {
 		return
 	}
 	ret = rcv.absPath(path.Join(rcv.Path, ret))
+
 	return
 }
 
 // Rotation Ротация файлов
 func (rcv *impl) Rotation(fnm string) (err error) {
-	var lockfn, tmpLinkName, pth string
-	var fh *os.File
-	var fi os.FileInfo
-	var guard fnGuard
-	var matches, toUnlink []string
-	var cutoff time.Time
+	var (
+		lockfn, tmpLinkName, pth string
+		fh                       *os.File
+		fi                       os.FileInfo
+		guard                    fnGuard
+		matches, toUnlink        []string
+		cutoff                   time.Time
+	)
 
 	lockfn = fmt.Sprintf("%s_lock", fnm)
 	if fh, err = os.OpenFile(lockfn, os.O_CREATE|os.O_EXCL, 0644); err != nil {
 		return
 	}
 	guard.fn = func() {
-		fh.Close()
-		os.Remove(lockfn)
+		_ = fh.Close()
+		_ = os.Remove(lockfn)
 	}
 	defer guard.Run()
 	if rcv.SymbolicLinkName != "" {
@@ -172,15 +187,19 @@ func (rcv *impl) Rotation(fnm string) (err error) {
 			_ = rcv.UnlinkFn(pth)
 		}
 	}()
+
 	return
 }
 
 // Ticker Внешний таймер для ротации лог файлов.
 // Смена имени файла журнала
 func (rcv *impl) Ticker() {
-	var err error
-	var fnm string
-	var isNew bool
+	var (
+		err   error
+		fnm   string
+		isNew bool
+	)
+
 	rcv.Lock()
 	defer rcv.Unlock()
 	if fnm, err = rcv.filename(); err != nil {
@@ -199,7 +218,7 @@ func (rcv *impl) Ticker() {
 	}
 	if isNew {
 		if err = rcv.Rotation(fnm); err != nil {
-			fmt.Fprintf(os.Stderr, "failed to rotate: %s\n", err.Error())
+			_, _ = fmt.Fprintf(os.Stderr, "failed to rotate: %s\n", err.Error())
 		}
 	}
 	rcv.FilenameCurrent = fnm
@@ -208,12 +227,13 @@ func (rcv *impl) Ticker() {
 // Receiver Message receiver
 func (rcv *impl) Receiver(msg s.Message) {
 	var err error
+
 	rcv.Ticker()
 	if _, err = rcv.FsWriter.
 		SetFilename(rcv.FilenameCurrent).
 		SetFormat(rcv.TplText).
 		WriteMessage(msg); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
+		_, _ = fmt.Fprintln(os.Stderr, err.Error())
 	}
 }
 
@@ -224,7 +244,8 @@ func (rcv *impl) Write(buf []byte) (n int, err error) {
 		FsWriter.
 		SetFilename(rcv.FilenameCurrent).
 		Write(buf); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
+		_, _ = fmt.Fprintln(os.Stderr, err.Error())
 	}
+
 	return
 }

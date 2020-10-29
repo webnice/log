@@ -1,12 +1,13 @@
-package lfilter
+package lfilter // import "github.com/webnice/log/v2/middleware/lfilter"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	"sync"
 
-	l "gopkg.in/webnice/log.v2/level"
-	s "gopkg.in/webnice/log.v2/sender"
+	l "github.com/webnice/log/v2/level"
+	s "github.com/webnice/log/v2/sender"
 )
+
+//import "github.com/webnice/debug/v1"
 
 // Interface is an interface of package
 type Interface interface {

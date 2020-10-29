@@ -1,10 +1,9 @@
-package sender
+package sender // import "github.com/webnice/log/v2/sender"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	"container/list"
 
-	l "gopkg.in/webnice/log.v2/level"
+	l "github.com/webnice/log/v2/level"
 )
 
 func init() {
@@ -14,10 +13,11 @@ func init() {
 
 // newSender Create new message object
 func newSender() *impl {
-	var snd = new(impl)
-	snd.receivers = list.New()
-	snd.input = make(chan Message, 100000)
-	snd.cancel = make(chan interface{})
+	var snd = &impl{
+		input:     make(chan Message, 100000),
+		cancel:    make(chan interface{}),
+		receivers: list.New(),
+	}
 	return snd
 }
 
@@ -53,9 +53,12 @@ func (snd *impl) RemoveAllSender() { snd.receivers.Init() }
 
 // Receiver Горутина получающая и обрабатывающая сообщения
 func (snd *impl) Receiver() {
-	var msg Message
-	var rec *list.Element
-	var exit bool
+	var (
+		msg  Message
+		rec  *list.Element
+		exit bool
+	)
+
 	for {
 		if len(snd.input) == 0 && exit {
 			return

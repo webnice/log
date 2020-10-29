@@ -1,4 +1,4 @@
-package uuid
+package uuid // import "github.com/webnice/log/v2/uuid"
 
 import (
 	"bytes"
@@ -44,8 +44,8 @@ func TestInit(t *testing.T) {
 				t.Errorf("Error init() unexpected panic")
 			}
 		}
-		testing_mode_one = false
-		testing_mode_two = false
+		testingModeOne = false
+		testingModeTwo = false
 	}()
 
 	if len(hardwareAddr) != 6 {
@@ -56,7 +56,7 @@ func TestInit(t *testing.T) {
 	}
 
 	// Test hardwareAddr = nil
-	testing_mode_one = true
+	testingModeOne = true
 	initialize()
 	if len(hardwareAddr) != 6 {
 		t.Errorf("Error init() hardwareAddr is wrong")
@@ -64,11 +64,11 @@ func TestInit(t *testing.T) {
 	if clockSeq == 0 {
 		t.Errorf("Error init() clockSeq is wrong")
 	}
-	testing_mode_one = false
+	testingModeOne = false
 
 	// Test panic - random generator error
-	testing_mode_one = true
-	testing_mode_two = true
+	testingModeOne = true
+	testingModeTwo = true
 	expectedPanic = true
 	initialize()
 }
@@ -149,12 +149,12 @@ func TestRandomUUID(t *testing.T) {
 		}
 	}
 
-	testing_mode_one = true
+	testingModeOne = true
 	_, err := RandomUUID()
 	if err == nil {
 		t.Errorf("Error in RandomUUID()")
 	}
-	testing_mode_one = false
+	testingModeOne = false
 }
 
 func TestRandomUUIDInvalidAPICalls(t *testing.T) {
@@ -233,12 +233,12 @@ func TestTimeUUID(t *testing.T) {
 func TestUnmarshalJSON(t *testing.T) {
 	var withHyphens, withoutHypens, tooLong UUID
 
-	withHyphens.UnmarshalJSON([]byte(`"486f3a88-775b-11e3-ae07-d231feb1dc81"`))
+	_ = withHyphens.UnmarshalJSON([]byte(`"486f3a88-775b-11e3-ae07-d231feb1dc81"`))
 	if withHyphens.Time().Truncate(time.Second) != time.Date(2014, 1, 7, 5, 19, 29, 0, time.UTC) {
 		t.Errorf("Expected date of 1/7/2014 at 5:19:29, got %v", withHyphens.Time())
 	}
 
-	withoutHypens.UnmarshalJSON([]byte(`"486f3a88775b11e3ae07d231feb1dc81"`))
+	_ = withoutHypens.UnmarshalJSON([]byte(`"486f3a88775b11e3ae07d231feb1dc81"`))
 	if withoutHypens.Time().Truncate(time.Second) != time.Date(2014, 1, 7, 5, 19, 29, 0, time.UTC) {
 		t.Errorf("Expected date of 1/7/2014 at 5:19:29, got %v", withoutHypens.Time())
 	}
@@ -254,7 +254,7 @@ func TestMarshalJSON(t *testing.T) {
 	const us string = `"486f3a88-775b-11e3-ae07-d231feb1dc81"`
 	var uuid UUID
 
-	uuid.UnmarshalJSON([]byte(us))
+	_ = uuid.UnmarshalJSON([]byte(us))
 	bt, err := uuid.MarshalJSON()
 	if err != nil {
 		t.Errorf("Error in MarshalJSON(): %v", err)

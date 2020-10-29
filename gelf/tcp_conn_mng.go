@@ -1,4 +1,4 @@
-package gelf
+package gelf // import "github.com/webnice/log/v2/gelf"
 
 import (
 	"net"
@@ -38,7 +38,7 @@ func (tcpConnMng *TcpConnMng) reconnect() (err error) {
 	tcpConnMng.Lock()
 	defer tcpConnMng.Unlock()
 	if tcpConnMng.tcpConnection != nil {
-		tcpConnMng.tcpConnection.Close()
+		_ = tcpConnMng.tcpConnection.Close()
 		tcpConnMng.tcpConnection = nil
 	}
 	tcpConnection, err = net.DialTCP(tcpConnMng.net, tcpConnMng.laddr, tcpConnMng.raddr)

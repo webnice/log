@@ -1,13 +1,10 @@
-package gelf_test
+package gelf // import "github.com/webnice/log/v2/gelf"
 
 import (
-	//"bytes"
 	"net"
 	"strconv"
 	"testing"
 	"time"
-
-	gelf "."
 )
 
 const (
@@ -17,7 +14,7 @@ const (
 
 func TestNewTcpClient(t *testing.T) {
 	listenTcpMessage(tcpHost, tcpPort, 10*time.Millisecond, func(messageDataChan <-chan []byte, errorChan <-chan error) {
-		validTcpClient, validTcpClientErr := gelf.NewTcpClient(tcpHost, tcpPort)
+		validTcpClient, validTcpClientErr := NewTcpClient(tcpHost, tcpPort)
 		if nil == validTcpClient {
 			t.Error("Valid TcpClient is not created")
 		}
@@ -25,7 +22,7 @@ func TestNewTcpClient(t *testing.T) {
 			t.Errorf("Valid TcpClient has error: %s", validTcpClientErr)
 		}
 
-		invalidTcpClient, invalidTcpClientErr := gelf.NewTcpClient("300.300.300.300", tcpPort)
+		invalidTcpClient, invalidTcpClientErr := NewTcpClient("300.300.300.300", tcpPort)
 		if nil != invalidTcpClient {
 			t.Error("Invalid TcpClient is created")
 		}
@@ -68,7 +65,7 @@ func acceptTcpMessage(tcpListener *net.TCPListener, deadlineTime time.Time, mess
 	if nil != acceptErr {
 		errorChan <- acceptErr
 	} else {
-		defer tcpConn.Close()
+		defer func() { _ = tcpConn.Close() }()
 	}
 
 	if setDeadlineErr := tcpConn.SetDeadline(deadlineTime); nil != setDeadlineErr {
@@ -86,29 +83,24 @@ func acceptTcpMessage(tcpListener *net.TCPListener, deadlineTime time.Time, mess
 
 func listenTcpMessage(host string, port uint16, timeout time.Duration, callback func(<-chan []byte, <-chan error)) {
 	hostWithPort := net.JoinHostPort(host, strconv.FormatUint(uint64(port), 10))
-	tcpAdd, resolveErr := net.ResolveTCPAddr(gelf.TCP_NETWORK, hostWithPort)
+	tcpAdd, resolveErr := net.ResolveTCPAddr(TCP_NETWORK, hostWithPort)
 	if nil != resolveErr {
 		panic(resolveErr)
 	}
-
-	tcpListener, listenErr := net.ListenTCP(gelf.TCP_NETWORK, tcpAdd)
+	tcpListener, listenErr := net.ListenTCP(TCP_NETWORK, tcpAdd)
 	if nil != listenErr {
 		panic(listenErr)
 	} else {
-		defer tcpListener.Close()
+		defer func() { _ = tcpListener.Close() }()
 	}
-
 	deadlineTime := time.Now().Add(timeout)
-
 	if setDeadlineErr := tcpListener.SetDeadline(deadlineTime); nil != setDeadlineErr {
 		panic(setDeadlineErr)
 	}
-
 	messageDataChan := make(chan []byte)
 	errorChan := make(chan error)
 	defer close(messageDataChan)
 	defer close(errorChan)
-
 	go acceptTcpMessage(tcpListener, deadlineTime, messageDataChan, errorChan)
 	callback(messageDataChan, errorChan)
 }

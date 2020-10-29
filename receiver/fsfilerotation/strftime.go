@@ -1,4 +1,4 @@
-package fsfilerotation
+package fsfilerotation // import "github.com/webnice/log/v2/receiver/fsfilerotation"
 
 /*
 Example:
@@ -28,7 +28,6 @@ Directives:
 	%Z - Time zone name (no characters if no time zone exists)
 */
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	"fmt"
 	"regexp"
@@ -36,7 +35,7 @@ import (
 )
 
 const (
-	_Week = time.Hour * 24 * 7
+	timeWeek = time.Hour * 24 * 7
 )
 
 var (
@@ -65,10 +64,12 @@ var (
 
 // replaces % directives with right time, will panic on unknown directive
 func replaces(match string, t time.Time) (ret string, err error) {
-	var format string
-	var ok bool
-	var st time.Time
-	var day, week int
+	var (
+		format    string
+		ok        bool
+		st        time.Time
+		day, week int
+	)
 
 	if match == "%%" {
 		ret = "%"
@@ -92,12 +93,13 @@ func replaces(match string, t time.Time) (ret string, err error) {
 		week = 0
 		for st.Before(t) {
 			week++
-			st = st.Add(_Week)
+			st = st.Add(timeWeek)
 		}
 		ret = fmt.Sprintf("%02d", week)
 		return
 	}
 	err = fmt.Errorf("Unknown directive: %s", match)
+
 	return
 }
 
@@ -115,5 +117,6 @@ func Format(format string, t time.Time) (ret string, err error) {
 		}
 		return
 	})
+
 	return
 }

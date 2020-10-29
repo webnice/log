@@ -1,6 +1,5 @@
-package gelf
+package gelf // import "github.com/webnice/log/v2/receiver/gelf"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
 	"bytes"
 	"fmt"
@@ -9,18 +8,23 @@ import (
 	"strings"
 	"time"
 
-	f "gopkg.in/webnice/log.v2/formater"
-	g "gopkg.in/webnice/log.v2/gelf"
-	s "gopkg.in/webnice/log.v2/sender"
-	t "gopkg.in/webnice/log.v2/trace"
+	f "github.com/webnice/log/v2/formater"
+	g "github.com/webnice/log/v2/gelf"
+	s "github.com/webnice/log/v2/sender"
+	t "github.com/webnice/log/v2/trace"
 )
 
-// const _DefaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
-const _DefaultTextFORMAT = `%{message}`
-const _GelfVersion = "1.2"
-const _DefaultNetwork = `udp`
-const _DefaultCompression = g.COMPRESSION_NONE
-const _DefaultChunkSize = uint(1400)
+const (
+	// defaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
+	defaultTextFORMAT = `%{message}`
+
+	keyTCP             = `tcp`
+	keyUDP             = `udp`
+	gelfVersion        = "1.2"
+	defaultNetwork     = keyUDP
+	defaultCompression = g.COMPRESSION_NONE
+	defaultChunkSize   = uint(1400)
+)
 
 // Interface is an interface of package
 type Interface interface {
@@ -61,13 +65,16 @@ type msg struct {
 
 // New Create new
 func New() Interface {
-	var rcv = new(impl)
-	rcv.Formater = f.New()
-	rcv.TplText = _DefaultTextFORMAT
-	rcv.Network = _DefaultNetwork
-	rcv.ChunkSize = _DefaultChunkSize
-	rcv.Compression = _DefaultCompression
+	var rcv = &impl{
+		Formater:    f.New(),
+		TplText:     defaultTextFORMAT,
+		Client:      nil,
+		Network:     defaultNetwork,
+		ChunkSize:   defaultChunkSize,
+		Compression: defaultCompression,
+	}
 	runtime.SetFinalizer(rcv, destructor)
+
 	return rcv
 }
 
@@ -75,19 +82,20 @@ func destructor(obj *impl) {
 	if obj.Client == nil {
 		return
 	}
-	defer obj.Client.Close()
+	defer func() { _ = obj.Client.Close() }()
 }
 
 // SetAddress Назначение адреса syslog сервера
 func (rcv *impl) SetAddress(proto string, host string, port uint16) Interface {
 	switch strings.ToLower(proto) {
-	case "udp", "tcp":
+	case keyUDP, keyTCP:
 		rcv.Network = strings.ToLower(proto)
 	default:
-		rcv.Network = _DefaultNetwork
+		rcv.Network = defaultNetwork
 	}
 	rcv.Host = host
 	rcv.Port = port
+
 	return rcv
 }
 
@@ -99,38 +107,42 @@ func (rcv *impl) SetCompression(compress string) Interface {
 
 func (rcv *impl) client() (ret *g.GelfClient, err error) {
 	var pc g.GelfProtocolClient
+
 	switch rcv.Network {
-	case "udp":
-		pc, err = g.NewUdpClient(rcv.Host, rcv.Port, _DefaultChunkSize)
-	case "tcp":
+	case keyUDP:
+		pc, err = g.NewUdpClient(rcv.Host, rcv.Port, defaultChunkSize)
+	case keyTCP:
 		pc, err = g.NewTcpClient(rcv.Host, rcv.Port)
 	}
 	if err != nil {
 		return
 	}
 	ret = g.NewGelfClient(pc, rcv.Compression)
+
 	return
 }
 
 // Receiver Message receiver. Output to STDERR
 func (rcv *impl) Receiver(inp s.Message) {
-	var err error
-	var msb *msg
-	var buf, short *bytes.Buffer
-	var i int
-	var rn rune
+	var (
+		err        error
+		msb        *msg
+		buf, short *bytes.Buffer
+		i          int
+		rn         rune
+	)
 
 	if rcv.Client == nil {
 		rcv.Client, err = rcv.client()
 	}
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error create graylog GELF client: %s", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "create graylog GELF client error: %s", err)
 		return
 	}
 	// Create object to send
 	msb = new(msg)
 	msb.Info = *inp.Trace
-	msb.Version = _GelfVersion
+	msb.Version = gelfVersion
 	msb.Host = inp.Trace.HostName
 	msb.Timestamp = float64(msb.TodayAndNow.Unix()) + float64(time.Second)/float64(msb.TodayAndNow.Nanosecond())
 	msb.Level = inp.Level.Int8()
@@ -144,8 +156,8 @@ func (rcv *impl) Receiver(inp s.Message) {
 	// Create full message by template
 	buf, err = rcv.Formater.Text(inp, rcv.TplText)
 	if err != nil {
-		buf = bytes.NewBufferString(fmt.Sprintf("Error formatting log message: %s", err.Error()))
-		fmt.Fprintln(os.Stderr, buf.String())
+		buf = bytes.NewBufferString(fmt.Sprintf("formatting log message error: %s", err))
+		_, _ = fmt.Fprintln(os.Stderr, buf.String())
 		return
 	}
 	msb.FullMessage = buf.String()
@@ -162,8 +174,7 @@ func (rcv *impl) Receiver(inp s.Message) {
 	}
 	// Send object
 	if err = rcv.Client.SendMessage(msb); err != nil {
-		fmt.Fprintf(os.Stderr, "Error send message to graylog: %s", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "send message to graylog error: %s", err)
 		return
 	}
-
 }

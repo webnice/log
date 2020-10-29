@@ -1,6 +1,6 @@
 // +build !windows
 
-package syslog
+package syslog // import "github.com/webnice/log/v2/receiver/syslog"
 
 import (
 	"bytes"
@@ -9,18 +9,21 @@ import (
 	"os"
 	"strings"
 
-	f "gopkg.in/webnice/log.v2/formater"
-	l "gopkg.in/webnice/log.v2/level"
-	s "gopkg.in/webnice/log.v2/sender"
+	f "github.com/webnice/log/v2/formater"
+	l "github.com/webnice/log/v2/level"
+	s "github.com/webnice/log/v2/sender"
 )
 
-// const _DefaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
-const _DefaultTextFORMAT = `%{message} {%{package}/%{shortfile}:%{line}, func: %{function}()}`
 const (
-	_DefaultNetwork  = `udp`
-	_DefaultAddress  = `localhost:514`
-	_DefaultPriority = syslog.LOG_INFO
-	_DefaultPreffix  = ``
+	// defaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
+	defaultTextFORMAT = `%{message} {%{package}/%{shortfile}:%{line}, func: %{function}()}`
+
+	keyTCP          = `tcp`
+	keyUDP          = `udp`
+	defaultNetwork  = keyUDP
+	defaultAddress  = `localhost:514`
+	defaultPriority = syslog.LOG_INFO
+	defaultPrefix   = ``
 )
 
 // Interface is an interface of package
@@ -39,52 +42,57 @@ type impl struct {
 	Network  string
 	Address  string
 	Priority syslog.Priority
-	Preffix  string
+	Prefix   string
 }
 
 // New Create new
 func New() Interface {
-	var rcv = new(impl)
-	rcv.TplText = _DefaultTextFORMAT
-	rcv.Formater = f.New()
-	rcv.Network = _DefaultNetwork
-	rcv.Address = _DefaultAddress
-	rcv.Priority = _DefaultPriority
-	rcv.Preffix = _DefaultPreffix
+	var rcv = &impl{
+		Formater: f.New(),
+		TplText:  defaultTextFORMAT,
+		Network:  defaultNetwork,
+		Address:  defaultAddress,
+		Priority: defaultPriority,
+		Prefix:   defaultPrefix,
+	}
 	return rcv
 }
 
 // SetAddress Назначение адреса syslog сервера
 func (rcv *impl) SetAddress(proto string, address string) Interface {
 	switch strings.ToLower(proto) {
-	case "udp", "tcp":
+	case keyUDP, keyTCP:
 		rcv.Network = strings.ToLower(proto)
 	default:
-		rcv.Network = _DefaultNetwork
+		rcv.Network = defaultNetwork
 	}
 	rcv.Address = address
+
 	return rcv
 }
 
 // Receiver Message receiver. Output to Syslog
 func (rcv *impl) Receiver(msg s.Message) {
-	var err error
-	var buf *bytes.Buffer
-	var level = l.New()
-	var wr *syslog.Writer
+	var (
+		err   error
+		buf   *bytes.Buffer
+		wr    *syslog.Writer
+		level l.Interface
+	)
 
-	if rcv.Network == _DefaultNetwork && rcv.Address == _DefaultAddress {
-		wr, err = syslog.New(rcv.Priority, rcv.Preffix)
+	level = l.New()
+	if rcv.Network == defaultNetwork && rcv.Address == defaultAddress {
+		wr, err = syslog.New(rcv.Priority, rcv.Prefix)
 	} else {
-		wr, err = syslog.Dial(rcv.Network, rcv.Address, rcv.Priority, rcv.Preffix)
+		wr, err = syslog.Dial(rcv.Network, rcv.Address, rcv.Priority, rcv.Prefix)
 	}
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error dial to syslog: %s\n", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "syslog dial error: %s\n", err)
 		return
 	}
-	defer wr.Close()
+	defer func() { _ = wr.Close() }()
 	if buf, err = rcv.Formater.Text(msg, rcv.TplText); err != nil {
-		buf = bytes.NewBufferString(fmt.Sprintf("Error formatting log message: %s", err.Error()))
+		buf = bytes.NewBufferString(fmt.Sprintf("formatting log message error: %s", err))
 	}
 	switch msg.Level {
 	case level.Fatal():
@@ -105,6 +113,6 @@ func (rcv *impl) Receiver(msg s.Message) {
 		err = wr.Debug(buf.String())
 	}
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error write to syslog: %s\n", err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "Error write to syslog: %s\n", err.Error())
 	}
 }

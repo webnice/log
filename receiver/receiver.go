@@ -1,13 +1,12 @@
-package receiver
+package receiver // import "github.com/webnice/log/v2/receiver"
 
-//import "gopkg.in/webnice/debug.v1"
 import (
-	"gopkg.in/webnice/log.v2/receiver/fsfile"
-	"gopkg.in/webnice/log.v2/receiver/fsfilerotation"
-	"gopkg.in/webnice/log.v2/receiver/gelf"
-	"gopkg.in/webnice/log.v2/receiver/stderr"
-	"gopkg.in/webnice/log.v2/receiver/stdout"
-	"gopkg.in/webnice/log.v2/receiver/syslog"
+	"github.com/webnice/log/v2/receiver/fsfile"
+	"github.com/webnice/log/v2/receiver/fsfilerotation"
+	"github.com/webnice/log/v2/receiver/gelf"
+	"github.com/webnice/log/v2/receiver/stderr"
+	"github.com/webnice/log/v2/receiver/stdout"
+	"github.com/webnice/log/v2/receiver/syslog"
 )
 
 var (

@@ -1,4 +1,4 @@
-package gelf
+package gelf // import "github.com/webnice/log/v2/gelf"
 
 import (
 	"crypto/rand"
@@ -27,8 +27,11 @@ type UdpClient struct {
 type MessageId []byte
 
 func NewUdpClient(host string, port uint16, chunkSize uint) (ret *UdpClient, err error) {
-	var address string
-	var addr *net.UDPAddr
+	var (
+		address string
+		addr    *net.UDPAddr
+	)
+
 	address = net.JoinHostPort(host, strconv.FormatUint(uint64(port), 10))
 	addr, err = net.ResolveUDPAddr(UDP_NETWORK, address)
 	if err != nil {
@@ -38,14 +41,17 @@ func NewUdpClient(host string, port uint16, chunkSize uint) (ret *UdpClient, err
 		ServerAddr: addr,
 		ChunkSize:  chunkSize,
 	}
+
 	return
 }
 
 func MustUdpClient(host string, port uint16, chunkSize uint) (ret *UdpClient) {
 	var err error
+
 	if ret, err = NewUdpClient(host, port, chunkSize); err != nil {
 		panic(err.Error())
 	}
+
 	return
 }
 
@@ -58,10 +64,12 @@ func createMessageId() (ret MessageId, err error) {
 }
 
 func (udpClient *UdpClient) SendMessageData(messageData MessageData) (err error) {
-	var messageSize, chunkStart, chunkEnd uint
-	var chunkCount, chunkIndex byte
-	var messageId MessageId
-	var messageChunk []byte
+	var (
+		messageSize, chunkStart, chunkEnd uint
+		chunkCount, chunkIndex            byte
+		messageId                         MessageId
+		messageChunk                      []byte
+	)
 
 	messageSize = uint(len(messageData))
 	chunkCount = byte(messageSize / udpClient.ChunkSize)
@@ -86,22 +94,23 @@ func (udpClient *UdpClient) SendMessageData(messageData MessageData) (err error)
 			return
 		}
 	}
+
 	return
 }
 
 func (udpClient *UdpClient) sendChunk(messageId MessageId, chunkIndex, chunkCount byte, messageChunk []byte) (err error) {
-	var udpConn *net.UDPConn
-	var sequenceInfo, chunkData []byte
-	var start int
+	var (
+		udpConn                 *net.UDPConn
+		sequenceInfo, chunkData []byte
+		start                   int
+	)
 
 	if udpConn, err = net.DialUDP(UDP_NETWORK, nil, udpClient.ServerAddr); err != nil {
 		return
 	}
-	defer udpConn.Close()
-
+	defer func() { _ = udpConn.Close() }()
 	sequenceInfo = []byte{chunkIndex, chunkCount}
 	chunkData = make([]byte, HEADER_SIZE+len(messageChunk))
-
 	start = 0
 	start += copy(chunkData[start:], CHUNCK_MAGIC_DATA)
 	start += copy(chunkData[start:], messageId)

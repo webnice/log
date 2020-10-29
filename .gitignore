@@ -3,10 +3,20 @@
 *.a
 *.so
 
+# IDE
+.project
+.settings
+.idea
+
 # Folders
 _obj
 _test
-src
+_dev
+/logs
+/log
+/storage
+/tmp
+/rpmbuild
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -24,4 +34,3 @@ _testmain.go
 *.test
 *.prof
 *.log
-dependences.log

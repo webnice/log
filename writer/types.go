@@ -1,8 +1,9 @@
-package writer
+package writer // import "github.com/webnice/log/v2/writer"
 
-import "regexp"
 import (
-	l "gopkg.in/webnice/log.v2/level"
+	"regexp"
+
+	l "github.com/webnice/log/v2/level"
 )
 
 var (
@@ -14,8 +15,10 @@ var (
 type Interface interface {
 	// Writer for []byte
 	Write([]byte) (int, error)
+
 	// Writer for string
 	WriteString(string) (int, error)
+
 	// Writer for ...any
 	Println(...interface{})
 }

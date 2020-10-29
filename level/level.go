@@ -1,4 +1,4 @@
-package level
+package level // import "github.com/webnice/log/v2/level"
 
 // New Create new level object
 func New() Interface {
@@ -11,28 +11,28 @@ func New() Interface {
 // -------
 
 // Fatal system is unusable
-func (l *impl) Fatal() Level { return _FATAL }
+func (l *impl) Fatal() Level { return levelFatal }
 
 // Alert action must be taken immediately
-func (l *impl) Alert() Level { return _ALERT }
+func (l *impl) Alert() Level { return levelAlert }
 
 // Critical conditions
-func (l *impl) Critical() Level { return _CRITICAL }
+func (l *impl) Critical() Level { return levelCritical }
 
 // Error conditions
-func (l *impl) Error() Level { return _ERROR }
+func (l *impl) Error() Level { return levelError }
 
 // Warning conditions
-func (l *impl) Warning() Level { return _WARNING }
+func (l *impl) Warning() Level { return levelWarning }
 
 // Notice normal but significant condition
-func (l *impl) Notice() Level { return _NOTICE }
+func (l *impl) Notice() Level { return levelNotice }
 
 // Informational messages
-func (l *impl) Informational() Level { return _INFO }
+func (l *impl) Informational() Level { return levelInfo }
 
 // Debug debug-level messages
-func (l *impl) Debug() Level { return _DEBUG }
+func (l *impl) Debug() Level { return levelDebug }
 
 // -------
 // Level

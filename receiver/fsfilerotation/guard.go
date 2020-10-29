@@ -1,6 +1,5 @@
-package fsfilerotation
+package fsfilerotation // import "github.com/webnice/log/v2/receiver/fsfilerotation"
 
-//import "gopkg.in/webnice/debug.v1"
 import "sync"
 
 type fnGuard struct {
@@ -14,4 +13,5 @@ func (g *fnGuard) Enable() {
 	defer g.mutex.Unlock()
 	g.enable = true
 }
+
 func (g *fnGuard) Run() { g.fn() }

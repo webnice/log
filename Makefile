@@ -7,13 +7,12 @@ PACKETS=$(shell cat .testpackages)
 default: lint test
 
 link:
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. log.v2 2>/dev/null; true
 .PHONY: link
 
 ## Generate code by go generate or other utilities
 generate: link
 	# GOPATH=${GOPATH} go generate
-	# GOPATH=${GOPATH} easyjson -output_filename gelf/gelf_client_gen.go src/gopkg.in/webnice/log.v2/gelf/gelf_client.go
+	# GOPATH=${GOPATH} easyjson -output_filename gelf/gelf_client_gen.go src/github.com/webnice/log/v2/gelf/gelf_client.go
 .PHONY: generate
 
 ## Dependence managers

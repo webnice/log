@@ -1,13 +1,10 @@
-package gelf_test
+package gelf // import "github.com/webnice/log/v2/gelf"
 
 import (
 	"bytes"
 	"fmt"
-	//"math"
 	"net"
 	"testing"
-
-	gelf "."
 )
 
 const (
@@ -17,16 +14,15 @@ const (
 )
 
 var (
-	indexOffset = len(gelf.CHUNCK_MAGIC_DATA) + gelf.MESSAGE_ID_SIZE
+	indexOffset = len(CHUNCK_MAGIC_DATA) + MESSAGE_ID_SIZE
 	countOffset = indexOffset + 1
 )
 
 func TestNewUdpClient(t *testing.T) {
-	gelfClient, gelfErr := gelf.NewUdpClient(udpHost, udpPort, chunkSize)
+	gelfClient, gelfErr := NewUdpClient(udpHost, udpPort, chunkSize)
 	if nil != gelfErr {
 		t.Error(gelfErr)
 	}
-
 	if nil == gelfClient {
 		t.Error("gelfClient is nil, but shuld be not")
 	}
@@ -39,7 +35,6 @@ func TestUdpClient_SendMessageData_Simple(t *testing.T) {
 	//	}
 	//
 	//	shortMessageData := createLongMessageData(0.5)
-
 	//	listenChunks(1, func(serverBuff chan []byte, serverErr chan error) {
 	//		if sendErr := gelfClient.SendMessageData(shortMessageData); nil != sendErr {
 	//			t.Fatal(sendErr)
@@ -64,7 +59,6 @@ func TestUdpClient_SendMessageData_Chunks(t *testing.T) {
 	//	longMessageMultiple := 2.5
 	//	chunkCount := byte(math.Ceil(longMessageMultiple))
 	//	longMessageData := createLongMessageData(longMessageMultiple)
-
 	//	listenChunks(chunkCount, func(serverBuff chan []byte, serverErr chan error) {
 	//		if sendErr := gelfClient.SendMessageData(longMessageData); nil != sendErr {
 	//			t.Fatal(sendErr)
@@ -80,7 +74,6 @@ func TestUdpClient_SendMessageData_Chunks(t *testing.T) {
 	//			}
 	//		}
 	//	})
-
 }
 
 func handlerChunks(serverConn *net.UDPConn, chunkCount byte, serverBuff chan []byte, serverErr chan error) {
@@ -94,17 +87,14 @@ func handlerChunks(serverConn *net.UDPConn, chunkCount byte, serverBuff chan []b
 	}
 }
 
-func createLongMessageData(longMessageMultiple float64) gelf.MessageData {
-
+func createLongMessageData(longMessageMultiple float64) MessageData {
 	longMessageSize := int(longMessageMultiple * chunkSize)
-
-	longMessageData := make(gelf.MessageData, longMessageSize)
+	longMessageData := make(MessageData, longMessageSize)
 	for i, _ := range longMessageData {
 		longMessageData[i] = byte(i % 100)
 	}
 
 	return longMessageData
-
 }
 
 //func listenChunks(chunkCount byte, callback func(chan []byte, chan error)) {
@@ -125,16 +115,16 @@ func createLongMessageData(longMessageMultiple float64) gelf.MessageData {
 //	callback(buff, err)
 //}
 
-func validateChunk(chunkData []byte, chunkCount byte) error {
-
-	if !bytes.HasPrefix(chunkData, gelf.CHUNCK_MAGIC_DATA) {
-		return fmt.Errorf("Chunk not have magic prefix")
+func validateChunk(chunkData []byte, chunkCount byte) (err error) {
+	if !bytes.HasPrefix(chunkData, CHUNCK_MAGIC_DATA) {
+		err = fmt.Errorf("chunk not have magic prefix")
+		return
 	}
-
 	if countValue := chunkData[countOffset]; countValue != chunkCount {
-		return fmt.Errorf("Invalid chunk count. Should be %d, but have %d",
+		err = fmt.Errorf("invalid chunk count. Should be %d, but have %d",
 			chunkCount, countValue)
+		return
 	}
 
-	return nil
+	return
 }

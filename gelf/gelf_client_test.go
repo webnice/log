@@ -1,40 +1,40 @@
-package gelf_test
+package gelf // import "github.com/webnice/log/v2/gelf"
 
 import (
-	//"bytes"
-	//"encoding/json"
 	"testing"
-
-	gelf "."
 )
 
 type TestingClient struct {
-	MessageDataBuffer []gelf.MessageData
+	MessageDataBuffer []MessageData
 }
 
 func NewTestingClient() *TestingClient {
 	return &TestingClient{
-		MessageDataBuffer: []gelf.MessageData{},
+		MessageDataBuffer: []MessageData{},
 	}
 }
 
-func (testingClient *TestingClient) SendMessageData(messageData gelf.MessageData) error {
+func (testingClient *TestingClient) SendMessageData(messageData MessageData) error {
 	testingClient.MessageDataBuffer = append(testingClient.MessageDataBuffer, messageData)
+	return nil
+}
+
+func (testingClient *TestingClient) Close() error {
 	return nil
 }
 
 func TestNewGelfClient(t *testing.T) {
 	testingClient := NewTestingClient()
-	gelfClient := gelf.NewGelfClient(testingClient, gelf.COMPRESSION_NONE)
+	gelfClient := NewGelfClient(testingClient, COMPRESSION_NONE)
 	if nil == gelfClient {
-		t.Error("NewGelfClient not return gelf clietn")
+		t.Error("new gelf client not return gelf client")
 	}
 }
 
-type CustomMessage struct {
-	*gelf.Message
-	SerialNumber string `json:"_serial_number"`
-}
+//type CustomMessage struct {
+//	*Message
+//	SerialNumber string `json:"_serial_number"`
+//}
 
 //func TestGelfClient_SendMessage(t *testing.T) {
 //	testingClient := NewTestingClient()

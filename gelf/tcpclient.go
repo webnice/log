@@ -1,4 +1,4 @@
-package gelf
+package gelf // import "github.com/webnice/log/v2/gelf"
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ const TCP_NETWORK = "tcp"
 
 var (
 	MESSAGE_SEPARATOR             = []byte{0}
-	_ErrorCompressionNotSupported = fmt.Errorf("Compression not supported")
+	_ErrorCompressionNotSupported = fmt.Errorf("compression not supported")
 )
 
 type TcpClient struct {
@@ -39,9 +39,11 @@ func NewTcpClient(host string, port uint16) (ret *TcpClient, err error) {
 
 func MustTcpClient(host string, port uint16) (ret *TcpClient) {
 	var err error
+
 	if ret, err = NewTcpClient(host, port); err != nil {
 		panic(err.Error())
 	}
+
 	return
 }
 
@@ -55,6 +57,7 @@ func (tcpClient *TcpClient) SendMessageData(message MessageData) (err error) {
 	if _, err = tcpClient.connection.Write(messageWithSeparator); err != nil {
 		return
 	}
+
 	return
 }
 

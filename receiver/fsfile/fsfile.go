@@ -1,17 +1,17 @@
-package fsfile
+package fsfile // import "github.com/webnice/log/v2/receiver/fsfile"
 
 import (
 	"fmt"
 	"os"
 
-	s "gopkg.in/webnice/log.v2/sender"
+	s "github.com/webnice/log/v2/sender"
 
-	"gopkg.in/webnice/log.v2/middleware"
-	"gopkg.in/webnice/log.v2/middleware/fswformattext"
+	"github.com/webnice/log/v2/middleware"
+	"github.com/webnice/log/v2/middleware/fswformattext"
 )
 
-// const _DefaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
-const _DefaultTextFORMAT = `(%{colorbeg}%{level:1s}:%{level:1d}%{colorend}): %{message} {%{package}/%{shortfile}:%{line}, func: %{function}()}`
+// const defaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`
+const defaultTextFORMAT = `(%{colorbeg}%{level:1s}:%{level:1d}%{colorend}): %{message} {%{package}/%{shortfile}:%{line}, func: %{function}()}`
 
 // Interface is an interface of package
 type Interface interface {
@@ -39,13 +39,18 @@ type impl struct {
 
 // New Create new
 func New(filename ...string) Interface {
-	var fnm string
-	var rcv = new(impl)
-	rcv.TplText = _DefaultTextFORMAT
+	var (
+		rcv *impl
+		fnm string
+	)
+
+	rcv = new(impl)
+	rcv.TplText = defaultTextFORMAT
 	rcv.FsWriter = fswformattext.New()
 	for _, fnm = range filename {
 		rcv.FsWriter.SetFilename(fnm)
 	}
+
 	return rcv
 }
 
@@ -64,16 +69,18 @@ func (rcv *impl) SetFsWriter(fn middleware.FsWriter) Interface { rcv.FsWriter = 
 // Receiver Message receiver. Output to file
 func (rcv *impl) Receiver(msg s.Message) {
 	var err error
+
 	rcv.FsWriter.SetFormat(rcv.TplText)
 	if _, err = rcv.FsWriter.WriteMessage(msg); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
+		_, _ = fmt.Fprintln(os.Stderr, err.Error())
 	}
 }
 
 // Write Запись среза байт
 func (rcv *impl) Write(buf []byte) (n int, err error) {
 	if n, err = rcv.FsWriter.Write(buf); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
+		_, _ = fmt.Fprintln(os.Stderr, err.Error())
 	}
+
 	return
 }

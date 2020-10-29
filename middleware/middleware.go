@@ -1,9 +1,9 @@
-package middleware
+package middleware // import "github.com/webnice/log/v2/middleware"
 
 import (
 	"os"
 
-	s "gopkg.in/webnice/log.v2/sender"
+	s "github.com/webnice/log/v2/sender"
 )
 
 // FsWriter Interface of filesystem writer
