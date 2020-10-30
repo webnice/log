@@ -1,12 +1,12 @@
-package stdout // import "github.com/webnice/log/v2/receiver/stdout"
+package stdout // import "github.com/webnice/log/receiver/stdout"
 
 import (
 	"bytes"
 	"fmt"
 	"os"
 
-	f "github.com/webnice/log/v2/formater"
-	s "github.com/webnice/log/v2/sender"
+	f "github.com/webnice/log/formater"
+	s "github.com/webnice/log/sender"
 )
 
 // const defaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`

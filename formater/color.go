@@ -1,9 +1,9 @@
-package formater // import "github.com/webnice/log/v2/formater"
+package formater // import "github.com/webnice/log/formater"
 
 import (
 	"fmt"
 
-	l "github.com/webnice/log/v2/level"
+	l "github.com/webnice/log/level"
 )
 
 const (

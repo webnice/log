@@ -1,12 +1,12 @@
-package sender // import "github.com/webnice/log/v2/sender"
+package sender // import "github.com/webnice/log/sender"
 
 import (
 	"container/list"
 	"os"
 	"sync"
 
-	l "github.com/webnice/log/v2/level"
-	t "github.com/webnice/log/v2/trace"
+	l "github.com/webnice/log/level"
+	t "github.com/webnice/log/trace"
 )
 
 var (

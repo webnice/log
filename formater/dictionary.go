@@ -1,11 +1,11 @@
-package formater // import "github.com/webnice/log/v2/formater"
+package formater // import "github.com/webnice/log/formater"
 
 import (
 	"errors"
 	"reflect"
 	"strings"
 
-	t "github.com/webnice/log/v2/trace"
+	t "github.com/webnice/log/trace"
 )
 
 func init() {

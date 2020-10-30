@@ -1,3 +1,3 @@
-package message // import "github.com/webnice/log/v2/message"
+package message // import "github.com/webnice/log/message"
 
 //import ()

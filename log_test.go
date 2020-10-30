@@ -1,4 +1,4 @@
-package log // import "github.com/webnice/log/v2"
+package log // import "github.com/webnice/log"
 
 //import "testing"
 //

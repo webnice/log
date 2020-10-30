@@ -1,12 +1,12 @@
 // +build windows
 
-package syslog // import "github.com/webnice/log/v2/receiver/syslog"
+package syslog // import "github.com/webnice/log/receiver/syslog"
 
 import (
 	"fmt"
 	"os"
 
-	s "github.com/webnice/log/v2/sender"
+	s "github.com/webnice/log/sender"
 )
 
 // Interface is an interface of package

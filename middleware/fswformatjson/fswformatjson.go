@@ -1,4 +1,4 @@
-package fswformatjson // import "github.com/webnice/log/v2/middleware/fswformatjson"
+package fswformatjson // import "github.com/webnice/log/middleware/fswformatjson"
 
 import (
 	"bytes"
@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/webnice/log/v2/middleware"
+	"github.com/webnice/log/middleware"
 
-	s "github.com/webnice/log/v2/sender"
+	s "github.com/webnice/log/sender"
 )
 
 // New Create new package implementation and return interface

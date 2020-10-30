@@ -1,7 +1,7 @@
-package message // import "github.com/webnice/log/v2/message"
+package message // import "github.com/webnice/log/message"
 
 import (
-	l "github.com/webnice/log/v2/level"
+	l "github.com/webnice/log/level"
 )
 
 // Interface is an interface of package

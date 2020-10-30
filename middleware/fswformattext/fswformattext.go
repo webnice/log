@@ -1,4 +1,4 @@
-package fswformattext // import "github.com/webnice/log/v2/middleware/fswformattext"
+package fswformattext // import "github.com/webnice/log/middleware/fswformattext"
 
 import (
 	"bytes"
@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/webnice/log/v2/middleware"
+	"github.com/webnice/log/middleware"
 
-	f "github.com/webnice/log/v2/formater"
-	s "github.com/webnice/log/v2/sender"
+	f "github.com/webnice/log/formater"
+	s "github.com/webnice/log/sender"
 )
 
 // New Create new package implementation and return interface

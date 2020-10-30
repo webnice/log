@@ -1,4 +1,4 @@
-package gelf // import "github.com/webnice/log/v2/gelf"
+package gelf // import "github.com/webnice/log/gelf"
 
 import (
 	"bytes"

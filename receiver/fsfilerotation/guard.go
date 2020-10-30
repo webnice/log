@@ -1,4 +1,4 @@
-package fsfilerotation // import "github.com/webnice/log/v2/receiver/fsfilerotation"
+package fsfilerotation // import "github.com/webnice/log/receiver/fsfilerotation"
 
 import "sync"
 

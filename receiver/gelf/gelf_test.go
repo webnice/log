@@ -1,3 +1,3 @@
-package gelf // import "github.com/webnice/log/v2/receiver/gelf"
+package gelf // import "github.com/webnice/log/receiver/gelf"
 
 //import ()

@@ -1,9 +1,9 @@
-package sender // import "github.com/webnice/log/v2/sender"
+package sender // import "github.com/webnice/log/sender"
 
 import (
 	"container/list"
 
-	l "github.com/webnice/log/v2/level"
+	l "github.com/webnice/log/level"
 )
 
 func init() {

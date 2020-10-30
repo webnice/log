@@ -1,3 +1,3 @@
-module github.com/webnice/log/v2
+module github.com/webnice/log
 
 go 1.15

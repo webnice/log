@@ -1,6 +1,6 @@
 // +build !windows
 
-package syslog // import "github.com/webnice/log/v2/receiver/syslog"
+package syslog // import "github.com/webnice/log/receiver/syslog"
 
 import (
 	"bytes"
@@ -9,9 +9,9 @@ import (
 	"os"
 	"strings"
 
-	f "github.com/webnice/log/v2/formater"
-	l "github.com/webnice/log/v2/level"
-	s "github.com/webnice/log/v2/sender"
+	f "github.com/webnice/log/formater"
+	l "github.com/webnice/log/level"
+	s "github.com/webnice/log/sender"
 )
 
 const (

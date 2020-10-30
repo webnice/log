@@ -1,4 +1,4 @@
-package gelf // import "github.com/webnice/log/v2/receiver/gelf"
+package gelf // import "github.com/webnice/log/receiver/gelf"
 
 import (
 	"bytes"
@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	f "github.com/webnice/log/v2/formater"
-	g "github.com/webnice/log/v2/gelf"
-	s "github.com/webnice/log/v2/sender"
-	t "github.com/webnice/log/v2/trace"
+	f "github.com/webnice/log/formater"
+	g "github.com/webnice/log/gelf"
+	s "github.com/webnice/log/sender"
+	t "github.com/webnice/log/trace"
 )
 
 const (

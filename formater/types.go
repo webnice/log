@@ -1,11 +1,11 @@
-package formater // import "github.com/webnice/log/v2/formater"
+package formater // import "github.com/webnice/log/formater"
 
 import (
 	"bytes"
 	"errors"
 	"regexp"
 
-	s "github.com/webnice/log/v2/sender"
+	s "github.com/webnice/log/sender"
 )
 
 const (

@@ -1,11 +1,11 @@
-package writer // import "github.com/webnice/log/v2/writer"
+package writer // import "github.com/webnice/log/writer"
 
 import (
 	"bytes"
 	"fmt"
 
-	l "github.com/webnice/log/v2/level"
-	m "github.com/webnice/log/v2/message"
+	l "github.com/webnice/log/level"
+	m "github.com/webnice/log/message"
 )
 
 // New Create new object

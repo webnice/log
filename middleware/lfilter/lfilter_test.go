@@ -1,3 +1,3 @@
-package lfilter // import "github.com/webnice/log/v2/middleware/lfilter"
+package lfilter // import "github.com/webnice/log/middleware/lfilter"
 
 //import ()

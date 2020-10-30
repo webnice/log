@@ -1,9 +1,9 @@
-package writer // import "github.com/webnice/log/v2/writer"
+package writer // import "github.com/webnice/log/writer"
 
 import (
 	"regexp"
 
-	l "github.com/webnice/log/v2/level"
+	l "github.com/webnice/log/level"
 )
 
 var (

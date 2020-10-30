@@ -1,9 +1,9 @@
-package log // import "github.com/webnice/log/v2"
+package log // import "github.com/webnice/log"
 
 import (
-	l "github.com/webnice/log/v2/level"
-	s "github.com/webnice/log/v2/sender"
-	w "github.com/webnice/log/v2/writer"
+	l "github.com/webnice/log/level"
+	s "github.com/webnice/log/sender"
+	w "github.com/webnice/log/writer"
 )
 
 // Key type, used in Keys(Key{})

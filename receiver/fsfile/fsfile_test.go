@@ -1,3 +1,3 @@
-package fsfile // import "github.com/webnice/log/v2/receiver/fsfile"
+package fsfile // import "github.com/webnice/log/receiver/fsfile"
 
 //import ()

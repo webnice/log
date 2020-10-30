@@ -1,13 +1,13 @@
-package fsfilerotation // import "github.com/webnice/log/v2/receiver/fsfilerotation"
+package fsfilerotation // import "github.com/webnice/log/receiver/fsfilerotation"
 
 import (
 	"regexp"
 	"sync"
 	"time"
 
-	"github.com/webnice/log/v2/middleware"
+	"github.com/webnice/log/middleware"
 
-	s "github.com/webnice/log/v2/sender"
+	s "github.com/webnice/log/sender"
 )
 
 // const _DefaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`

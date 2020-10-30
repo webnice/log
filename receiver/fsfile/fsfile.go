@@ -1,13 +1,13 @@
-package fsfile // import "github.com/webnice/log/v2/receiver/fsfile"
+package fsfile // import "github.com/webnice/log/receiver/fsfile"
 
 import (
 	"fmt"
 	"os"
 
-	s "github.com/webnice/log/v2/sender"
+	s "github.com/webnice/log/sender"
 
-	"github.com/webnice/log/v2/middleware"
-	"github.com/webnice/log/v2/middleware/fswformattext"
+	"github.com/webnice/log/middleware"
+	"github.com/webnice/log/middleware/fswformattext"
 )
 
 // const defaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`

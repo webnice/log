@@ -1,4 +1,4 @@
-package formater // import "github.com/webnice/log/v2/formater"
+package formater // import "github.com/webnice/log/formater"
 
 import (
 	"bytes"
@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	s "github.com/webnice/log/v2/sender"
-	t "github.com/webnice/log/v2/trace"
+	s "github.com/webnice/log/sender"
+	t "github.com/webnice/log/trace"
 )
 
 // New Create new object

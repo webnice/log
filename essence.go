@@ -1,13 +1,13 @@
-package log // import "github.com/webnice/log/v2"
+package log // import "github.com/webnice/log"
 
 import (
 	standardLog "log"
 	"os"
 
-	m "github.com/webnice/log/v2/message"
-	r "github.com/webnice/log/v2/receiver"
-	s "github.com/webnice/log/v2/sender"
-	w "github.com/webnice/log/v2/writer"
+	m "github.com/webnice/log/message"
+	r "github.com/webnice/log/receiver"
+	s "github.com/webnice/log/sender"
+	w "github.com/webnice/log/writer"
 )
 
 var ess *impl

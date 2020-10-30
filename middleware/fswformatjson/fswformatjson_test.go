@@ -1,3 +1,3 @@
-package fswformatjson // import "github.com/webnice/log/v2/middleware/fswformatjson"
+package fswformatjson // import "github.com/webnice/log/middleware/fswformatjson"
 
 //import ()

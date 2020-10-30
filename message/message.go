@@ -1,4 +1,4 @@
-package message // import "github.com/webnice/log/v2/message"
+package message // import "github.com/webnice/log/message"
 
 import (
 	"fmt"
@@ -7,10 +7,10 @@ import (
 	"syscall"
 	"time"
 
-	l "github.com/webnice/log/v2/level"
-	s "github.com/webnice/log/v2/sender"
-	t "github.com/webnice/log/v2/trace"
-	u "github.com/webnice/log/v2/uuid"
+	l "github.com/webnice/log/level"
+	s "github.com/webnice/log/sender"
+	t "github.com/webnice/log/trace"
+	u "github.com/webnice/log/uuid"
 )
 
 //import "github.com/webnice/debug/v1"

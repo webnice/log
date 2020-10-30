@@ -1,4 +1,4 @@
-package fsfilerotation // import "github.com/webnice/log/v2/receiver/fsfilerotation"
+package fsfilerotation // import "github.com/webnice/log/receiver/fsfilerotation"
 
 import (
 	"fmt"
@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/webnice/log/v2/middleware"
-	"github.com/webnice/log/v2/middleware/fswformattext"
+	"github.com/webnice/log/middleware"
+	"github.com/webnice/log/middleware/fswformattext"
 
-	s "github.com/webnice/log/v2/sender"
+	s "github.com/webnice/log/sender"
 )
 
 // New Create new

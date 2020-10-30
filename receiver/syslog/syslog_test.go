@@ -1,3 +1,3 @@
-package syslog // import "github.com/webnice/log/v2/receiver/syslog"
+package syslog // import "github.com/webnice/log/receiver/syslog"
 
 //import ()

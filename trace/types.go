@@ -1,10 +1,10 @@
-package trace // import "github.com/webnice/log/v2/trace"
+package trace // import "github.com/webnice/log/trace"
 
 import (
 	"time"
 
-	l "github.com/webnice/log/v2/level"
-	u "github.com/webnice/log/v2/uuid"
+	l "github.com/webnice/log/level"
+	u "github.com/webnice/log/uuid"
 )
 
 const (

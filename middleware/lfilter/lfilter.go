@@ -1,10 +1,10 @@
-package lfilter // import "github.com/webnice/log/v2/middleware/lfilter"
+package lfilter // import "github.com/webnice/log/middleware/lfilter"
 
 import (
 	"sync"
 
-	l "github.com/webnice/log/v2/level"
-	s "github.com/webnice/log/v2/sender"
+	l "github.com/webnice/log/level"
+	s "github.com/webnice/log/sender"
 )
 
 //import "github.com/webnice/debug/v1"

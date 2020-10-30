@@ -1,8 +1,8 @@
-package log // import "github.com/webnice/log/v2"
+package log // import "github.com/webnice/log"
 
 import (
-	l "github.com/webnice/log/v2/level"
-	m "github.com/webnice/log/v2/message"
+	l "github.com/webnice/log/level"
+	m "github.com/webnice/log/message"
 )
 
 // Fatal Level 0: system is unusable

@@ -1,4 +1,4 @@
-package uuid // import "github.com/webnice/log/v2/uuid"
+package uuid // import "github.com/webnice/log/uuid"
 
 import (
 	"bytes"

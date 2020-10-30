@@ -1,3 +1,3 @@
-package receiver // import "github.com/webnice/log/v2/receiver"
+package receiver // import "github.com/webnice/log/receiver"
 
 //import ()
