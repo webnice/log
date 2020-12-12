@@ -1,4 +1,4 @@
-package gelf // import "github.com/webnice/log/gelf"
+package gelf
 
 import (
 	"net"
@@ -31,33 +31,6 @@ func TestNewTcpClient(t *testing.T) {
 		}
 	})
 }
-
-//func TestTcpClient_SendMessage(t *testing.T) {
-//
-//	listenTcpMessage(tcpHost, tcpPort, 3*time.Second, func(messageDataChan <-chan []byte, errorChan <-chan error) {
-//		tcpClient, tcpClientErr := gelf.NewTcpClient(tcpHost, tcpPort)
-//		if nil != tcpClientErr {
-//			t.Errorf("TcpClient error: %s", tcpClientErr)
-//			return
-//		}
-//
-//		messageData := createLongMessageData(4.5)
-//
-//		if sendErr := tcpClient.SendMessageData(messageData); nil != sendErr {
-//			t.Errorf("Send error: %s", sendErr)
-//			return
-//		}
-//
-//		select {
-//		case sendedMessageData := <-messageDataChan:
-//			if false == bytes.Equal(sendedMessageData[0:len(sendedMessageData)-1], messageData) {
-//				t.Errorf("Recived data(len: %d) not equal to sended data(len: %d)", len(sendedMessageData)-1, len(messageData))
-//			}
-//		case senderError := <-errorChan:
-//			t.Errorf("Sender error: %s", senderError)
-//		}
-//	})
-//}
 
 func acceptTcpMessage(tcpListener *net.TCPListener, deadlineTime time.Time, messageDataChan chan<- []byte, errorChan chan<- error) {
 	tcpConn, acceptErr := tcpListener.AcceptTCP()

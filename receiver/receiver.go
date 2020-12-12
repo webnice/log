@@ -1,4 +1,4 @@
-package receiver // import "github.com/webnice/log/receiver"
+package receiver
 
 import (
 	"github.com/webnice/log/receiver/fsfile"

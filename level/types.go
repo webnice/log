@@ -1,4 +1,4 @@
-package level // import "github.com/webnice/log/level"
+package level
 
 const (
 	levelFatal    Level = iota // 0 Fatal: system is unusable

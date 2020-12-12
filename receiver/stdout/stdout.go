@@ -1,4 +1,4 @@
-package stdout // import "github.com/webnice/log/receiver/stdout"
+package stdout
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package uuid // import "github.com/webnice/log/uuid"
+package uuid
 
 import (
 	"crypto/rand"

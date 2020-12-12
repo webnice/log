@@ -1,4 +1,4 @@
-package fswformattext // import "github.com/webnice/log/middleware/fswformattext"
+package fswformattext
 
 import (
 	"bytes"

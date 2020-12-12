@@ -1,4 +1,4 @@
-package level // import "github.com/webnice/log/level"
+package level
 
 // New Create new level object
 func New() Interface {

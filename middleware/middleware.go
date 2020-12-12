@@ -1,4 +1,4 @@
-package middleware // import "github.com/webnice/log/middleware"
+package middleware
 
 import (
 	"os"

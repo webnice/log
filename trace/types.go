@@ -1,4 +1,4 @@
-package trace // import "github.com/webnice/log/trace"
+package trace
 
 import (
 	"time"

@@ -1,4 +1,4 @@
-package fswformatjson // import "github.com/webnice/log/middleware/fswformatjson"
+package fswformatjson
 
 import (
 	"bytes"

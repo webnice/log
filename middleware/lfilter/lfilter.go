@@ -1,4 +1,4 @@
-package lfilter // import "github.com/webnice/log/middleware/lfilter"
+package lfilter
 
 import (
 	"sync"

@@ -1,6 +1,6 @@
 // +build windows
 
-package syslog // import "github.com/webnice/log/receiver/syslog"
+package syslog
 
 import (
 	"fmt"

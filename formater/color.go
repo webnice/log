@@ -1,4 +1,4 @@
-package formater // import "github.com/webnice/log/formater"
+package formater
 
 import (
 	"fmt"

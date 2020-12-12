@@ -1,4 +1,4 @@
-package sender // import "github.com/webnice/log/sender"
+package sender
 
 import (
 	"container/list"

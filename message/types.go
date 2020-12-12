@@ -1,4 +1,4 @@
-package message // import "github.com/webnice/log/message"
+package message
 
 import (
 	l "github.com/webnice/log/level"

@@ -1,4 +1,4 @@
-package gelf // import "github.com/webnice/log/gelf"
+package gelf
 
 import (
 	"testing"

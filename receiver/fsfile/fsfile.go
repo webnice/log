@@ -1,4 +1,4 @@
-package fsfile // import "github.com/webnice/log/receiver/fsfile"
+package fsfile
 
 import (
 	"fmt"
