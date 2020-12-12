@@ -17,7 +17,7 @@ generate: link
 
 ## Dependence managers
 dep: link
-	GOPATH=${GOPATH} glide install
+	# GOPATH=${GOPATH} glide install
 .PHONY: dep
 
 test: link

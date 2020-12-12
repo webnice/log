@@ -1,4 +1,4 @@
-package log
+package lv2
 
 import (
 	l "github.com/webnice/lv2/level"
