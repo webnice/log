@@ -3,7 +3,7 @@ package writer
 import (
 	"regexp"
 
-	l "github.com/webnice/log/level"
+	l "github.com/webnice/lv2/level"
 )
 
 var (

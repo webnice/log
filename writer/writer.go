@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 
-	l "github.com/webnice/log/level"
-	m "github.com/webnice/log/message"
+	l "github.com/webnice/lv2/level"
+	m "github.com/webnice/lv2/message"
 )
 
 // New Create new object

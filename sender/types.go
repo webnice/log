@@ -5,8 +5,8 @@ import (
 	"os"
 	"sync"
 
-	l "github.com/webnice/log/level"
-	t "github.com/webnice/log/trace"
+	l "github.com/webnice/lv2/level"
+	t "github.com/webnice/lv2/trace"
 )
 
 var (

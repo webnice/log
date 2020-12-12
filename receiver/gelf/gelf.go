@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	f "github.com/webnice/log/formater"
-	g "github.com/webnice/log/gelf"
-	s "github.com/webnice/log/sender"
-	t "github.com/webnice/log/trace"
+	f "github.com/webnice/lv2/formater"
+	g "github.com/webnice/lv2/gelf"
+	s "github.com/webnice/lv2/sender"
+	t "github.com/webnice/lv2/trace"
 )
 
 const (

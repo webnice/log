@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	f "github.com/webnice/log/formater"
-	s "github.com/webnice/log/sender"
+	f "github.com/webnice/lv2/formater"
+	s "github.com/webnice/lv2/sender"
 )
 
 // const defaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`

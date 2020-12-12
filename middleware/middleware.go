@@ -3,7 +3,7 @@ package middleware
 import (
 	"os"
 
-	s "github.com/webnice/log/sender"
+	s "github.com/webnice/lv2/sender"
 )
 
 // FsWriter Interface of filesystem writer

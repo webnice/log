@@ -3,8 +3,8 @@ package lfilter
 import (
 	"sync"
 
-	l "github.com/webnice/log/level"
-	s "github.com/webnice/log/sender"
+	l "github.com/webnice/lv2/level"
+	s "github.com/webnice/lv2/sender"
 )
 
 // Interface is an interface of package

@@ -4,7 +4,7 @@ import (
 	"os"
 	"sync"
 
-	f "github.com/webnice/log/formater"
+	f "github.com/webnice/lv2/formater"
 )
 
 // const _DefaultTextFORMAT = `%{color}[%{module:-10s}] %{time:2006-01-02T15:04:05.000Z07:00t} (%{level:-8s}): %{message} (%{package}) (%{function}:%{line}) (%{shortfile}:%{line}) (%{longfile})`

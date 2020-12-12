@@ -5,7 +5,7 @@ import (
 	"errors"
 	"regexp"
 
-	s "github.com/webnice/log/sender"
+	s "github.com/webnice/lv2/sender"
 )
 
 const (

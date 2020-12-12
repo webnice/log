@@ -6,10 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/webnice/log/middleware"
+	"github.com/webnice/lv2/middleware"
 
-	f "github.com/webnice/log/formater"
-	s "github.com/webnice/log/sender"
+	f "github.com/webnice/lv2/formater"
+	s "github.com/webnice/lv2/sender"
 )
 
 // New Create new package implementation and return interface

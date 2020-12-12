@@ -12,7 +12,7 @@ link:
 ## Generate code by go generate or other utilities
 generate: link
 	# GOPATH=${GOPATH} go generate
-	# GOPATH=${GOPATH} easyjson -output_filename gelf/gelf_client_gen.go src/github.com/webnice/log/gelf/gelf_client.go
+	# GOPATH=${GOPATH} easyjson -output_filename gelf/gelf_client_gen.go src/github.com/webnice/lv2/gelf/gelf_client.go
 .PHONY: generate
 
 ## Dependence managers

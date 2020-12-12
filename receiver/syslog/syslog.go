@@ -9,9 +9,9 @@ import (
 	"os"
 	"strings"
 
-	f "github.com/webnice/log/formater"
-	l "github.com/webnice/log/level"
-	s "github.com/webnice/log/sender"
+	f "github.com/webnice/lv2/formater"
+	l "github.com/webnice/lv2/level"
+	s "github.com/webnice/lv2/sender"
 )
 
 const (

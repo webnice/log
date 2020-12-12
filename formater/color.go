@@ -3,7 +3,7 @@ package formater
 import (
 	"fmt"
 
-	l "github.com/webnice/log/level"
+	l "github.com/webnice/lv2/level"
 )
 
 const (

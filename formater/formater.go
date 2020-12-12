@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	s "github.com/webnice/log/sender"
-	t "github.com/webnice/log/trace"
+	s "github.com/webnice/lv2/sender"
+	t "github.com/webnice/lv2/trace"
 )
 
 // New Create new object

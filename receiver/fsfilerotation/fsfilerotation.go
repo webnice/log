@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/webnice/log/middleware"
-	"github.com/webnice/log/middleware/fswformattext"
+	"github.com/webnice/lv2/middleware"
+	"github.com/webnice/lv2/middleware/fswformattext"
 
-	s "github.com/webnice/log/sender"
+	s "github.com/webnice/lv2/sender"
 )
 
 // New Create new

@@ -3,8 +3,8 @@ package trace
 import (
 	"time"
 
-	l "github.com/webnice/log/level"
-	u "github.com/webnice/log/uuid"
+	l "github.com/webnice/lv2/level"
+	u "github.com/webnice/lv2/uuid"
 )
 
 const (

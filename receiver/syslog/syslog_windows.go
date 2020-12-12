@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	s "github.com/webnice/log/sender"
+	s "github.com/webnice/lv2/sender"
 )
 
 // Interface is an interface of package

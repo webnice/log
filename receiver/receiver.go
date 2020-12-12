@@ -1,12 +1,12 @@
 package receiver
 
 import (
-	"github.com/webnice/log/receiver/fsfile"
-	"github.com/webnice/log/receiver/fsfilerotation"
-	"github.com/webnice/log/receiver/gelf"
-	"github.com/webnice/log/receiver/stderr"
-	"github.com/webnice/log/receiver/stdout"
-	"github.com/webnice/log/receiver/syslog"
+	"github.com/webnice/lv2/receiver/fsfile"
+	"github.com/webnice/lv2/receiver/fsfilerotation"
+	"github.com/webnice/lv2/receiver/gelf"
+	"github.com/webnice/lv2/receiver/stderr"
+	"github.com/webnice/lv2/receiver/stdout"
+	"github.com/webnice/lv2/receiver/syslog"
 )
 
 var (

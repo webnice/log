@@ -7,10 +7,10 @@ import (
 	"syscall"
 	"time"
 
-	l "github.com/webnice/log/level"
-	s "github.com/webnice/log/sender"
-	t "github.com/webnice/log/trace"
-	u "github.com/webnice/log/uuid"
+	l "github.com/webnice/lv2/level"
+	s "github.com/webnice/lv2/sender"
+	t "github.com/webnice/lv2/trace"
+	u "github.com/webnice/lv2/uuid"
 )
 
 // New Create new message object

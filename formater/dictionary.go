@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	t "github.com/webnice/log/trace"
+	t "github.com/webnice/lv2/trace"
 )
 
 func init() {

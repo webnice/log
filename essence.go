@@ -4,10 +4,10 @@ import (
 	standardLog "log"
 	"os"
 
-	m "github.com/webnice/log/message"
-	r "github.com/webnice/log/receiver"
-	s "github.com/webnice/log/sender"
-	w "github.com/webnice/log/writer"
+	m "github.com/webnice/lv2/message"
+	r "github.com/webnice/lv2/receiver"
+	s "github.com/webnice/lv2/sender"
+	w "github.com/webnice/lv2/writer"
 )
 
 var ess *impl

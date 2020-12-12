@@ -3,7 +3,7 @@ package sender
 import (
 	"container/list"
 
-	l "github.com/webnice/log/level"
+	l "github.com/webnice/lv2/level"
 )
 
 func init() {
