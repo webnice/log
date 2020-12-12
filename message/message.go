@@ -13,8 +13,6 @@ import (
 	u "github.com/webnice/log/uuid"
 )
 
-//import "github.com/webnice/debug/v1"
-
 // New Create new message object
 func New() Interface {
 	var msg = new(impl)

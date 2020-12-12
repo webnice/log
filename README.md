@@ -18,5 +18,5 @@ With structured data and pluggable modules.
 
 #### Installation
 ```bash
-go get github.com/webnice/log/v2
+go get github.com/webnice/log
 ```

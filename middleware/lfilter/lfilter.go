@@ -7,8 +7,6 @@ import (
 	s "github.com/webnice/log/sender"
 )
 
-//import "github.com/webnice/debug/v1"
-
 // Interface is an interface of package
 type Interface interface {
 	// Receiver Message receiver
